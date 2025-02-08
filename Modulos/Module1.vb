@@ -120,6 +120,7 @@ Public Module Module1
     Public PendenciasRNC As New frmRNC
     Public CriaProdutos As New frmCriaProdutos
     Public InspecaoQualidade As New frmInspecaoQualidade
+    Public OpcaoLiberacaoOrdemServico As New frmOpcaoLiberacaoOrdemServico
 
     Public ClSwAddin As New SwAddin
 
@@ -150,5 +151,8 @@ Public Module Module1
     Public ExtensaoArquivoCorrente As String
 
     Public EnviarEmailLiberacaoOS As String
+
+    Public TipoLiberacaoOrdemServico As String
+
 
 End Module

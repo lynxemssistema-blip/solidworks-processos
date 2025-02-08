@@ -293,6 +293,30 @@ Namespace My
                 Me("AtualizaCadastroComLeituraBOM") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property ArquivoConfiguracaoBancoDados() As String
+            Get
+                Return CType(Me("ArquivoConfiguracaoBancoDados"),String)
+            End Get
+            Set
+                Me("ArquivoConfiguracaoBancoDados") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property SQLServerProtheus() As String
+            Get
+                Return CType(Me("SQLServerProtheus"),String)
+            End Get
+            Set
+                Me("SQLServerProtheus") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

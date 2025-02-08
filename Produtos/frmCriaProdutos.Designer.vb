@@ -22,6 +22,7 @@ Partial Class frmCriaProdutos
     'Não o modifique usando o editor de códigos.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmCriaProdutos))
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.btnBuscarIsometrico = New System.Windows.Forms.Button()
         Me.btnBuscarFichaTecnica = New System.Windows.Forms.Button()
@@ -36,7 +37,7 @@ Partial Class frmCriaProdutos
         Me.Label2 = New System.Windows.Forms.Label()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.btnSalvar = New System.Windows.Forms.Button()
-        Me.Button1 = New System.Windows.Forms.Button()
+        Me.btnCancelar = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -58,14 +59,15 @@ Partial Class frmCriaProdutos
         Me.GroupBox1.Controls.Add(Me.Label1)
         Me.GroupBox1.Location = New System.Drawing.Point(12, 82)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(667, 407)
+        Me.GroupBox1.Size = New System.Drawing.Size(655, 407)
         Me.GroupBox1.TabIndex = 0
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Dados do Produto"
         '
         'btnBuscarIsometrico
         '
-        Me.btnBuscarIsometrico.Location = New System.Drawing.Point(611, 369)
+        Me.btnBuscarIsometrico.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnBuscarIsometrico.Location = New System.Drawing.Point(598, 369)
         Me.btnBuscarIsometrico.Name = "btnBuscarIsometrico"
         Me.btnBuscarIsometrico.Size = New System.Drawing.Size(40, 23)
         Me.btnBuscarIsometrico.TabIndex = 17
@@ -74,7 +76,8 @@ Partial Class frmCriaProdutos
         '
         'btnBuscarFichaTecnica
         '
-        Me.btnBuscarFichaTecnica.Location = New System.Drawing.Point(612, 301)
+        Me.btnBuscarFichaTecnica.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnBuscarFichaTecnica.Location = New System.Drawing.Point(598, 301)
         Me.btnBuscarFichaTecnica.Name = "btnBuscarFichaTecnica"
         Me.btnBuscarFichaTecnica.Size = New System.Drawing.Size(40, 23)
         Me.btnBuscarFichaTecnica.TabIndex = 16
@@ -88,7 +91,7 @@ Partial Class frmCriaProdutos
         Me.lblEnderecoIsometrico.BackColor = System.Drawing.SystemColors.Window
         Me.lblEnderecoIsometrico.Location = New System.Drawing.Point(8, 369)
         Me.lblEnderecoIsometrico.Name = "lblEnderecoIsometrico"
-        Me.lblEnderecoIsometrico.Size = New System.Drawing.Size(596, 23)
+        Me.lblEnderecoIsometrico.Size = New System.Drawing.Size(584, 23)
         Me.lblEnderecoIsometrico.TabIndex = 15
         Me.lblEnderecoIsometrico.Text = "Buscar Ficha Tecnica:"
         '
@@ -108,7 +111,7 @@ Partial Class frmCriaProdutos
         Me.lblEnderecoFichaTecnica.BackColor = System.Drawing.SystemColors.Window
         Me.lblEnderecoFichaTecnica.Location = New System.Drawing.Point(8, 301)
         Me.lblEnderecoFichaTecnica.Name = "lblEnderecoFichaTecnica"
-        Me.lblEnderecoFichaTecnica.Size = New System.Drawing.Size(596, 23)
+        Me.lblEnderecoFichaTecnica.Size = New System.Drawing.Size(584, 23)
         Me.lblEnderecoFichaTecnica.TabIndex = 13
         Me.lblEnderecoFichaTecnica.Text = "Buscar Ficha Tecnica:"
         '
@@ -129,7 +132,7 @@ Partial Class frmCriaProdutos
         Me.txtDescricaoProduto.Location = New System.Drawing.Point(6, 144)
         Me.txtDescricaoProduto.Multiline = True
         Me.txtDescricaoProduto.Name = "txtDescricaoProduto"
-        Me.txtDescricaoProduto.Size = New System.Drawing.Size(645, 124)
+        Me.txtDescricaoProduto.Size = New System.Drawing.Size(633, 124)
         Me.txtDescricaoProduto.TabIndex = 9
         '
         'Label7
@@ -148,7 +151,7 @@ Partial Class frmCriaProdutos
         Me.txtCodOmie.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
         Me.txtCodOmie.Location = New System.Drawing.Point(6, 90)
         Me.txtCodOmie.Name = "txtCodOmie"
-        Me.txtCodOmie.Size = New System.Drawing.Size(645, 22)
+        Me.txtCodOmie.Size = New System.Drawing.Size(633, 22)
         Me.txtCodOmie.TabIndex = 7
         '
         'txCodDesenhoProduto
@@ -158,7 +161,7 @@ Partial Class frmCriaProdutos
         Me.txCodDesenhoProduto.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
         Me.txCodDesenhoProduto.Location = New System.Drawing.Point(6, 46)
         Me.txCodDesenhoProduto.Name = "txCodDesenhoProduto"
-        Me.txCodDesenhoProduto.Size = New System.Drawing.Size(645, 22)
+        Me.txCodDesenhoProduto.Size = New System.Drawing.Size(633, 22)
         Me.txCodDesenhoProduto.TabIndex = 6
         '
         'Label2
@@ -166,9 +169,9 @@ Partial Class frmCriaProdutos
         Me.Label2.AutoSize = True
         Me.Label2.Location = New System.Drawing.Point(5, 71)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(90, 16)
+        Me.Label2.Size = New System.Drawing.Size(240, 16)
         Me.Label2.TabIndex = 1
-        Me.Label2.Text = "Codigo OMIE:"
+        Me.Label2.Text = "Codigo do Produto no Sistema Gestão:"
         '
         'Label1
         '
@@ -181,42 +184,45 @@ Partial Class frmCriaProdutos
         '
         'btnSalvar
         '
-        Me.btnSalvar.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnSalvar.Image = Global.SwLynx_4._1.My.Resources.Resources.salvar
-        Me.btnSalvar.Location = New System.Drawing.Point(18, 11)
+        Me.btnSalvar.Location = New System.Drawing.Point(12, 11)
         Me.btnSalvar.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnSalvar.Name = "btnSalvar"
         Me.btnSalvar.Size = New System.Drawing.Size(164, 51)
         Me.btnSalvar.TabIndex = 4
-        Me.btnSalvar.Text = "Salvar/Sair"
+        Me.btnSalvar.Text = "Salvar"
         Me.btnSalvar.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
         Me.btnSalvar.UseVisualStyleBackColor = True
         '
-        'Button1
+        'btnCancelar
         '
-        Me.Button1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.Button1.Image = Global.SwLynx_4._1.My.Resources.Resources.cancelar
-        Me.Button1.Location = New System.Drawing.Point(515, 11)
-        Me.Button1.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(164, 51)
-        Me.Button1.TabIndex = 5
-        Me.Button1.Text = "Cancelar"
-        Me.Button1.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
-        Me.Button1.UseVisualStyleBackColor = True
+        Me.btnCancelar.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnCancelar.DialogResult = System.Windows.Forms.DialogResult.Cancel
+        Me.btnCancelar.Image = Global.SwLynx_4._1.My.Resources.Resources.cancelar
+        Me.btnCancelar.Location = New System.Drawing.Point(507, 11)
+        Me.btnCancelar.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.btnCancelar.Name = "btnCancelar"
+        Me.btnCancelar.Size = New System.Drawing.Size(164, 51)
+        Me.btnCancelar.TabIndex = 5
+        Me.btnCancelar.Text = "Sair"
+        Me.btnCancelar.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
+        Me.btnCancelar.UseVisualStyleBackColor = True
         '
         'frmCriaProdutos
         '
+        Me.AcceptButton = Me.btnSalvar
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(691, 506)
-        Me.Controls.Add(Me.Button1)
+        Me.CancelButton = Me.btnCancelar
+        Me.ClientSize = New System.Drawing.Size(679, 500)
+        Me.Controls.Add(Me.btnCancelar)
         Me.Controls.Add(Me.btnSalvar)
         Me.Controls.Add(Me.GroupBox1)
-        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "frmCriaProdutos"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent
-        Me.Text = "Criar Produtos"
+        Me.Text = "Criar Produtos com Base na OS  selecionada"
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
         Me.ResumeLayout(False)
@@ -235,7 +241,7 @@ Partial Class frmCriaProdutos
     Friend WithEvents lblEnderecoIsometrico As Windows.Forms.Label
     Friend WithEvents Label15 As Windows.Forms.Label
     Friend WithEvents btnSalvar As Windows.Forms.Button
-    Friend WithEvents Button1 As Windows.Forms.Button
+    Friend WithEvents btnCancelar As Windows.Forms.Button
     Friend WithEvents btnBuscarIsometrico As Windows.Forms.Button
     Friend WithEvents btnBuscarFichaTecnica As Windows.Forms.Button
 End Class

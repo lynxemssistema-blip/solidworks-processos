@@ -25,11 +25,11 @@ Public Class CLOrdemServico
     Public Palavrachave As String
     Public Notas As String
     Public Espessura As String
-    Public AreaPintura As String
-    Public AreaPinturaUnitario As String
+    Public AreaPintura As Double
+    Public AreaPinturaUnitario As Double
     Public NumeroDobras As String
-    Public Peso As String
-    Public PesoUnitario As String
+    Public Peso As Double
+    Public PesoUnitario As Double
     Public Unidade As String
     Public UnidadeSW As String
     Public ValorSW As String
@@ -42,8 +42,8 @@ Public Class CLOrdemServico
     Public DtAlteracao As String
     Public EnderecoArquivo As String
     Public MaterialSW As String
-    Public QtdeTotal As String
-    Public qtde As String
+    Public QtdeTotal As Double
+    Public qtde As Double
     Public txtSoldagem As String
     Public txtTipoDesenho As String
     Public txtCorte As String
@@ -58,6 +58,13 @@ Public Class CLOrdemServico
     Public tttxtPintura As String
     Public tttxtMontagem As String
     Public DataPrevisao As String
+    Public ProdutoPrincipal As String
+    Public Fator As String
+
+    Public QtdeTag As Integer
+    Public QtdeLiberada As Integer
+    Public SaldoTag As Integer
+
 
     Public Liberado_Engenharia As String
     Public Data_Liberacao_Engenharia As String
@@ -88,9 +95,9 @@ Public Class CLOrdemServico
 
             Try
 
-                If Tag = "" Or Projeto = "" Then
+                If Tag = "" Or Projeto = "" Or Descricao = "" Then
 
-                    MsgBox("O Projeto e Tag devem ser informados", vbInformation, "Atenção")
+                    MsgBox("O Projeto, Tag e ou uma descrição devem ser informados", vbInformation, "Atenção")
                 Else
 
                     ''''''' OrdemServico.idProjeto = Nothing
@@ -162,42 +169,12 @@ Public Class CLOrdemServico
 
                             SalvarOrdeMServicoBanco()
 
-                            '                            cl_BancoDados.Salvar("insert into ordemservico (idProjeto,
-                            'Projeto,
-                            'idTag,
-                            'Tag,
-                            'Descricao,
-                            'EnderecoOrdemServico,
-                            'CriadoPor,
-                            'DataCriacao,
-                            'Estatus,
-                            'D_E_L_E_T_E,
-                            'Liberado_Engenharia,
-                            'Data_Liberacao_Engenharia,
-                            'IdOSReferencia,
-                            'DescEmpresa,
-                            'DataPrevisao)
-                            'values
-                            '('" & OrdemServico.idProjeto & "','" _
-                            '            & OrdemServico.Projeto & "','" _
-                            '            & OrdemServico.idTag & "','" _
-                            '            & OrdemServico.Tag & "','" _
-                            '            & OrdemServico.Descricao & "','" _
-                            '            & OrdemServico.EnderecoOrdemServico & "','" _
-                            '            & OrdemServico.CriadoPor.ToString().ToUpper() & "','" _
-                            '            & OrdemServico.DataCriacao & "','" _
-                            '            & OrdemServico.Estatus & "','','" _
-                            '            & OrdemServico.Liberado_Engenharia & "','" _
-                            '            & OrdemServico.Data_Liberacao_Engenharia & "','" _
-                            '            & OrdemServico.IdOSReferencia & "','" _
-                            '            & OrdemServico.DescEmpresa & "','" _
-                            '            & OrdemServico.DataPrevisao & "');")
-
                             timerDgvOS.Enabled = True
 
                             MsgBox("Ordem de Serviço Criada com sucesso!")
 
                         End If
+
                     Else
 
                         'Altera dos dados da Ordem de serviço
@@ -206,6 +183,8 @@ Projeto = '" & OrdemServico.Projeto & "',
 Tag = '" & OrdemServico.Tag & "',
 idProjeto = '" & OrdemServico.idProjeto & "',
 idTag = '" & OrdemServico.idTag & "',
+Fator = '" & OrdemServico.Fator & "',
+DataPrevisao = '" & OrdemServico.DataPrevisao & "',
 DescEmpresa = '" & OrdemServico.DescEmpresa & "'
 where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'")
 
@@ -213,6 +192,7 @@ where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'")
                         cl_BancoDados.Salvar("update  " & ComplementoTipoBanco & "ordemservicoitem set Projeto = '" & OrdemServico.Projeto & "',
 Tag = '" & OrdemServico.Tag & "',
 idProjeto = '" & OrdemServico.idProjeto & "',
+DataPrevisao = '" & OrdemServico.DataPrevisao & "',
 idTag = '" & OrdemServico.idTag & "'
 where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto = '" & OrdemServico.idProjeto & "' and idTag = '" & OrdemServico.idTag & "'")
 
@@ -262,11 +242,11 @@ where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto =
                 Dim cmd As New MySqlCommand("insert into  " & ComplementoTipoBanco & "ordemservico 
     (idProjeto, Projeto, idTag, Tag, Descricao, EnderecoOrdemServico, 
     CriadoPor, DataCriacao, Estatus, D_E_L_E_T_E, Liberado_Engenharia, 
-    Data_Liberacao_Engenharia, IdOSReferencia, DescEmpresa, DataPrevisao) 
+    Data_Liberacao_Engenharia, IdOSReferencia, DescEmpresa, DataPrevisao, Fator) 
     values 
     (@idProjeto, @Projeto, @idTag, @Tag, @Descricao, @EnderecoOrdemServico, 
     @CriadoPor, @DataCriacao, @Estatus, @D_E_L_E_T_E, @Liberado_Engenharia, 
-    @Data_Liberacao_Engenharia, @IdOSReferencia, @DescEmpresa, @DataPrevisao)", myconect)
+    @Data_Liberacao_Engenharia, @IdOSReferencia, @DescEmpresa, @DataPrevisao, @Fator)", myconect)
 
                 cmd.Parameters.AddWithValue("@idProjeto", OrdemServico.idProjeto)
                 cmd.Parameters.AddWithValue("@Projeto", OrdemServico.Projeto)
@@ -283,6 +263,7 @@ where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto =
                 cmd.Parameters.AddWithValue("@IdOSReferencia", OrdemServico.IdOSReferencia)
                 cmd.Parameters.AddWithValue("@DescEmpresa", OrdemServico.DescEmpresa)
                 cmd.Parameters.AddWithValue("@DataPrevisao", OrdemServico.DataPrevisao)
+                cmd.Parameters.AddWithValue("@Fator", OrdemServico.Fator)
 
                 cmd.ExecuteNonQuery()
 

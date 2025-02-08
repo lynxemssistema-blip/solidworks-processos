@@ -2,6 +2,7 @@
 Imports System.Data.SqlClient
 Imports System.Drawing
 Imports System.IO
+Imports System.Windows.Forms
 Imports System.Windows.Forms.DataVisualization.Charting
 
 Public Class frmMateriaisAlmoxarifado
@@ -12,6 +13,7 @@ Public Class frmMateriaisAlmoxarifado
     Dim TotalValor As Double = 0
     Dim IdMaterial As Integer = 0
     Dim Valor As Double = 0
+    Dim Unidade As String = ""
 
     Private Sub TimerDgvMaterial_Tick(sender As Object, e As EventArgs) Handles TimerDgvMaterial.Tick
 
@@ -21,17 +23,19 @@ Peso, Unidade,
 CodigoJuridicoMat, 
 PercIPI, vIPI, 
 PercICMS, vICMS, 
-TotalValor
+TotalValor, Unidade
     FROM  " & ComplementoTipoBanco & "material
-    WHERE DescDetal LIKE '%" & TxtPesqDesc1.Text & "%'
+    WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '') AND (PecaManuFat IS NULL or PecaManuFat <> 'S')
+    and DescDetal LIKE '%" & TxtPesqDesc1.Text & "%'
   AND DescDetal LIKE '%" & TxtPesqDesc2.Text & "%'
   AND DescDetal LIKE '%" & TxtPesqDesc3.Text & "%'
   AND CodigoJuridicoMat LIKE '%" & TxtPesqJuridico.Text & "%'
   AND CodMatFabricante LIKE '%" & TxtPesqCod.Text & "%'
-  AND PecaManuFat IS NULL
-ORDER BY DescDetal limit 500;"
+  ORDER BY DescDetal limit 500;"
 
         dgvMaterial.DataSource = cl_BancoDados.CarregarDados(query)
+
+
 
         TimerDgvMaterial.Enabled = False
 
@@ -39,7 +43,11 @@ ORDER BY DescDetal limit 500;"
 
     End Sub
 
+
+    Dim TaxaUtilizacao As Double = 0
+
     Private Sub frmMateriaisAlmoxarifado_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
 
         TimerDgvMaterial.Enabled = True
 
@@ -52,7 +60,6 @@ ORDER BY DescDetal limit 500;"
             Dim comprimentoBlank As Double = Replace(DadosArquivoCorrente.ComprimentoBlank, ".", ",")
             Dim Peso As Double = Replace(DadosArquivoCorrente.Massa, ".", ",")
 
-            Dim TaxaUtilizacao As Double = 0
             Dim AreaCalculadaBlank As Double = 0
 
             Dim AreaChapaM As Double = 1.2 * 3 * 0.95
@@ -124,7 +131,6 @@ ORDER BY DescDetal limit 500;"
 
     Private Function SalvarMaterial()
 
-
         Try
 
             If (DadosArquivoCorrente.IdMaterial <> 0) And (IdMaterial > 0) Then
@@ -153,20 +159,35 @@ order by descdetal")
                 Next
 
 
-                cl_BancoDados.Salvar("insert into montapeca (CodMatFabricante,TipoPeca,IdMaterial, PecaQtde, IdMaterialPeca, Peso, Valor)
-                                                                         values ('" & DadosArquivoCorrente.NomeArquivoSemExtensao.Trim & "','0','" & IdMaterial & "','" _
-                                                                                     & Replace(QtdeEntrada, ",", ".") & "','" _
-                                                                                     & DadosArquivoCorrente.IdMaterial & "','" & Replace(Peso, ",", ".") & "','" & Replace(TotalValor, ",", ".") & "')")
-                MsgBox("material Inserido com Sucesso!", vbInformation, "Salvamento com Sucesso!")
-
-                MyTaskPanelHost.TimerMontaPeca.Enabled = True
 
 
-            End If
+
+
+                DadosArquivoCorrente.SalvarMaterialDesenho(DadosArquivoCorrente.NomeArquivoSemExtensao.Trim, "0",
+                                                     IdMaterial,
+                                                     QtdeEntrada,
+                                                     DadosArquivoCorrente.IdMaterial,
+                                                     Peso,
+                                                     TotalValor,
+                                                     Usuario.NomeCompleto,
+                                                     Date.Now)
+
+                    'cl_BancoDados.Salvar("insert into montapeca (CodMatFabricante,TipoPeca,IdMaterial, PecaQtde, IdMaterialPeca, Peso, Valor, UsuarioCriacao, DataCriacao)
+                    '                                                         values ('" & DadosArquivoCorrente.NomeArquivoSemExtensao.Trim & "','0','" & IdMaterial & "','" _
+                    '                                                                     & Replace(QtdeEntrada, ",", ".") & "','" _
+                    '                                                                     & DadosArquivoCorrente.IdMaterial & "','" & Replace(Peso, ",", ".") & "','" _
+                    '                                                                     & Replace(TotalValor, ",", ".") & "','" _
+                    '                                                                     & Usuario.NomeCompleto & "','" & Date.Now & "')")
+
+
+                    MsgBox("material Inserido com Sucesso!", vbInformation, "Salvamento com Sucesso!")
+
+                    MyTaskPanelHost.TimerMontaPeca.Enabled = True
+
+
+                End If
 
         Catch ex As Exception
-
-            '     MsgBox(ex.Message & " ERRO do monta peça", vbCritical, "Atenção")
 
         Finally
 
@@ -178,27 +199,57 @@ order by descdetal")
 
         If DadosArquivoCorrente.IdMaterial <> 0 Then
 
-            IdMaterial = dgvMaterial.CurrentRow.Cells("IdMaterial").Value
-
-            IdMaterial = If(IsDBNull(dgvMaterial.CurrentRow.Cells("IdMaterial").Value), 0, Convert.ToInt32(dgvMaterial.CurrentRow.Cells("IdMaterial").Value))
-            TotalValor = If(IsDBNull(dgvMaterial.CurrentRow.Cells("TotalValor").Value), 0, Convert.ToDouble(dgvMaterial.CurrentRow.Cells("TotalValor").Value))
-            Peso = If(IsDBNull(dgvMaterial.CurrentRow.Cells("Peso").Value), 0, Convert.ToDouble(dgvMaterial.CurrentRow.Cells("Peso").Value))
-            ' Valor = If(IsDBNull(dgvMaterial.CurrentRow.Cells("Valor").Value), 0, Convert.ToDouble(dgvMaterial.CurrentRow.Cells("Valor").Value))
+            Try
+                If dgvMaterial.CurrentRow IsNot Nothing Then
+                    IdMaterial = If(IsDBNull(dgvMaterial.CurrentRow.Cells("IdMaterial").Value), 0, Convert.ToInt32(dgvMaterial.CurrentRow.Cells("IdMaterial").Value))
+                    TotalValor = If(IsDBNull(dgvMaterial.CurrentRow.Cells("TotalValor").Value), 0, Convert.ToDouble(dgvMaterial.CurrentRow.Cells("TotalValor").Value))
+                    Peso = If(IsDBNull(dgvMaterial.CurrentRow.Cells("Peso").Value), 0, Convert.ToDouble(dgvMaterial.CurrentRow.Cells("Peso").Value))
+                    Valor = If(IsDBNull(dgvMaterial.CurrentRow.Cells("TotalValor").Value), 0, Convert.ToDouble(dgvMaterial.CurrentRow.Cells("TotalValor").Value))
+                    Unidade = If(dgvMaterial.CurrentRow.Cells("Unidade").Value Is Nothing OrElse IsDBNull(dgvMaterial.CurrentRow.Cells("Unidade").Value), "", dgvMaterial.CurrentRow.Cells("Unidade").Value.ToString())
+                Else
+                    IdMaterial = 0
+                    TotalValor = 0
+                    Peso = 0
+                    Valor = 0
+                    Unidade = ""
+                End If
+            Catch ex As Exception
+                MessageBox.Show("Erro ao obter dados do material: " & ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                IdMaterial = 0
+                TotalValor = 0
+                Peso = 0
+                Valor = 0
+                Unidade = ""
+            End Try
 
 
             Me.txtPesoMaterial.Text = Peso
             Me.txtValorMaterial.Text = TotalValor
 
+            Try
 
+
+                txtValorCalculado.Text = (TotalValor * TaxaUtilizacao).ToString("F2")
+                txtPesoCalculado.Text = (Peso * TaxaUtilizacao).ToString("F2")
+                txtUnidade.Text = Unidade
+
+                TotalValor = txtValorCalculado.Text
+                Peso = txtPesoCalculado.Text
+                '  Unidade = txtUnidade.Text
+
+            Catch ex As Exception
+
+                txtValorCalculado.Text = ""
+
+            Finally
+
+            End Try
 
         Else
-
             ' Caso o valor não seja um número válido, QtdeEntrada permanece 0
             MsgBox("Valor inválido. Por favor, insira um número válido.", vbExclamation, "Atenção")
 
         End If
-
-
 
     End Sub
 
@@ -211,10 +262,23 @@ order by descdetal")
         DadosArquivoCorrente.NomeArquivoSemExtensao = Path.GetFileNameWithoutExtension(DadosArquivoCorrente.EnderecoArquivo)
 
 
-        '   MyTaskPanelHost.TimerMontaPeca.Enabled = True
+        MyTaskPanelHost.TimerMontaPeca.Enabled = True
 
 
     End Sub
 
 
+    Private Sub dgvMaterial_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles dgvMaterial.DataError
+
+        Try
+
+        Catch ex As Exception
+        Finally
+
+        End Try
+    End Sub
+
+    Private Sub dgvMaterial_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles dgvMaterial.CellContentClick
+
+    End Sub
 End Class

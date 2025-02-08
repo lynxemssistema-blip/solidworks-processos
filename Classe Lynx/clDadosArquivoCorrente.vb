@@ -104,7 +104,7 @@ Public Class ClDadosArquivoCorrente
 
 
 
-    Public Function ArquivoCorrente(ByVal swModel As ModelDoc2) As Boolean
+    Public Function ArquivoCorrente(ByVal swModel As ModelDoc2, ByVal chkBoxProcesso As CheckedListBox) As Boolean
 
 
         MyTaskPanelHost.LimparTelaVariaveis()
@@ -135,13 +135,13 @@ Public Class ClDadosArquivoCorrente
 
                     docHandler = New PartEventHandler()
                     ' Adicione o código específico para manipular documentos de peça aqui
-                    LendoDadosComunsPartAssembly(swModel)
+                    LendoDadosComunsPartAssembly(swModel, chkBoxProcesso)
 
                 Case swDocumentTypes_e.swDocASSEMBLY
 
                     docHandler = New AssemblyEventHandler()
                     ' Adicione o código específico para manipular documentos de montagem aqui
-                    LendoDadosComunsPartAssembly(swModel)
+                    LendoDadosComunsPartAssembly(swModel, chkBoxProcesso)
 
                 Case swDocumentTypes_e.swDocDRAWING
 
@@ -156,15 +156,21 @@ Public Class ClDadosArquivoCorrente
             End Select
 
             ' Se chegou aqui, o tipo de documento foi reconhecido
+
+
+
             Return True
+
+
+
+
 
         End If
 
-        ' MyTaskPanelHost.TimerMontaPeca.Enabled = True
 
     End Function
 
-    Public Function LendoDadosComunsPartAssembly(ByRef swModel As ModelDoc2) As Boolean
+    Public Function LendoDadosComunsPartAssembly(ByRef swModel As ModelDoc2, ByVal chkBoxProcesso As CheckedListBox) As Boolean
 
         Try
 
@@ -224,12 +230,10 @@ Public Class ClDadosArquivoCorrente
                     Montagem = GetCustomProperty(swCustProp, "txtmontagem")
                     ItemEstoque = GetCustomProperty(swCustProp, "txtitemestoque")
 
-                    ' Catch ex As Exception
-                    ' Registrar a exceção, se necessário
-                    'End Try'
-                    'R'eturn True
 
 
+
+                    LerPropriedadesPersonalizadas(swModel, chkBoxProcesso)
 
 
                 End If
@@ -248,7 +252,82 @@ Public Class ClDadosArquivoCorrente
         Finally
 
         End Try
+
+        '  MyTaskPanelHost.TimerMontaPeca.Enabled = True
+
+
     End Function
+
+
+    Sub LerPropriedadesPersonalizadas(swModel As ModelDoc2, ByVal chkBoxProcesso As CheckedListBox)
+
+
+
+
+        If swModel Is Nothing Then
+            Exit Sub
+        End If
+
+
+        'desmarca todos os itens
+        For i As Integer = 0 To chkBoxProcesso.Items.Count - 1
+
+            chkBoxProcesso.SetItemChecked(i, False)
+
+
+        Next
+
+
+        ' Obtém a extensão do documento
+        Dim swModelDocExt As ModelDocExtension = swModel.Extension
+
+        ' Obtém o gerenciador de propriedades personalizadas
+        Dim swCustPropMgr As CustomPropertyManager = swModelDocExt.CustomPropertyManager("")
+
+        If swCustPropMgr Is Nothing Then
+            Exit Sub
+        End If
+
+        ' Obtém todas as propriedades personalizadas do documento
+        Dim propNames As Object = swCustPropMgr.GetNames()
+
+        If propNames IsNot Nothing Then
+            Dim propArray() As String = CType(propNames, String())
+
+            For Each propName As String In propArray
+                Dim propValue As String = ""
+                Dim resolvedValue As String = ""
+
+                ' Obtém o valor da propriedade
+                swCustPropMgr.Get4(propName, False, propValue, resolvedValue)
+
+                ' Exibe no console ou armazena como necessário
+                '  MsgBox($"Propriedade: {propName}, Valor: {resolvedValue}")
+
+                propName = Replace(propName.ToString(), " ", "")
+
+                For i As Integer = 0 To chkBoxProcesso.Items.Count - 1
+
+                    ' Obtém o nome do processo sem espaços
+                    Dim Processo As String = "txt" & Replace(chkBoxProcesso.Items(i).ToString(), " ", "")
+
+                    If propName = Processo AndAlso resolvedValue = "1" Then
+                        ' Verifica se o item está marcado corretamente
+                        ' If chkBoxProcesso.GetItemChecked(i) Then
+
+                        chkBoxProcesso.SetItemChecked(i, True)
+
+
+                    End If
+
+
+                Next
+
+            Next
+        Else
+            Console.WriteLine("Nenhuma propriedade personalizada encontrada.")
+        End If
+    End Sub
 
 
     Private Sub LimparPropriedadesListaDeCorte()
@@ -758,9 +837,6 @@ Public Class ClDadosArquivoCorrente
             Return ""
         End Try
     End Function
-
-
-
     Public Sub GarantirOuCriarPropriedade(ByVal swModel As ModelDoc2, ByVal nomePropriedade As String, ByVal valorPadrao As String, ByRef VariavelRecebeValor As String)
 
         Try
@@ -798,13 +874,20 @@ Public Class ClDadosArquivoCorrente
         End Try
 
     End Sub
-
     Public Function VerificarProcessodaPecaCorrente(ByVal swModel As ModelDoc2, ByVal msg As Boolean) As Boolean
+
 
         VerificarProcessodaPecaCorrente = True
 
         Try
 
+            If DadosArquivoCorrente.EnderecoArquivo = "" Then   'Se o desenho não for um arquivo tipo chapa sai da verificação
+
+
+                VerificarProcessodaPecaCorrente = True
+                Exit Function
+
+            End If
 
 
             Dim MensagemErros As String = "Lista de Ações Pendentes no Arquivo: " & DadosArquivoCorrente.NomeArquivoSemExtensao & vbCrLf & vbCrLf & vbCrLf
@@ -874,7 +957,7 @@ Public Class ClDadosArquivoCorrente
                             DadosArquivoCorrente.Pintura = "" And
                             DadosArquivoCorrente.Montagem = "" Then
 
-                        MsgBox("E necessario a indição de pelo menos (1)um processo!")
+                        MensagemErros = MensagemErros & "Erro 08 - Os arquivos com extensão 'SLDASM' conjuntos do SolidWorks, não podem ser do tipo 'CHAPARIA'" & vbCrLf
 
                     Else
 
@@ -883,6 +966,9 @@ Public Class ClDadosArquivoCorrente
                     End If
 
                 End If
+
+
+
 
             ElseIf swModel.GetType() = swDocumentTypes_e.swDocASSEMBLY Then
 
@@ -925,9 +1011,16 @@ Public Class ClDadosArquivoCorrente
                               (Estatus <> 'FINALIZADA' OR  Estatus =  '' OR  Estatus  IS NULL) 
                     and CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "';", "qtdernc"))
 
+
+
             If qtdernc > 0 Then
 
                 MensagemErros = MensagemErros & "Erro 11 - Existem RNC's em aberto no arquivo corrente!" & vbCrLf
+
+                VerificarProcessodaPecaCorrente = True
+
+
+            Else
 
                 VerificarProcessodaPecaCorrente = False
 
@@ -935,17 +1028,21 @@ Public Class ClDadosArquivoCorrente
 
             If msg = True Then
 
-                If VerificarProcessodaPecaCorrente = False Then
+                If VerificarProcessodaPecaCorrente = True Then
 
                     MessageBox.Show(MensagemErros, "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error)
 
                 End If
 
+            Else
+
+                VerificarProcessodaPecaCorrente = False
+
             End If
 
         Catch ex As Exception
 
-            '  VerificarProcessodaPecaCorrente = False
+            VerificarProcessodaPecaCorrente = False
 
         Finally
 
@@ -955,7 +1052,8 @@ Public Class ClDadosArquivoCorrente
 
     End Function
 
-    Public Sub AtualizaDesenho(ByVal swModel As ModelDoc2)
+    Public Function AtualizaDesenho(ByVal swModel As ModelDoc2) As Boolean
+
 
         If TipoBanco = "MYSQL" Then
 
@@ -1050,36 +1148,36 @@ Public Class ClDadosArquivoCorrente
 
 
 
-                        '    cmd.ExecuteNonQuery()
+                        cmd.ExecuteNonQuery()
 
-                        Dim maxTentativas As Integer = 3 ' Quantidade máxima de tentativas
-                        Dim tentativaAtual As Integer = 0
-                        Dim sucesso As Boolean = False
+                        'Dim maxTentativas As Integer = 3 ' Quantidade máxima de tentativas
+                        'Dim tentativaAtual As Integer = 0
+                        'Dim sucesso As Boolean = False
 
-                        Do While Not sucesso And tentativaAtual < maxTentativas
-                            Try
-                                cmd.ExecuteNonQuery()
-                                sucesso = True ' Se chegou aqui, a execução foi bem-sucedida
-                                Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
-                            Catch ex As Exception
-                                tentativaAtual += 1
-                                If tentativaAtual < maxTentativas Then
-                                    '  MsgBox($"Erro na execução. Tentando novamente em 30 segundos... ({tentativaAtual}/{maxTentativas})")
-                                    Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
+                        'Do While Not sucesso And tentativaAtual < maxTentativas
+                        '    Try
+                        '        cmd.ExecuteNonQuery()
+                        '        sucesso = True ' Se chegou aqui, a execução foi bem-sucedida
+                        '        Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
+                        '    Catch ex As Exception
+                        '        tentativaAtual += 1
+                        '        If tentativaAtual < maxTentativas Then
+                        '            '  MsgBox($"Erro na execução. Tentando novamente em 30 segundos... ({tentativaAtual}/{maxTentativas})")
+                        '            Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
 
-                                    cl_BancoDados.AbrirBanco()
+                        '            cl_BancoDados.AbrirBanco()
 
-                                Else
-                                    ' Lançar exceção após atingir o limite de tentativas
-                                    ' Throw New Exception($"Falha ao executar o comando após {maxTentativas} tentativas.", ex)
+                        '        Else
+                        '            ' Lançar exceção após atingir o limite de tentativas
+                        '            ' Throw New Exception($"Falha ao executar o comando após {maxTentativas} tentativas.", ex)
 
-                                    cl_BancoDados.AbrirBanco()
+                        '            cl_BancoDados.AbrirBanco()
 
-                                End If
+                        '        End If
 
-                            End Try
+                        '    End Try
 
-                        Loop
+                        'Loop
 
                     Catch ex As Exception
 
@@ -1093,11 +1191,16 @@ Public Class ClDadosArquivoCorrente
                     End Try
                 End Using
 
+                AtualizaDesenho = True
+
             Catch ex As Exception
 
+                Return AtualizaDesenho
             Finally
 
             End Try
+
+
 
         ElseIf TipoBanco = "SQL" Then
 
@@ -1219,9 +1322,7 @@ Public Class ClDadosArquivoCorrente
         End If
 
 
-    End Sub
-
-
+    End Function
     ' Função para adicionar parâmetros como texto
     Public Function AddTextParameterMysql(ByRef cmd As MySqlCommand, ByVal paramName As String, ByVal value As Object) As Boolean
 
@@ -1238,14 +1339,11 @@ Public Class ClDadosArquivoCorrente
 
 
     End Function
-
     Public Function AddTextParameterSql(ByRef cmd As SqlCommand, ByVal paramName As String, ByVal value As Object)
 
         cmd.Parameters.AddWithValue(paramName, If(value Is Nothing, String.Empty, value.ToString().Trim()))
 
     End Function
-
-
     ' Função para gerar o SQL com parâmetros substituídos (para depuração)
     Function GenerateSqlWithParams(ByVal cmd As MySqlCommand) As String
         Dim sql As String = cmd.CommandText
@@ -1260,10 +1358,7 @@ Public Class ClDadosArquivoCorrente
         Next
         Return sql
     End Function
-
-
     Public Function ExportDXF(ByVal swModel As ModelDoc2, ByVal ManterAberto As Boolean, ByVal ExcluirLxds As Boolean) As Boolean
-
 
         Try
 
@@ -1329,77 +1424,94 @@ Public Class ClDadosArquivoCorrente
 
                         End If
 
-                        ' Cria uma anotação de texto na vista de anotação
-                        Dim swAnnotation As Annotation
-                        Dim swNote As Note
-                        Dim swText As String
-                        swText = swModel.GetTitle
+                        If ExcluirLxds Then
 
-                        ' Obtém a caixa delimitadora (bounding box) do modelo
-                        Dim minPt(3) As Double
-                        Dim maxPt(3) As Double
+                            sPathName = Left(sModelName, Len(sModelName) - 6) & "lxds"
 
-                        ' Obtém as coordenadas da caixa delimitadora
-                        swPart.GetPartBox(True)
 
-                        ' Calcula a posição dentro da geometria, por exemplo, na parte inferior direita
-                        Dim posX As Double
-                        Dim posY As Double
+                            If File.Exists(sPathName) Then
 
-                        ' Posiciona a anotação na parte inferior direita da geometria
-                        posX = maxPt(0) - 0.1 ' Ajuste conforme necessário para deixar um espaço de margem
-                        posY = minPt(1) + 0.1 ' Ajuste conforme necessário para deixar um espaço de margem
+                                File.Delete(sPathName)
 
-                        ' Insere a nota no modelo
-                        swNote = swModel.InsertNote(swText)
-                        swAnnotation = swNote.GetAnnotation
-
-                        ' Define o estilo do texto
-                        swAnnotation.Width = 1 '0.04
-                        swAnnotation.SetPosition2(posX, posY, 0) ' Define a posição da anotação
-
-                        ' Define a cor do texto (branco, por exemplo)
-                        swAnnotation.Color = RGB(255, 255, 255) ' Define a cor do texto como branco
-
-                        ' Garantir que a anotação está configurada para ser exportada no DXF
-                        swAnnotation.Visible = True ' Garante que a anotação será visível na exportação
-
-                        ' Define os alinhamentos de geometria para exportação
-                        dataAlignment(0) = 0.0#
-                        dataAlignment(1) = 0.0#
-                        dataAlignment(2) = 0.0#
-                        dataAlignment(3) = 1.0#
-                        dataAlignment(4) = 0.0#
-                        dataAlignment(5) = 0.0#
-                        dataAlignment(6) = 0.0#
-                        dataAlignment(7) = 1.0#
-                        dataAlignment(8) = 0.0#
-                        dataAlignment(9) = 0.0#
-                        dataAlignment(10) = 0.0#
-                        dataAlignment(11) = 1.0#
-
-                        varAlignment = dataAlignment
-
-                        ' Define as vistas
-                        dataViews(0) = "*Current"
-                        dataViews(1) = "*Front"
-
-                        varViews = dataViews
-
-                        ' Configurações para exportação de chapas metálicas
-                        options = 1 ' Inclui a geometria do flat-pattern
-
-                        ' Exporta o arquivo para DXF
-                        swPart.ExportToDWG2(sPathName, sModelName, swExportToDWG_e.swExportToDWG_ExportSheetMetal, True, varAlignment, False, False, options, Nothing)
-
-                        ' Fecha o documento se necessário
-                        If ManterAberto = False Then
-                            swapp.CloseDoc(sModelName)
+                            End If
                         End If
 
-                    Else
-                        ' Para peças que não são de chapa metálica, apenas exporte o DXF
-                        sModelName = swModel.GetPathName
+
+
+
+
+
+                        ' Cria uma anotação de texto na vista de anotação
+                        Dim swAnnotation As Annotation
+                            Dim swNote As Note
+                            Dim swText As String
+                            swText = swModel.GetTitle
+
+                            ' Obtém a caixa delimitadora (bounding box) do modelo
+                            Dim minPt(3) As Double
+                            Dim maxPt(3) As Double
+
+                            ' Obtém as coordenadas da caixa delimitadora
+                            swPart.GetPartBox(True)
+
+                            ' Calcula a posição dentro da geometria, por exemplo, na parte inferior direita
+                            Dim posX As Double
+                            Dim posY As Double
+
+                            ' Posiciona a anotação na parte inferior direita da geometria
+                            posX = maxPt(0) - 0.1 ' Ajuste conforme necessário para deixar um espaço de margem
+                            posY = minPt(1) + 0.1 ' Ajuste conforme necessário para deixar um espaço de margem
+
+                            ' Insere a nota no modelo
+                            swNote = swModel.InsertNote(swText)
+                            swAnnotation = swNote.GetAnnotation
+
+                            ' Define o estilo do texto
+                            swAnnotation.Width = 1 '0.04
+                            swAnnotation.SetPosition2(posX, posY, 0) ' Define a posição da anotação
+
+                            ' Define a cor do texto (branco, por exemplo)
+                            swAnnotation.Color = RGB(255, 255, 255) ' Define a cor do texto como branco
+
+                            ' Garantir que a anotação está configurada para ser exportada no DXF
+                            swAnnotation.Visible = True ' Garante que a anotação será visível na exportação
+
+                            ' Define os alinhamentos de geometria para exportação
+                            dataAlignment(0) = 0.0#
+                            dataAlignment(1) = 0.0#
+                            dataAlignment(2) = 0.0#
+                            dataAlignment(3) = 1.0#
+                            dataAlignment(4) = 0.0#
+                            dataAlignment(5) = 0.0#
+                            dataAlignment(6) = 0.0#
+                            dataAlignment(7) = 1.0#
+                            dataAlignment(8) = 0.0#
+                            dataAlignment(9) = 0.0#
+                            dataAlignment(10) = 0.0#
+                            dataAlignment(11) = 1.0#
+
+                            varAlignment = dataAlignment
+
+                            ' Define as vistas
+                            dataViews(0) = "*Current"
+                            dataViews(1) = "*Front"
+
+                            varViews = dataViews
+
+                            ' Configurações para exportação de chapas metálicas
+                            options = 1 ' Inclui a geometria do flat-pattern
+
+                            ' Exporta o arquivo para DXF
+                            swPart.ExportToDWG2(sPathName, sModelName, swExportToDWG_e.swExportToDWG_ExportSheetMetal, True, varAlignment, False, False, options, Nothing)
+
+                            ' Fecha o documento se necessário
+                            If ManterAberto = False Then
+                                swapp.CloseDoc(sModelName)
+                            End If
+
+                        Else
+                            ' Para peças que não são de chapa metálica, apenas exporte o DXF
+                            sModelName = swModel.GetPathName
                         sPathName = Left(sModelName, Len(sModelName) - 6) & "dxf"
 
                         ' Exporta o arquivo para DXF
@@ -1432,6 +1544,7 @@ Public Class ClDadosArquivoCorrente
         Catch ex As Exception
 
             ClasseEmail.EmailTratamentoErro(ex.Message.ToString)
+
         Finally
 
         End Try
@@ -1460,8 +1573,6 @@ Public Class ClDadosArquivoCorrente
         ' Retorna False se nenhuma feature de chapa metálica for encontrada
         Return False
     End Function
-
-
     Public Sub ExportToPDF(ByVal swModel As ModelDoc2, ByVal filePath As String, ByVal ManterAberto As Boolean)
 
         IntanciaSolidWorks.ConectarSolidWorks()
@@ -1510,6 +1621,84 @@ Public Class ClDadosArquivoCorrente
         Catch ex As Exception
         Finally
         End Try
+
+    End Sub
+
+
+
+
+    Public Sub SalvarMaterialDesenho(ByVal CodMatFabricante As String,
+                                     ByVal TipoPeca As String,
+                                     ByVal IdMaterial As String,
+                                     ByVal PecaQtde As String,
+                                     ByVal IdMaterialPeca As String,
+                                     ByVal Peso As String,
+                                     ByVal Valor As String,
+                                     ByVal UsuarioCriacao As String,
+                                     ByVal DataCriacao As String)
+
+        Dim query As String
+
+        If TipoBanco = "MYSQL" Then
+
+
+            Try
+
+
+                Using cmd As New MySqlCommand("insert into  " & ComplementoTipoBanco & "montapeca 
+                                             (CodMatFabricante,TipoPeca,IdMaterial, PecaQtde, IdMaterialPeca, Peso, Valor, UsuarioCriacao, DataCriacao)
+                                              values 
+                                             (@CodMatFabricante,@TipoPeca,@IdMaterial, @PecaQtde, @IdMaterialPeca, @Peso, @Valor, @UsuarioCriacao, @DataCriacao)", myconect)
+
+                    cmd.Parameters.AddWithValue("@CodMatFabricante", CodMatFabricante)
+                    cmd.Parameters.AddWithValue("@TipoPeca", TipoPeca)
+                    cmd.Parameters.AddWithValue("@IdMaterial", IdMaterial)
+                    cmd.Parameters.AddWithValue("@PecaQtde", PecaQtde)
+                    cmd.Parameters.AddWithValue("@IdMaterialPeca", IdMaterialPeca)
+                    cmd.Parameters.AddWithValue("@Peso", Peso)
+                    cmd.Parameters.AddWithValue("@Valor", Valor)
+                    cmd.Parameters.AddWithValue("@UsuarioCriacao", UsuarioCriacao)
+                    cmd.Parameters.AddWithValue("@DataCriacao", DataCriacao)
+
+
+                    cmd.ExecuteNonQuery()
+                End Using
+
+            Catch ex As Exception
+
+                MsgBox(ex.Message)
+
+            Finally
+
+            End Try
+
+
+        ElseIf TipoBanco = "SQL" Then
+
+
+            Using cmd As New SqlCommand("insert into  " & ComplementoTipoBanco & "montapeca 
+                                             (CodMatFabricante,TipoPeca,IdMaterial, PecaQtde, IdMaterialPeca, Peso, Valor, UsuarioCriacao, DataCriacao)
+                                              values 
+                                             (@CodMatFabricante,@TipoPeca,@IdMaterial, @PecaQtde, @IdMaterialPeca, @Peso, @Valor, @UsuarioCriacao, @DataCriacao)", myconectSQL)
+
+                cmd.Parameters.Add("@CodMatFabricante", CodMatFabricante)
+                cmd.Parameters.Add("@TipoPeca", TipoPeca)
+                cmd.Parameters.Add("@IdMaterial", IdMaterial)
+                cmd.Parameters.Add("@PecaQtde", PecaQtde)
+                cmd.Parameters.Add("@IdMaterialPeca", IdMaterialPeca)
+                cmd.Parameters.Add("@Peso", Peso)
+                cmd.Parameters.Add("@Valor", Valor)
+                cmd.Parameters.Add("@UsuarioCriacao", UsuarioCriacao)
+                cmd.Parameters.Add("@DataCriacao", DataCriacao)
+
+
+                cmd.ExecuteNonQuery()
+            End Using
+
+
+
+        End If
+
 
     End Sub
 
@@ -1640,9 +1829,6 @@ Public Class clPdf
         End Try
     End Sub
 
-
-
-
     Public Function EditarPdf(Origem As String, Parametro As String) As Boolean
         Try
             ' Cria o leitor e escritor para o mesmo arquivo
@@ -1682,6 +1868,5 @@ Public Class clPdf
             Console.WriteLine("Erro ao editar PDF: " & ex.Message)
         End Try
     End Function
-
 
 End Class

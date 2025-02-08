@@ -26,6 +26,7 @@ Partial Class Painel_Leitura_Dados
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Painel_Leitura_Dados))
         Me.tpgPrincipal = New System.Windows.Forms.TabControl()
         Me.tpgFolhaDados = New System.Windows.Forms.TabPage()
+        Me.txtTitulo = New System.Windows.Forms.TextBox()
         Me.btnIsometrico = New System.Windows.Forms.Button()
         Me.btnFichaTecnica = New System.Windows.Forms.Button()
         Me.txtIsometrico = New System.Windows.Forms.TextBox()
@@ -59,6 +60,7 @@ Partial Class Painel_Leitura_Dados
         Me.tsBLerDados = New System.Windows.Forms.ToolStripButton()
         Me.tsbSalvar = New System.Windows.Forms.ToolStripButton()
         Me.tsbConverterDXF = New System.Windows.Forms.ToolStripButton()
+        Me.tsbEspecial = New System.Windows.Forms.ToolStripButton()
         Me.TSBConverterPDF = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripButton2 = New System.Windows.Forms.ToolStripButton()
         Me.ToolStripButton8 = New System.Windows.Forms.ToolStripButton()
@@ -90,19 +92,12 @@ Partial Class Painel_Leitura_Dados
         Me.GroupBox8 = New System.Windows.Forms.GroupBox()
         Me.optProcessoSoldagemSim = New System.Windows.Forms.RadioButton()
         Me.optProcessoSoldagemNao = New System.Windows.Forms.RadioButton()
-        Me.GroupBox2 = New System.Windows.Forms.GroupBox()
-        Me.chkCorte = New System.Windows.Forms.CheckBox()
-        Me.chkDobra = New System.Windows.Forms.CheckBox()
-        Me.chkSolda = New System.Windows.Forms.CheckBox()
-        Me.chkPintura = New System.Windows.Forms.CheckBox()
-        Me.chkMontagem = New System.Windows.Forms.CheckBox()
         Me.GroupBox7 = New System.Windows.Forms.GroupBox()
         Me.OPTEstoqueSim = New System.Windows.Forms.RadioButton()
         Me.OPTEstoqueNao = New System.Windows.Forms.RadioButton()
         Me.btnPendencias = New System.Windows.Forms.Button()
         Me.chkVerificarLXDS = New System.Windows.Forms.CheckBox()
         Me.chkVerificarDFT = New System.Windows.Forms.CheckBox()
-        Me.cboTitulo = New System.Windows.Forms.ComboBox()
         Me.DGVMontaPeca = New System.Windows.Forms.DataGridView()
         Me.mnuDGVMontaPeca = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.ExcluirOMaterialDoDesenhoToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -117,6 +112,14 @@ Partial Class Painel_Leitura_Dados
         Me.Label3 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.Label1 = New System.Windows.Forms.Label()
+        Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.chkBoxProcessos = New System.Windows.Forms.CheckedListBox()
+        Me.GroupBox2 = New System.Windows.Forms.GroupBox()
+        Me.chkCorte = New System.Windows.Forms.CheckBox()
+        Me.chkDobra = New System.Windows.Forms.CheckBox()
+        Me.chkSolda = New System.Windows.Forms.CheckBox()
+        Me.chkPintura = New System.Windows.Forms.CheckBox()
+        Me.chkMontagem = New System.Windows.Forms.CheckBox()
         Me.mnuPrincipal = New System.Windows.Forms.MenuStrip()
         Me.ConfiguraçãoToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ConfiguraçãoToolStripMenuItem1 = New System.Windows.Forms.ToolStripMenuItem()
@@ -183,6 +186,14 @@ Partial Class Painel_Leitura_Dados
         Me.btnLimparBom = New System.Windows.Forms.Button()
         Me.btnInserirItensOrdemServico = New System.Windows.Forms.Button()
         Me.tpgOrdemServico = New System.Windows.Forms.TabPage()
+        Me.lblFator = New System.Windows.Forms.TextBox()
+        Me.Label38 = New System.Windows.Forms.Label()
+        Me.txtSaldoTag = New System.Windows.Forms.TextBox()
+        Me.Label37 = New System.Windows.Forms.Label()
+        Me.txtQtdeLiberada = New System.Windows.Forms.TextBox()
+        Me.Label36 = New System.Windows.Forms.Label()
+        Me.txtQtdeTag = New System.Windows.Forms.TextBox()
+        Me.Label35 = New System.Windows.Forms.Label()
         Me.BindingNavigator1 = New System.Windows.Forms.BindingNavigator(Me.components)
         Me.ToolStripButton1 = New System.Windows.Forms.ToolStripButton()
         Me.TSBSalvarOrdemServico = New System.Windows.Forms.ToolStripButton()
@@ -330,10 +341,11 @@ Partial Class Painel_Leitura_Dados
         Me.BnPrincipal.SuspendLayout()
         Me.GroupBox10.SuspendLayout()
         Me.GroupBox8.SuspendLayout()
-        Me.GroupBox2.SuspendLayout()
         Me.GroupBox7.SuspendLayout()
         CType(Me.DGVMontaPeca, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.mnuDGVMontaPeca.SuspendLayout()
+        Me.GroupBox1.SuspendLayout()
+        Me.GroupBox2.SuspendLayout()
         Me.mnuPrincipal.SuspendLayout()
         Me.tpgDesenhosCadstrados.SuspendLayout()
         CType(Me.dgvDesenhos, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -385,6 +397,7 @@ Partial Class Painel_Leitura_Dados
         '
         'tpgFolhaDados
         '
+        Me.tpgFolhaDados.Controls.Add(Me.txtTitulo)
         Me.tpgFolhaDados.Controls.Add(Me.btnIsometrico)
         Me.tpgFolhaDados.Controls.Add(Me.btnFichaTecnica)
         Me.tpgFolhaDados.Controls.Add(Me.txtIsometrico)
@@ -396,12 +409,10 @@ Partial Class Painel_Leitura_Dados
         Me.tpgFolhaDados.Controls.Add(Me.BnPrincipal)
         Me.tpgFolhaDados.Controls.Add(Me.GroupBox10)
         Me.tpgFolhaDados.Controls.Add(Me.GroupBox8)
-        Me.tpgFolhaDados.Controls.Add(Me.GroupBox2)
         Me.tpgFolhaDados.Controls.Add(Me.GroupBox7)
         Me.tpgFolhaDados.Controls.Add(Me.btnPendencias)
         Me.tpgFolhaDados.Controls.Add(Me.chkVerificarLXDS)
         Me.tpgFolhaDados.Controls.Add(Me.chkVerificarDFT)
-        Me.tpgFolhaDados.Controls.Add(Me.cboTitulo)
         Me.tpgFolhaDados.Controls.Add(Me.DGVMontaPeca)
         Me.tpgFolhaDados.Controls.Add(Me.chkVerificarDXF)
         Me.tpgFolhaDados.Controls.Add(Me.chkVerificarPDF)
@@ -414,6 +425,8 @@ Partial Class Painel_Leitura_Dados
         Me.tpgFolhaDados.Controls.Add(Me.Label3)
         Me.tpgFolhaDados.Controls.Add(Me.Label2)
         Me.tpgFolhaDados.Controls.Add(Me.Label1)
+        Me.tpgFolhaDados.Controls.Add(Me.GroupBox1)
+        Me.tpgFolhaDados.Controls.Add(Me.GroupBox2)
         Me.tpgFolhaDados.Controls.Add(Me.mnuPrincipal)
         Me.tpgFolhaDados.Location = New System.Drawing.Point(4, 25)
         Me.tpgFolhaDados.Margin = New System.Windows.Forms.Padding(4)
@@ -423,6 +436,17 @@ Partial Class Painel_Leitura_Dados
         Me.tpgFolhaDados.TabIndex = 0
         Me.tpgFolhaDados.Text = "Dados Principais"
         Me.tpgFolhaDados.UseVisualStyleBackColor = True
+        '
+        'txtTitulo
+        '
+        Me.txtTitulo.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtTitulo.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
+        Me.txtTitulo.Location = New System.Drawing.Point(96, 206)
+        Me.txtTitulo.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtTitulo.Name = "txtTitulo"
+        Me.txtTitulo.Size = New System.Drawing.Size(672, 22)
+        Me.txtTitulo.TabIndex = 37
         '
         'btnIsometrico
         '
@@ -508,14 +532,16 @@ Partial Class Painel_Leitura_Dados
         Me.GroupBox5.Controls.Add(Me.Label21)
         Me.GroupBox5.Controls.Add(Me.lblEspessura)
         Me.GroupBox5.Controls.Add(Me.Label17)
-        Me.GroupBox5.Location = New System.Drawing.Point(8, 471)
+        Me.GroupBox5.Location = New System.Drawing.Point(8, 412)
         Me.GroupBox5.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GroupBox5.Name = "GroupBox5"
         Me.GroupBox5.Padding = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GroupBox5.Size = New System.Drawing.Size(215, 300)
         Me.GroupBox5.TabIndex = 29
         Me.GroupBox5.TabStop = False
-        Me.GroupBox5.Text = "Processos:"
+        Me.GroupBox5.Text = "Dados técnicos:"
+        Me.ToolTipAjuda.SetToolTip(Me.GroupBox5, "Para preenchimento destes dados, basta criar e ou atualizar a lista de corte do S" &
+        "olidWorks")
         '
         'lblProfundidadeTotalCaixaDelimitadora
         '
@@ -729,14 +755,12 @@ Partial Class Painel_Leitura_Dados
         '
         'GroupBox4
         '
-        Me.GroupBox4.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.GroupBox4.Controls.Add(Me.chkBoxTipoDesenho)
-        Me.GroupBox4.Location = New System.Drawing.Point(229, 608)
+        Me.GroupBox4.Location = New System.Drawing.Point(229, 532)
         Me.GroupBox4.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GroupBox4.Name = "GroupBox4"
         Me.GroupBox4.Padding = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.GroupBox4.Size = New System.Drawing.Size(663, 162)
+        Me.GroupBox4.Size = New System.Drawing.Size(267, 180)
         Me.GroupBox4.TabIndex = 28
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Tipo Desenho"
@@ -748,13 +772,15 @@ Partial Class Painel_Leitura_Dados
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.chkBoxTipoDesenho.CheckOnClick = True
         Me.chkBoxTipoDesenho.FormattingEnabled = True
-        Me.chkBoxTipoDesenho.Location = New System.Drawing.Point(11, 15)
+        Me.chkBoxTipoDesenho.Location = New System.Drawing.Point(11, 21)
         Me.chkBoxTipoDesenho.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.chkBoxTipoDesenho.Name = "chkBoxTipoDesenho"
         Me.chkBoxTipoDesenho.ScrollAlwaysVisible = True
-        Me.chkBoxTipoDesenho.Size = New System.Drawing.Size(643, 123)
+        Me.chkBoxTipoDesenho.Size = New System.Drawing.Size(247, 157)
         Me.chkBoxTipoDesenho.Sorted = True
         Me.chkBoxTipoDesenho.TabIndex = 16
+        Me.ToolTipAjuda.SetToolTip(Me.chkBoxTipoDesenho, "Informe o tipo de desenho da peças, esta separação ajuda na " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "organização dos arq" &
+        "uivos, principalmente na OS" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10))
         '
         'BnPrincipal
         '
@@ -763,7 +789,7 @@ Partial Class Painel_Leitura_Dados
         Me.BnPrincipal.CountItem = Nothing
         Me.BnPrincipal.DeleteItem = Nothing
         Me.BnPrincipal.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.BnPrincipal.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsBLerDados, Me.tsbSalvar, Me.tsbConverterDXF, Me.TSBConverterPDF, Me.ToolStripButton2, Me.ToolStripButton8, Me.TSBAssociarMaterial, Me.tsbInserirNaOS, Me.ToolStripSeparator23, Me.tsbConfiguracoes, Me.ToolStripSeparator24, Me.tsbFerramentas, Me.ToolStripSeparator25, Me.TsbInspecaoQualidade, Me.ToolStripSeparator39, Me.ToolStripButton9, Me.ToolStripLabel1, Me.lblQtdeEstoque, Me.tslVersaoSistema, Me.txtNomeArquivo})
+        Me.BnPrincipal.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsBLerDados, Me.tsbSalvar, Me.tsbConverterDXF, Me.tsbEspecial, Me.TSBConverterPDF, Me.ToolStripButton2, Me.ToolStripButton8, Me.TSBAssociarMaterial, Me.tsbInserirNaOS, Me.ToolStripSeparator23, Me.tsbConfiguracoes, Me.ToolStripSeparator24, Me.tsbFerramentas, Me.ToolStripSeparator25, Me.TsbInspecaoQualidade, Me.ToolStripSeparator39, Me.ToolStripButton9, Me.ToolStripLabel1, Me.lblQtdeEstoque, Me.tslVersaoSistema, Me.txtNomeArquivo})
         Me.BnPrincipal.Location = New System.Drawing.Point(4, 4)
         Me.BnPrincipal.MoveFirstItem = Nothing
         Me.BnPrincipal.MoveLastItem = Nothing
@@ -809,7 +835,18 @@ Partial Class Painel_Leitura_Dados
         Me.tsbConverterDXF.Size = New System.Drawing.Size(29, 28)
         Me.tsbConverterDXF.Text = "DXF"
         Me.tsbConverterDXF.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText
-        Me.tsbConverterDXF.ToolTipText = "Se for um arquivo part do tipo Chapa irá converter o blank em dxf"
+        Me.tsbConverterDXF.ToolTipText = "Se for um arquivo part do tipo Chapa irá converter o blank em dxf, caso haja arqu" &
+    "ivo lxds o mesmo será apagado"
+        '
+        'tsbEspecial
+        '
+        Me.tsbEspecial.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.tsbEspecial.Image = CType(resources.GetObject("tsbEspecial.Image"), System.Drawing.Image)
+        Me.tsbEspecial.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsbEspecial.Name = "tsbEspecial"
+        Me.tsbEspecial.Size = New System.Drawing.Size(29, 28)
+        Me.tsbEspecial.Text = "Funções Especiais"
+        Me.tsbEspecial.Visible = False
         '
         'TSBConverterPDF
         '
@@ -967,8 +1004,8 @@ Partial Class Painel_Leitura_Dados
         Me.TsbInspecaoQualidade.Name = "TsbInspecaoQualidade"
         Me.TsbInspecaoQualidade.Size = New System.Drawing.Size(29, 28)
         Me.TsbInspecaoQualidade.Text = "Ficha para Controle Dimencional"
-        Me.TsbInspecaoQualidade.ToolTipText = "Ficha para Controle Dimencional:" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Informe as principais medidas com controel dime" &
-    "ncional da peças."
+        Me.TsbInspecaoQualidade.ToolTipText = "Ficha para Controle Dimensional: " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Informe as principais medidas para controle di" &
+    "mensional da peças."
         '
         'ToolStripSeparator39
         '
@@ -983,7 +1020,7 @@ Partial Class Painel_Leitura_Dados
         Me.ToolStripButton9.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.ToolStripButton9.Name = "ToolStripButton9"
         Me.ToolStripButton9.Size = New System.Drawing.Size(29, 28)
-        Me.ToolStripButton9.Text = "Atualizar"
+        Me.ToolStripButton9.Text = "Atualizar os dados que são recebidos do SINCO"
         Me.ToolStripButton9.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText
         Me.ToolStripButton9.ToolTipText = "Dicas de uso:" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Caso um novo cadastro de Acabamento, Tipo Desenho, Projeto e/ou Ta" &
     "g seja inserido e não " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "apareça no ComboBox, basta clicar aqui para atualizar os" &
@@ -994,8 +1031,10 @@ Partial Class Painel_Leitura_Dados
         Me.ToolStripLabel1.Font = New System.Drawing.Font("Segoe UI Semibold", 9.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.ToolStripLabel1.ForeColor = System.Drawing.Color.Red
         Me.ToolStripLabel1.Name = "ToolStripLabel1"
-        Me.ToolStripLabel1.Size = New System.Drawing.Size(143, 28)
-        Me.ToolStripLabel1.Text = "qtde Peças Estoque:"
+        Me.ToolStripLabel1.Size = New System.Drawing.Size(140, 28)
+        Me.ToolStripLabel1.Text = "Qtde pç na Fabrica:"
+        Me.ToolStripLabel1.ToolTipText = "Informa a quantidade de peças na fabrica, não e um controle de estoque e sim um i" &
+    "nformativo para adicionar na OS."
         '
         'lblQtdeEstoque
         '
@@ -1021,14 +1060,12 @@ Partial Class Painel_Leitura_Dados
         '
         'GroupBox10
         '
-        Me.GroupBox10.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.GroupBox10.Controls.Add(Me.chkBoxAcabamento)
-        Me.GroupBox10.Location = New System.Drawing.Point(229, 391)
+        Me.GroupBox10.Location = New System.Drawing.Point(229, 329)
         Me.GroupBox10.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GroupBox10.Name = "GroupBox10"
         Me.GroupBox10.Padding = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.GroupBox10.Size = New System.Drawing.Size(663, 210)
+        Me.GroupBox10.Size = New System.Drawing.Size(267, 208)
         Me.GroupBox10.TabIndex = 20
         Me.GroupBox10.TabStop = False
         Me.GroupBox10.Text = "Acabamento"
@@ -1044,15 +1081,17 @@ Partial Class Painel_Leitura_Dados
         Me.chkBoxAcabamento.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.chkBoxAcabamento.Name = "chkBoxAcabamento"
         Me.chkBoxAcabamento.ScrollAlwaysVisible = True
-        Me.chkBoxAcabamento.Size = New System.Drawing.Size(651, 174)
+        Me.chkBoxAcabamento.Size = New System.Drawing.Size(255, 174)
         Me.chkBoxAcabamento.Sorted = True
         Me.chkBoxAcabamento.TabIndex = 18
+        Me.ToolTipAjuda.SetToolTip(Me.chkBoxAcabamento, "Marque o possivel tipo de acabamento que a peça tem" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & " como padrão, este acabament" &
+        "o " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "pode ser alterado no geração da OS.")
         '
         'GroupBox8
         '
         Me.GroupBox8.Controls.Add(Me.optProcessoSoldagemSim)
         Me.GroupBox8.Controls.Add(Me.optProcessoSoldagemNao)
-        Me.GroupBox8.Location = New System.Drawing.Point(123, 391)
+        Me.GroupBox8.Location = New System.Drawing.Point(123, 329)
         Me.GroupBox8.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GroupBox8.Name = "GroupBox8"
         Me.GroupBox8.Padding = New System.Windows.Forms.Padding(3, 2, 3, 2)
@@ -1060,6 +1099,8 @@ Partial Class Painel_Leitura_Dados
         Me.GroupBox8.TabIndex = 16
         Me.GroupBox8.TabStop = False
         Me.GroupBox8.Text = "Soldagem:"
+        Me.ToolTipAjuda.SetToolTip(Me.GroupBox8, "Marque SIM, para desenho de conjunto de Solda. " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Ou seja são desenhos que  são mo" &
+        "ntados com outras peças." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10))
         '
         'optProcessoSoldagemSim
         '
@@ -1086,94 +1127,11 @@ Partial Class Painel_Leitura_Dados
         Me.optProcessoSoldagemNao.Text = "NÃO"
         Me.optProcessoSoldagemNao.UseVisualStyleBackColor = True
         '
-        'GroupBox2
-        '
-        Me.GroupBox2.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.GroupBox2.Controls.Add(Me.chkCorte)
-        Me.GroupBox2.Controls.Add(Me.chkDobra)
-        Me.GroupBox2.Controls.Add(Me.chkSolda)
-        Me.GroupBox2.Controls.Add(Me.chkPintura)
-        Me.GroupBox2.Controls.Add(Me.chkMontagem)
-        Me.GroupBox2.Location = New System.Drawing.Point(12, 329)
-        Me.GroupBox2.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Padding = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.GroupBox2.Size = New System.Drawing.Size(881, 57)
-        Me.GroupBox2.TabIndex = 17
-        Me.GroupBox2.TabStop = False
-        Me.GroupBox2.Text = "Processos"
-        '
-        'chkCorte
-        '
-        Me.chkCorte.AutoSize = True
-        Me.chkCorte.Image = Global.SwLynx_4._1.My.Resources.Resources.chapa_de_aco_32x32
-        Me.chkCorte.Location = New System.Drawing.Point(13, 20)
-        Me.chkCorte.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.chkCorte.Name = "chkCorte"
-        Me.chkCorte.Size = New System.Drawing.Size(87, 26)
-        Me.chkCorte.TabIndex = 1
-        Me.chkCorte.Text = "Corte"
-        Me.chkCorte.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
-        Me.chkCorte.UseVisualStyleBackColor = True
-        '
-        'chkDobra
-        '
-        Me.chkDobra.AutoSize = True
-        Me.chkDobra.Image = Global.SwLynx_4._1.My.Resources.Resources.dobra
-        Me.chkDobra.Location = New System.Drawing.Point(133, 20)
-        Me.chkDobra.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.chkDobra.Name = "chkDobra"
-        Me.chkDobra.Size = New System.Drawing.Size(93, 26)
-        Me.chkDobra.TabIndex = 0
-        Me.chkDobra.Text = "Dodra"
-        Me.chkDobra.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
-        Me.chkDobra.UseVisualStyleBackColor = True
-        '
-        'chkSolda
-        '
-        Me.chkSolda.AutoSize = True
-        Me.chkSolda.Image = Global.SwLynx_4._1.My.Resources.Resources.de_solda
-        Me.chkSolda.Location = New System.Drawing.Point(267, 20)
-        Me.chkSolda.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.chkSolda.Name = "chkSolda"
-        Me.chkSolda.Size = New System.Drawing.Size(91, 26)
-        Me.chkSolda.TabIndex = 2
-        Me.chkSolda.Text = "Solda"
-        Me.chkSolda.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
-        Me.chkSolda.UseVisualStyleBackColor = True
-        '
-        'chkPintura
-        '
-        Me.chkPintura.AutoSize = True
-        Me.chkPintura.Image = Global.SwLynx_4._1.My.Resources.Resources.rolo_de_pintura
-        Me.chkPintura.Location = New System.Drawing.Point(397, 20)
-        Me.chkPintura.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.chkPintura.Name = "chkPintura"
-        Me.chkPintura.Size = New System.Drawing.Size(132, 26)
-        Me.chkPintura.TabIndex = 3
-        Me.chkPintura.Text = "Acabamento"
-        Me.chkPintura.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
-        Me.chkPintura.UseVisualStyleBackColor = True
-        '
-        'chkMontagem
-        '
-        Me.chkMontagem.AutoSize = True
-        Me.chkMontagem.Image = Global.SwLynx_4._1.My.Resources.Resources.montagem
-        Me.chkMontagem.Location = New System.Drawing.Point(577, 20)
-        Me.chkMontagem.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.chkMontagem.Name = "chkMontagem"
-        Me.chkMontagem.Size = New System.Drawing.Size(119, 26)
-        Me.chkMontagem.TabIndex = 4
-        Me.chkMontagem.Text = "Montagem"
-        Me.chkMontagem.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
-        Me.chkMontagem.UseVisualStyleBackColor = True
-        '
         'GroupBox7
         '
         Me.GroupBox7.Controls.Add(Me.OPTEstoqueSim)
         Me.GroupBox7.Controls.Add(Me.OPTEstoqueNao)
-        Me.GroupBox7.Location = New System.Drawing.Point(11, 391)
+        Me.GroupBox7.Location = New System.Drawing.Point(11, 329)
         Me.GroupBox7.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.GroupBox7.Name = "GroupBox7"
         Me.GroupBox7.Padding = New System.Windows.Forms.Padding(3, 2, 3, 2)
@@ -1181,6 +1139,8 @@ Partial Class Painel_Leitura_Dados
         Me.GroupBox7.TabIndex = 15
         Me.GroupBox7.TabStop = False
         Me.GroupBox7.Text = "Estoque:"
+        Me.ToolTipAjuda.SetToolTip(Me.GroupBox7, "Marque SIM, para peças que serão excluidas do plano de corte, como padrão." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Ou se" &
+        "ja peças de fabricação interna que são consideradas peças de estoque." & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & " ")
         '
         'OPTEstoqueSim
         '
@@ -1214,10 +1174,10 @@ Partial Class Painel_Leitura_Dados
         Me.btnPendencias.Enabled = False
         Me.btnPendencias.Image = Global.SwLynx_4._1.My.Resources.Resources.atencao
         Me.btnPendencias.ImageAlign = System.Drawing.ContentAlignment.TopCenter
-        Me.btnPendencias.Location = New System.Drawing.Point(5, 42)
+        Me.btnPendencias.Location = New System.Drawing.Point(7, 42)
         Me.btnPendencias.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnPendencias.Name = "btnPendencias"
-        Me.btnPendencias.Size = New System.Drawing.Size(891, 50)
+        Me.btnPendencias.Size = New System.Drawing.Size(889, 50)
         Me.btnPendencias.TabIndex = 23
         Me.btnPendencias.Text = " Pendências"
         Me.btnPendencias.TextImageRelation = System.Windows.Forms.TextImageRelation.TextAboveImage
@@ -1251,20 +1211,6 @@ Partial Class Painel_Leitura_Dados
         Me.chkVerificarDFT.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
         Me.chkVerificarDFT.UseVisualStyleBackColor = True
         '
-        'cboTitulo
-        '
-        Me.cboTitulo.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.cboTitulo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed
-        Me.cboTitulo.FormattingEnabled = True
-        Me.cboTitulo.Location = New System.Drawing.Point(95, 206)
-        Me.cboTitulo.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
-        Me.cboTitulo.Name = "cboTitulo"
-        Me.cboTitulo.Size = New System.Drawing.Size(672, 23)
-        Me.cboTitulo.TabIndex = 6
-        Me.ToolTipAjuda.SetToolTip(Me.cboTitulo, "O usuário pode digitar diretamente ou selecionar um tipo de produto que foi previ" &
-        "amente" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "cadastrado no sistema SINCO através do formulário de tipos de produto.")
-        '
         'DGVMontaPeca
         '
         Me.DGVMontaPeca.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
@@ -1274,12 +1220,12 @@ Partial Class Painel_Leitura_Dados
         Me.DGVMontaPeca.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders
         Me.DGVMontaPeca.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.DGVMontaPeca.ContextMenuStrip = Me.mnuDGVMontaPeca
-        Me.DGVMontaPeca.Location = New System.Drawing.Point(7, 780)
+        Me.DGVMontaPeca.Location = New System.Drawing.Point(7, 716)
         Me.DGVMontaPeca.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.DGVMontaPeca.Name = "DGVMontaPeca"
         Me.DGVMontaPeca.RowHeadersWidth = 51
         Me.DGVMontaPeca.RowTemplate.Height = 24
-        Me.DGVMontaPeca.Size = New System.Drawing.Size(885, 65)
+        Me.DGVMontaPeca.Size = New System.Drawing.Size(885, 129)
         Me.DGVMontaPeca.TabIndex = 15
         '
         'mnuDGVMontaPeca
@@ -1419,6 +1365,121 @@ Partial Class Painel_Leitura_Dados
         Me.Label1.TabIndex = 0
         Me.Label1.Text = "Author:"
         '
+        'GroupBox1
+        '
+        Me.GroupBox1.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.GroupBox1.Controls.Add(Me.chkBoxProcessos)
+        Me.GroupBox1.Location = New System.Drawing.Point(502, 329)
+        Me.GroupBox1.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.GroupBox1.Name = "GroupBox1"
+        Me.GroupBox1.Padding = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.GroupBox1.Size = New System.Drawing.Size(387, 383)
+        Me.GroupBox1.TabIndex = 38
+        Me.GroupBox1.TabStop = False
+        Me.GroupBox1.Text = "Processos"
+        '
+        'chkBoxProcessos
+        '
+        Me.chkBoxProcessos.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.chkBoxProcessos.CheckOnClick = True
+        Me.chkBoxProcessos.FormattingEnabled = True
+        Me.chkBoxProcessos.Location = New System.Drawing.Point(6, 19)
+        Me.chkBoxProcessos.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.chkBoxProcessos.Name = "chkBoxProcessos"
+        Me.chkBoxProcessos.ScrollAlwaysVisible = True
+        Me.chkBoxProcessos.Size = New System.Drawing.Size(375, 361)
+        Me.chkBoxProcessos.Sorted = True
+        Me.chkBoxProcessos.TabIndex = 18
+        Me.ToolTipAjuda.SetToolTip(Me.chkBoxProcessos, "Selecione os Setores/Processos de fabricação do desenho corrente, esta seleção ir" &
+        "a definir" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "no SINCO a forma e os processo de controle de produção.")
+        '
+        'GroupBox2
+        '
+        Me.GroupBox2.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.GroupBox2.Controls.Add(Me.chkCorte)
+        Me.GroupBox2.Controls.Add(Me.chkDobra)
+        Me.GroupBox2.Controls.Add(Me.chkSolda)
+        Me.GroupBox2.Controls.Add(Me.chkPintura)
+        Me.GroupBox2.Controls.Add(Me.chkMontagem)
+        Me.GroupBox2.Location = New System.Drawing.Point(12, 329)
+        Me.GroupBox2.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.GroupBox2.Name = "GroupBox2"
+        Me.GroupBox2.Padding = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.GroupBox2.Size = New System.Drawing.Size(881, 57)
+        Me.GroupBox2.TabIndex = 17
+        Me.GroupBox2.TabStop = False
+        Me.GroupBox2.Text = "Setores"
+        Me.GroupBox2.Visible = False
+        '
+        'chkCorte
+        '
+        Me.chkCorte.AutoSize = True
+        Me.chkCorte.Image = Global.SwLynx_4._1.My.Resources.Resources.chapa_de_aco_32x32
+        Me.chkCorte.Location = New System.Drawing.Point(13, 20)
+        Me.chkCorte.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.chkCorte.Name = "chkCorte"
+        Me.chkCorte.Size = New System.Drawing.Size(87, 26)
+        Me.chkCorte.TabIndex = 1
+        Me.chkCorte.Text = "Corte"
+        Me.chkCorte.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
+        Me.chkCorte.UseVisualStyleBackColor = True
+        '
+        'chkDobra
+        '
+        Me.chkDobra.AutoSize = True
+        Me.chkDobra.Image = Global.SwLynx_4._1.My.Resources.Resources.dobra
+        Me.chkDobra.Location = New System.Drawing.Point(133, 20)
+        Me.chkDobra.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.chkDobra.Name = "chkDobra"
+        Me.chkDobra.Size = New System.Drawing.Size(93, 26)
+        Me.chkDobra.TabIndex = 0
+        Me.chkDobra.Text = "Dodra"
+        Me.chkDobra.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
+        Me.chkDobra.UseVisualStyleBackColor = True
+        '
+        'chkSolda
+        '
+        Me.chkSolda.AutoSize = True
+        Me.chkSolda.Image = Global.SwLynx_4._1.My.Resources.Resources.de_solda
+        Me.chkSolda.Location = New System.Drawing.Point(267, 20)
+        Me.chkSolda.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.chkSolda.Name = "chkSolda"
+        Me.chkSolda.Size = New System.Drawing.Size(91, 26)
+        Me.chkSolda.TabIndex = 2
+        Me.chkSolda.Text = "Solda"
+        Me.chkSolda.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
+        Me.chkSolda.UseVisualStyleBackColor = True
+        '
+        'chkPintura
+        '
+        Me.chkPintura.AutoSize = True
+        Me.chkPintura.Image = Global.SwLynx_4._1.My.Resources.Resources.rolo_de_pintura
+        Me.chkPintura.Location = New System.Drawing.Point(397, 20)
+        Me.chkPintura.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.chkPintura.Name = "chkPintura"
+        Me.chkPintura.Size = New System.Drawing.Size(132, 26)
+        Me.chkPintura.TabIndex = 3
+        Me.chkPintura.Text = "Acabamento"
+        Me.chkPintura.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
+        Me.chkPintura.UseVisualStyleBackColor = True
+        '
+        'chkMontagem
+        '
+        Me.chkMontagem.AutoSize = True
+        Me.chkMontagem.Image = Global.SwLynx_4._1.My.Resources.Resources.montagem
+        Me.chkMontagem.Location = New System.Drawing.Point(577, 20)
+        Me.chkMontagem.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.chkMontagem.Name = "chkMontagem"
+        Me.chkMontagem.Size = New System.Drawing.Size(119, 26)
+        Me.chkMontagem.TabIndex = 4
+        Me.chkMontagem.Text = "Montagem"
+        Me.chkMontagem.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
+        Me.chkMontagem.UseVisualStyleBackColor = True
+        '
         'mnuPrincipal
         '
         Me.mnuPrincipal.ImageScalingSize = New System.Drawing.Size(20, 20)
@@ -1426,7 +1487,7 @@ Partial Class Painel_Leitura_Dados
         Me.mnuPrincipal.Location = New System.Drawing.Point(4, 4)
         Me.mnuPrincipal.Name = "mnuPrincipal"
         Me.mnuPrincipal.Padding = New System.Windows.Forms.Padding(5, 2, 0, 2)
-        Me.mnuPrincipal.Size = New System.Drawing.Size(796, 31)
+        Me.mnuPrincipal.Size = New System.Drawing.Size(892, 31)
         Me.mnuPrincipal.TabIndex = 17
         Me.mnuPrincipal.Text = "MenuStrip1"
         Me.mnuPrincipal.Visible = False
@@ -2053,6 +2114,14 @@ Partial Class Painel_Leitura_Dados
         '
         'tpgOrdemServico
         '
+        Me.tpgOrdemServico.Controls.Add(Me.lblFator)
+        Me.tpgOrdemServico.Controls.Add(Me.Label38)
+        Me.tpgOrdemServico.Controls.Add(Me.txtSaldoTag)
+        Me.tpgOrdemServico.Controls.Add(Me.Label37)
+        Me.tpgOrdemServico.Controls.Add(Me.txtQtdeLiberada)
+        Me.tpgOrdemServico.Controls.Add(Me.Label36)
+        Me.tpgOrdemServico.Controls.Add(Me.txtQtdeTag)
+        Me.tpgOrdemServico.Controls.Add(Me.Label35)
         Me.tpgOrdemServico.Controls.Add(Me.BindingNavigator1)
         Me.tpgOrdemServico.Controls.Add(Me.txtPesqAcabamentoDesenho)
         Me.tpgOrdemServico.Controls.Add(Me.Label29)
@@ -2085,6 +2154,90 @@ Partial Class Painel_Leitura_Dados
         Me.tpgOrdemServico.TabIndex = 3
         Me.tpgOrdemServico.Text = "Ordem de Serviço"
         Me.tpgOrdemServico.UseVisualStyleBackColor = True
+        '
+        'lblFator
+        '
+        Me.lblFator.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.lblFator.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
+        Me.lblFator.Enabled = False
+        Me.lblFator.Location = New System.Drawing.Point(829, 202)
+        Me.lblFator.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.lblFator.Name = "lblFator"
+        Me.lblFator.Size = New System.Drawing.Size(49, 22)
+        Me.lblFator.TabIndex = 36
+        '
+        'Label38
+        '
+        Me.Label38.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Label38.AutoSize = True
+        Me.Label38.Location = New System.Drawing.Point(782, 206)
+        Me.Label38.Name = "Label38"
+        Me.Label38.Size = New System.Drawing.Size(41, 16)
+        Me.Label38.TabIndex = 35
+        Me.Label38.Text = "Fator:"
+        '
+        'txtSaldoTag
+        '
+        Me.txtSaldoTag.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtSaldoTag.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
+        Me.txtSaldoTag.Enabled = False
+        Me.txtSaldoTag.Location = New System.Drawing.Point(798, 94)
+        Me.txtSaldoTag.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.txtSaldoTag.Name = "txtSaldoTag"
+        Me.txtSaldoTag.Size = New System.Drawing.Size(80, 22)
+        Me.txtSaldoTag.TabIndex = 34
+        '
+        'Label37
+        '
+        Me.Label37.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Label37.AutoSize = True
+        Me.Label37.Location = New System.Drawing.Point(748, 97)
+        Me.Label37.Name = "Label37"
+        Me.Label37.Size = New System.Drawing.Size(46, 16)
+        Me.Label37.TabIndex = 33
+        Me.Label37.Text = "Saldo:"
+        '
+        'txtQtdeLiberada
+        '
+        Me.txtQtdeLiberada.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtQtdeLiberada.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
+        Me.txtQtdeLiberada.Enabled = False
+        Me.txtQtdeLiberada.Location = New System.Drawing.Point(798, 66)
+        Me.txtQtdeLiberada.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.txtQtdeLiberada.Name = "txtQtdeLiberada"
+        Me.txtQtdeLiberada.Size = New System.Drawing.Size(80, 22)
+        Me.txtQtdeLiberada.TabIndex = 32
+        '
+        'Label36
+        '
+        Me.Label36.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Label36.AutoSize = True
+        Me.Label36.Location = New System.Drawing.Point(730, 69)
+        Me.Label36.Name = "Label36"
+        Me.Label36.Size = New System.Drawing.Size(64, 16)
+        Me.Label36.TabIndex = 31
+        Me.Label36.Text = "Liberada:"
+        '
+        'txtQtdeTag
+        '
+        Me.txtQtdeTag.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.txtQtdeTag.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper
+        Me.txtQtdeTag.Enabled = False
+        Me.txtQtdeTag.Location = New System.Drawing.Point(798, 38)
+        Me.txtQtdeTag.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
+        Me.txtQtdeTag.Name = "txtQtdeTag"
+        Me.txtQtdeTag.Size = New System.Drawing.Size(80, 22)
+        Me.txtQtdeTag.TabIndex = 30
+        '
+        'Label35
+        '
+        Me.Label35.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.Label35.AutoSize = True
+        Me.Label35.Location = New System.Drawing.Point(755, 41)
+        Me.Label35.Name = "Label35"
+        Me.Label35.Size = New System.Drawing.Size(39, 16)
+        Me.Label35.TabIndex = 29
+        Me.Label35.Text = "Qtde:"
         '
         'BindingNavigator1
         '
@@ -2137,7 +2290,7 @@ Partial Class Painel_Leitura_Dados
         Me.ToolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.ToolStripButton3.Name = "ToolStripButton3"
         Me.ToolStripButton3.Size = New System.Drawing.Size(29, 24)
-        Me.ToolStripButton3.Text = "Atualizar"
+        Me.ToolStripButton3.Text = "Atualizar os dados que são recebidos do SINCO."
         Me.ToolStripButton3.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText
         Me.ToolStripButton3.ToolTipText = "Dicas de uso:" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Caso um novo cadastro de Projeto e/ou Tag seja inserido e não " & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "ap" &
     "areça no ComboBox, basta clicar aqui para atualizar os dados."
@@ -2293,6 +2446,7 @@ Partial Class Painel_Leitura_Dados
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.DGVListaMaterialSW.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCellsExceptHeader
+        Me.DGVListaMaterialSW.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCellsExceptHeaders
         Me.DGVListaMaterialSW.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.DGVListaMaterialSW.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.dgvSelecao, Me.dgvIconeItemOS, Me.dgvDXF, Me.dgvPDF})
         Me.DGVListaMaterialSW.ContextMenuStrip = Me.mnuDGVListaMaterialSW
@@ -2687,7 +2841,7 @@ Partial Class Painel_Leitura_Dados
         Me.txtDescricaoTag.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.txtDescricaoTag.Multiline = True
         Me.txtDescricaoTag.Name = "txtDescricaoTag"
-        Me.txtDescricaoTag.Size = New System.Drawing.Size(524, 61)
+        Me.txtDescricaoTag.Size = New System.Drawing.Size(372, 61)
         Me.txtDescricaoTag.TabIndex = 6
         '
         'txtCliente
@@ -2708,7 +2862,7 @@ Partial Class Painel_Leitura_Dados
         Me.cboTag.Location = New System.Drawing.Point(355, 38)
         Me.cboTag.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.cboTag.Name = "cboTag"
-        Me.cboTag.Size = New System.Drawing.Size(524, 24)
+        Me.cboTag.Size = New System.Drawing.Size(372, 24)
         Me.cboTag.TabIndex = 4
         '
         'Label24
@@ -3335,12 +3489,13 @@ Partial Class Painel_Leitura_Dados
         Me.GroupBox10.ResumeLayout(False)
         Me.GroupBox8.ResumeLayout(False)
         Me.GroupBox8.PerformLayout()
-        Me.GroupBox2.ResumeLayout(False)
-        Me.GroupBox2.PerformLayout()
         Me.GroupBox7.ResumeLayout(False)
         Me.GroupBox7.PerformLayout()
         CType(Me.DGVMontaPeca, System.ComponentModel.ISupportInitialize).EndInit()
         Me.mnuDGVMontaPeca.ResumeLayout(False)
+        Me.GroupBox1.ResumeLayout(False)
+        Me.GroupBox2.ResumeLayout(False)
+        Me.GroupBox2.PerformLayout()
         Me.mnuPrincipal.ResumeLayout(False)
         Me.mnuPrincipal.PerformLayout()
         Me.tpgDesenhosCadstrados.ResumeLayout(False)
@@ -3497,7 +3652,6 @@ Partial Class Painel_Leitura_Dados
     Friend WithEvents ConfiguraçãoToolStripMenuItem As Windows.Forms.ToolStripMenuItem
     Friend WithEvents ConfiguraçãoToolStripMenuItem1 As Windows.Forms.ToolStripMenuItem
     Friend WithEvents TrocarFormatoA3ToolStripMenuItem As Windows.Forms.ToolStripMenuItem
-    Friend WithEvents cboTitulo As Windows.Forms.ComboBox
     Friend WithEvents ToolTipAjuda As Windows.Forms.ToolTip
     Friend WithEvents ToolStripSeparator11 As Windows.Forms.ToolStripSeparator
     Friend WithEvents LimparPastaOrdemDeServiçoSelecionadaToolStripMenuItem As Windows.Forms.ToolStripMenuItem
@@ -3679,4 +3833,16 @@ Partial Class Painel_Leitura_Dados
     Friend WithEvents ToolStripButton9 As Windows.Forms.ToolStripButton
     Friend WithEvents TsbInspecaoQualidade As Windows.Forms.ToolStripButton
     Friend WithEvents ToolStripSeparator39 As Windows.Forms.ToolStripSeparator
+    Friend WithEvents txtTitulo As Windows.Forms.TextBox
+    Friend WithEvents txtQtdeTag As Windows.Forms.TextBox
+    Friend WithEvents Label35 As Windows.Forms.Label
+    Friend WithEvents txtSaldoTag As Windows.Forms.TextBox
+    Friend WithEvents Label37 As Windows.Forms.Label
+    Friend WithEvents txtQtdeLiberada As Windows.Forms.TextBox
+    Friend WithEvents Label36 As Windows.Forms.Label
+    Friend WithEvents lblFator As Windows.Forms.TextBox
+    Friend WithEvents Label38 As Windows.Forms.Label
+    Friend WithEvents tsbEspecial As Windows.Forms.ToolStripButton
+    Friend WithEvents GroupBox1 As Windows.Forms.GroupBox
+    Friend WithEvents chkBoxProcessos As Windows.Forms.CheckedListBox
 End Class

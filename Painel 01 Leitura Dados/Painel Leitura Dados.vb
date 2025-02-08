@@ -32,6 +32,8 @@ Imports iText.Kernel.Pdf.Canvas
 Imports iText.Kernel.Font
 Imports iText.Kernel.Pdf.Xobject
 Imports iText.Layout.Element
+Imports iText.IO.Font.Constants
+Imports iText.Layout
 
 Imports System.Runtime.CompilerServices.Unsafe
 
@@ -45,7 +47,6 @@ Imports netDxf
 Imports netDxf.Entities
 Imports netDxf.Tables
 
-Imports iText.IO.Font.Constants
 Imports System.ComponentModel
 Imports System.Threading.Tasks
 Imports Rectangle = System.Drawing.Rectangle
@@ -55,6 +56,10 @@ Imports iText.Commons.Bouncycastle
 Imports System.Data.SqlClient
 Imports System.Threading
 Imports iText.StyledXmlParser.Jsoup
+Imports DocumentFormat.OpenXml.Office2016.Drawing.Command
+Imports SolidWorks.Interop.cosworks
+Imports System.CodeDom
+Imports System.Security.AccessControl
 
 
 
@@ -83,7 +88,7 @@ Public Class Painel_Leitura_Dados
 
 
 
-	Public Function AtualizaTela(ByVal swModel As ModelDoc2) As Boolean
+	Public Function AtualizaTela(ByVal swModel As ModelDoc2, chkBoxProcesso As CheckedListBox) As Boolean
 
 		' Conectar ao SolidWorks
 		IntanciaSolidWorks.ConectarSolidWorks()
@@ -104,7 +109,8 @@ Public Class Painel_Leitura_Dados
 				'****************************************************************
 				'BUSCA DADOS DA LEITURA DO DESENHO
 
-				Me.cboTitulo.Text = swModel.SummaryInfo(swSummInfoField_e.swSumInfoTitle)
+				'Me.cboTitulo.Text = swModel.SummaryInfo(swSummInfoField_e.swSumInfoTitle).ToUpper
+				Me.txtTitulo.Text = swModel.SummaryInfo(swSummInfoField_e.swSumInfoTitle).ToUpper()
 				Me.txtAssuntoSubiTitulo.Text = swModel.SummaryInfo(swSummInfoField_e.swSumInfoSubject).ToUpper()
 				Me.txtComentarios.Text = swModel.SummaryInfo(swSummInfoField_e.swSumInfoComment).ToUpper()
 				Me.txtAuthor.Text = swModel.SummaryInfo(swSummInfoField_e.swSumInfoAuthor).ToUpper()
@@ -184,37 +190,6 @@ Public Class Painel_Leitura_Dados
 					lblQtdeEstoque.Text = DadosArquivoCorrente.Sobra_Fabrica
 				End Try
 
-				Try
-					' Recuperar RNC
-					DadosArquivoCorrente.rnc = cl_BancoDados.RetornaCampoDaPesquisa(
-		$"SELECT RNC FROM  " & ComplementoTipoBanco & "material WHERE CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'", "RNC")
-
-					If Not String.IsNullOrEmpty(DadosArquivoCorrente.rnc) Then
-						'                ' Recuperar DescricaoPendencia se RNC não estiver vazio
-						'                DadosArquivoCorrente.DescricaoPendencia = cl_BancoDados.RetornaCampoDaPesquisa(
-						'    $"SELECT DescricaoPendencia FROM ordemservicoitempendencia 
-						'      WHERE CodMatFabricante = '{DadosArquivoCorrente.NomeArquivoSemExtensao}' 
-						'      AND Estatus = 'PENDENCIA' 
-						'      AND d_e_l_e_t_e IS NULL",
-						'    "DescricaoPendencia"
-						')
-						'txtDescricaoPendencia.Text = DadosArquivoCorrente.DescricaoPendencia
-						btnPendencias.Image = My.Resources.atencao
-						btnPendencias.Enabled = True
-
-					Else
-
-						' RNC vazio
-						LimparPendencias()
-
-					End If
-				Catch ex As Exception
-					' Tratar falha na recuperação de RNC ou DescricaoPendencia
-					DadosArquivoCorrente.rnc = ""
-					LimparPendencias()
-				End Try
-
-
 				For i As Integer = 0 To chkBoxAcabamento.Items.Count - 1
 					If DadosArquivoCorrente.Acabamento.ToString = chkBoxAcabamento.Items(i).ToString Then
 						chkBoxAcabamento.Text = DadosArquivoCorrente.Acabamento
@@ -235,40 +210,68 @@ Public Class Painel_Leitura_Dados
 
 				Me.lblEspessura.Text = DadosArquivoCorrente.Espessura
 
-				If Not String.IsNullOrEmpty(DadosArquivoCorrente.NumeroDobras) AndAlso DadosArquivoCorrente.NumeroDobras <> "0" Then
-					DadosArquivoCorrente.Dobra = "1"
-					chkDobra.Checked = True
-				End If
+				'If Not String.IsNullOrEmpty(DadosArquivoCorrente.NumeroDobras) AndAlso DadosArquivoCorrente.NumeroDobras <> "0" Then
+				'	DadosArquivoCorrente.Dobra = "1"
+				'	chkDobra.Checked = True
+				'End If
 
-				chkCorte.Checked = (DadosArquivoCorrente.Corte.ToString = "1")
-				If chkCorte.Checked = False Then
-					DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtCorte", "", "")
-				End If
+				'chkCorte.Checked = (DadosArquivoCorrente.Corte.ToString = "1")
+				'If chkCorte.Checked = False Then
+				'	DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtCorte", "", "")
+				'End If
 
 
-				chkDobra.Checked = (DadosArquivoCorrente.Dobra.ToString = "1")
-				If chkDobra.Checked = False Then
-					DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtDobra", "", "")
-				End If
+				'chkDobra.Checked = (DadosArquivoCorrente.Dobra.ToString = "1")
+				'If chkDobra.Checked = False Then
+				'	DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtDobra", "", "")
+				'End If
 
-				chkSolda.Checked = (DadosArquivoCorrente.Solda.ToString = "1")
-				If chkSolda.Checked = False Then
-					DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtSolda", "", "")
-				End If
+				'chkSolda.Checked = (DadosArquivoCorrente.Solda.ToString = "1")
+				'If chkSolda.Checked = False Then
+				'	DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtSolda", "", "")
+				'End If
 
-				chkPintura.Checked = (DadosArquivoCorrente.Pintura.ToString = "1")
-				If chkPintura.Checked = False Then
-					DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtPintura", "", "")
-				End If
+				'chkPintura.Checked = (DadosArquivoCorrente.Pintura.ToString = "1")
+				'If chkPintura.Checked = False Then
+				'	DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtPintura", "", "")
+				'End If
 
-				chkMontagem.Checked = (DadosArquivoCorrente.Montagem.ToString = "1")
-				If chkMontagem.Checked = False Then
-					DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtMontagem", "", "")
-				End If
+				'chkMontagem.Checked = (DadosArquivoCorrente.Montagem.ToString = "1")
+				'If chkMontagem.Checked = False Then
+				'	DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtMontagem", "", "")
+				'End If
+
+				DadosArquivoCorrente.LerPropriedadesPersonalizadas(swModel, chkBoxProcesso)
+
+
 
 			End If
 
 		End If
+
+
+		'Dim TabelaProcesso As System.Data.DataTable
+
+		'' Carrega os dados do banco
+		'TabelaProcesso = cl_BancoDados.CarregarDados("SELECT processofabricacao FROM materialprocessofabricacao 
+		'                            WHERE codmatfabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'
+		'					  and d_e_l_e_t_e = '' or d_e_l_e_t_e is null")
+
+		'' Converte os valores da tabela para uma lista para facilitar a busca
+		'Dim processosNoBanco As New List(Of String)
+		'For Each row As DataRow In TabelaProcesso.Rows
+		'	processosNoBanco.Add(row("processofabricacao").ToString())
+		'Next
+
+		'For i As Integer = 0 To chkBoxProcessos.Items.Count - 1
+		'	Dim processo As String = chkBoxProcessos.Items(i).ToString()
+		'	' Se o processo existir no banco, marcar o checkbox como selecionado
+		'	chkBoxProcessos.SetItemChecked(i, processosNoBanco.Contains(processo))
+		'Next
+
+
+
+		TimerMontaPeca.Enabled = True
 
 
 	End Function
@@ -339,14 +342,14 @@ Public Class Painel_Leitura_Dados
 		Try
 
 
-			DadosArquivoCorrente.ArquivoCorrente(swModel)
+			DadosArquivoCorrente.ArquivoCorrente(swModel, chkBoxProcessos)
 
 			DadosArquivoCorrente.PercorrerPropriedadesDaListaDeCorte(swModel)
 
 			'dados da caixa delimitadora
 			DadosArquivoCorrente.LerDadosCaixaDelimitadora(swModel)
 
-			AtualizaTela(swModel)
+			AtualizaTela(swModel, chkBoxProcessos)
 
 
 		Catch ex As Exception
@@ -385,7 +388,8 @@ Public Class Painel_Leitura_Dados
 					If DadosArquivoCorrente.NomeArquivoSemExtensao.ToString.Trim = dgvDataGridBOM.Rows(i).Cells("CodMatFabricante").Value.ToString.Trim Then
 
 						' Adicione os parâmetros ao comando
-						dgvDataGridBOM.Rows(i).Cells("DescResumo").Value = Me.cboTitulo.Text ' UCase(DadosArquivoCorrente.Titulo)
+						'dgvDataGridBOM.Rows(i).Cells("DescResumo").Value = Me.cboTitulo.Text.ToUpper  ' UCase(DadosArquivoCorrente.Titulo)
+						dgvDataGridBOM.Rows(i).Cells("DescResumo").Value = Me.txtTitulo.Text.ToUpper  ' UCase(DadosArquivoCorrente.Titulo)
 						dgvDataGridBOM.Rows(i).Cells("DescDetal").Value = Me.txtAssuntoSubiTitulo.Text ' UCase(DadosArquivoCorrente.AssuntoSubiTitulo)
 						dgvDataGridBOM.Rows(i).Cells("Autor").Value = Me.txtAuthor.Text ' UCase(DadosArquivoCorrente.Author)
 						dgvDataGridBOM.Rows(i).Cells("Palavrachave").Value = Me.txtPalavraChave.Text ' UCase(DadosArquivoCorrente.PalavraChave)
@@ -451,7 +455,7 @@ Public Class Painel_Leitura_Dados
 
 		'  DGVTimerFiltroPecaAtivaOS.Refresh()
 
-		DadosArquivoCorrente.ArquivoCorrente(swModel)
+		DadosArquivoCorrente.ArquivoCorrente(swModel, chkBoxProcessos)
 
 		DadosArquivoCorrente.PercorrerPropriedadesDaListaDeCorte(swModel)
 
@@ -629,7 +633,7 @@ Public Class Painel_Leitura_Dados
 		Try
 
 
-			DadosArquivoCorrente.ArquivoCorrente(swModel)
+			DadosArquivoCorrente.ArquivoCorrente(swModel, chkBoxProcessos)
 		Catch ex As Exception
 		Finally
 		End Try
@@ -656,7 +660,7 @@ Public Class Painel_Leitura_Dados
 		Try
 
 
-			AtualizaTela(swModel)
+			AtualizaTela(swModel, chkBoxProcessos)
 
 		Catch ex As Exception
 		Finally
@@ -956,44 +960,107 @@ Public Class Painel_Leitura_Dados
 
 			For i As Integer = 0 To TabelaViewMontaPeca.Rows.Count - 1
 
-				If Trim(TabelaViewMontaPeca.Rows(i)("CodMatFabricante").ToString) = DadosArquivoCorrente.NomeArquivoSemExtensao Then
+				Try
 
-					iconeAtencao = My.Resources.verificado1  ' Substitua pelo seu ícone
 
-					iconeTipoArquivo = My.Resources.material_escolar_32
+					If Trim(TabelaViewMontaPeca.Rows(i)("NomeArquivoSemExtensao").ToString) = DadosArquivoCorrente.NomeArquivoSemExtensao Then
 
-					dgvDataGridBOM.Rows.Add(iconeTipoArquivo, iconeAtencao,
-											Trim(TabelaViewMontaPeca.Rows(i).Item("IdMaterial").ToString.ToUpper), 'IdMaterial,
-												Trim(TabelaViewMontaPeca.Rows(i).Item("CodMatFabricante").ToString.ToUpper), 'CodMatFabricante,
-												"",'DescResumo
-															Trim(TabelaViewMontaPeca.Rows(i).Item("DescDetal").ToString.ToUpper),'DescDetal,
-												"",'Autor,
-											"",'Palavrachave,
-												   "",'Notas,
-											"",'Espessura,
-												"",'ComprimentoBlank,
-													   "",'LarguraBlank,
-												   "",'material,
-											   "",'AreaPintura,
-												  "",'NumeroDobras,
-												   Trim(TabelaViewMontaPeca.Rows(i).Item("Peso").ToString) * qtdePecaLm,'Peso,
-										   "",'EnderecoArquivo,
-													  "",'Acabamento,
-												 "",'soldagem,
-											   "material",'TipoDesenho,
-												  "",'Corte,
-											"",'Dobra,
-											"",'Solda,
-											"",'Pintura,
-											  "",'Montagem,
-											   "",'rnc,
-										  "",'Alturacaixadelimitadora,
-															  "",'Larguracaixadelimitadora,
-															   "",'Profundidadeaixadelimitadora,
-																   "",'ItemEstoque,
-												  Trim(TabelaViewMontaPeca.Rows(i).Item("PecaQtde").ToString * qtdePecaLm)) 'qtde,
+						iconeTipoArquivo = My.Resources.material_escolar_32
 
-				End If
+						Dim peso As Double
+						Dim PecaQtde As Double
+
+						Try
+
+
+							peso = Convert.ToDouble(Replace(TabelaViewMontaPeca.Rows(i).Item("Peso").ToString, ",", "."))
+
+							peso = peso * qtdePecaLm
+
+							If peso = 0 Then
+
+								peso = 0.01
+
+							End If
+
+						Catch ex As Exception
+
+							peso = 0.01
+
+						Finally
+
+						End Try
+
+						Try
+
+							PecaQtde = Convert.ToDouble(Replace(TabelaViewMontaPeca.Rows(i).Item("PecaQtde").ToString, ",", "."))
+
+							PecaQtde = PecaQtde * qtdePecaLm
+
+							If PecaQtde = 0 Then
+
+								PecaQtde = 0.01
+
+							End If
+
+
+						Catch ex As Exception
+							PecaQtde = 0.01
+						Finally
+						End Try
+
+
+						' Preencher o DataGridView com os dados da peça
+						dgvDataGridBOM.Rows.Add(My.Resources.Sem_Incone,
+											iconeDXF,
+											iconePDF,
+											iconeTipoArquivo,
+										iconeAtencao,
+										Trim(TabelaViewMontaPeca.Rows(i).Item("IdMaterial").ToString.ToUpper), 'IdMaterial,
+										Trim(TabelaViewMontaPeca.Rows(i).Item("CodMatFabricante").ToString.ToUpper), 'CodMatFabricante,
+										"",'DescResumo
+										Trim(TabelaViewMontaPeca.Rows(i).Item("DescDetal").ToString.ToUpper),'DescDetal,
+										"",'Autor,
+										"",'Palavrachave,
+										"",'Notas,
+										"",'Espessura,
+										"",'ComprimentoBlank,
+										"",'LarguraBlank,
+										"",'material,
+										"",'AreaPintura,
+										"",'NumeroDobras,
+										peso, 'Replace((Trim(TabelaViewMontaPeca.Rows(i).Item("Peso").ToString) * qtdePecaLm), ",", "."),'Peso,
+										"",'EnderecoArquivo,
+										"",'Acabamento,
+										"",'soldagem,
+										"MATERIAL",'TipoDesenho,
+										"",'Corte,
+										"",'Dobra,
+										"",'Solda,
+										"",'Pintura,
+										"",'Montagem,
+										"",'rnc,
+										"",'Alturacaixadelimitadora,
+										"",'Larguracaixadelimitadora,
+										"",'Profundidadeaixadelimitadora,
+										"",'ItemEstoque,
+										PecaQtde) 'Replace(Trim(TabelaViewMontaPeca.Rows(i).Item("PecaQtde").ToString * qtdePecaLm), ",", ".")) 'qtde,
+
+						iconeDXF = My.Resources.Sem_Incone
+						iconePDF = My.Resources.Sem_Incone
+						iconeTipoArquivo = My.Resources.Sem_Incone
+						iconeAtencao = My.Resources.Sem_Incone
+
+
+
+
+					End If
+
+
+				Catch ex As Exception
+					Continue For
+				Finally
+				End Try
 
 			Next
 		Catch ex As Exception
@@ -1284,7 +1351,7 @@ Public Class Painel_Leitura_Dados
 					End If
 
 
-					If DadosArquivoCorrente.VerificarProcessodaPecaCorrente(swModel, False) = False Then
+					If DadosArquivoCorrente.VerificarProcessodaPecaCorrente(swModel, False) = True Then
 
 						DadosArquivoCorrente.rnc = "S"
 
@@ -1302,9 +1369,10 @@ Public Class Painel_Leitura_Dados
 
 
 
-					dgvDataGridBOM.Rows.Add(My.Resources.Sem_Incone, iconeDXF,
-										iconePDF,
-										iconeTipoArquivo,
+					dgvDataGridBOM.Rows.Add(My.Resources.Sem_Incone,
+												iconeDXF,
+												iconePDF,
+												iconeTipoArquivo,
 												iconeAtencao,
 												DadosArquivoCorrente.IdMaterial,
 												DadosArquivoCorrente.NomeArquivoSemExtensao,
@@ -1338,42 +1406,10 @@ Public Class Painel_Leitura_Dados
 					DadosArquivoCorrente.qtde = tempTable.Rows(a)("qtdePeca")
 
 
-
-
-
-					' ' Condição 2: Arquivo é uma peça, TipoDesenho está vazio, e Liberação é "NÃO"
-					' If swModel.GetType() = swDocumentTypes_e.swDocPART AndAlso
-					'String.IsNullOrEmpty(DadosArquivoCorrente.TipoDesenho.ToString) AndAlso
-					'My.Settings.LiberaOSsemMaterial = "NÃO" Then
-
-					'     dgvDataGridBOM.Rows(a).Cells("RNC").Value = "S"
-					'     AlterarEstiloDataGrid(a, dgvDataGridBOM, "txtTipoDesenho", Color.Red, Color.LightPink)
-					' End If
-
-					' ' Condição 3: Arquivo é uma peça, material está vazio, Número de Dobras não está vazio, e Liberação é "NÃO"
-					' If swModel.GetType() = swDocumentTypes_e.swDocPART AndAlso
-					'String.IsNullOrEmpty(DadosArquivoCorrente.material.ToString) AndAlso
-					'Not String.IsNullOrEmpty(DadosArquivoCorrente.NumeroDobras.ToString) AndAlso
-					'My.Settings.LiberaOSsemMaterial = "NÃO" Then
-
-					'     dgvDataGridBOM.Rows(a).Cells("RNC").Value = "S"
-					'     AlterarEstiloDataGrid(a, dgvDataGridBOM, "MaterialSW", Color.Red, Color.LightPink)
-					' End If
-
-					' ' Condição 4: Arquivo é uma peça, Espessura não está vazia, material está vazio,
-					' ' Tipo de Desenho está vazio e Liberação é "NÃO".
-					' If swModel.GetType() = swDocumentTypes_e.swDocPART AndAlso
-					'Not String.IsNullOrEmpty(DadosArquivoCorrente.Espessura) AndAlso
-					'My.Settings.LiberaOSsemMaterial = "NÃO" AndAlso
-					'String.IsNullOrEmpty(DadosArquivoCorrente.material) AndAlso
-					'String.IsNullOrEmpty(DadosArquivoCorrente.TipoDesenho) Then
-
-					'     ' Define o valor da célula "RNC" como "S"
-					'     dgvDataGridBOM.Rows(a).Cells("RNC").Value = "S"
-
-					'     ' Altera o estilo da célula e da linha no DataGridView
-					'     AlterarEstiloDataGrid(a, dgvDataGridBOM, "txtTipoDesenho", Color.Red, Color.LightPink)
-					' End If
+					iconeDXF = My.Resources.Sem_Incone
+					iconePDF = My.Resources.Sem_Incone
+					iconeTipoArquivo = My.Resources.Sem_Incone
+					iconeAtencao = My.Resources.Sem_Incone
 
 
 
@@ -1430,7 +1466,6 @@ Public Class Painel_Leitura_Dados
 
 		ProgressBarListaSW.Maximum = dgvDataGridBOM.Rows.Count
 
-
 		For aa As Integer = 0 To dgvDataGridBOM.Rows.Count - 1
 
 			Try
@@ -1466,6 +1501,11 @@ Public Class Painel_Leitura_Dados
 				DadosArquivoCorrente.Profundidadeaixadelimitadora = dgvDataGridBOM.Rows(aa).Cells("Espessuracaixadelimitadora").Value.ToString
 				DadosArquivoCorrente.ItemEstoque = dgvDataGridBOM.Rows(aa).Cells("txtItemEstoque").Value.ToString
 				DadosArquivoCorrente.qtde = dgvDataGridBOM.Rows(aa).Cells("qtde").Value.ToString
+
+
+
+
+
 
 				If TipoBanco = "MYSQL" Then
 
@@ -1537,6 +1577,7 @@ Public Class Painel_Leitura_Dados
 
 							'End If
 							updateCommand.ExecuteNonQuery()
+
 
 						Catch ex As Exception
 							MsgBox(ex.Message & " Erro Update - arquivo: " & UCase(DadosArquivoCorrente.NomeArquivoSemExtensao))
@@ -2000,7 +2041,7 @@ Public Class Painel_Leitura_Dados
 	''' <param name="swModel">O modelo ativo do SolidWorks.</param>
 	''' <param name="docType">O tipo do documento.</param>
 	''' <returns>True se o documento foi carregado com sucesso; caso contrário, False.</returns>   
- Private Function WaitForDocumentToLoad(ByVal swModel As ModelDoc2, ByVal docType As swDocumentTypes_e) As Boolean
+	Private Function WaitForDocumentToLoad(ByVal swModel As ModelDoc2, ByVal docType As swDocumentTypes_e) As Boolean
 		Dim maxRetries As Integer = 10
 		Dim retryInterval As Integer = 100 ' Tempo em milissegundos
 
@@ -2139,67 +2180,15 @@ Public Class Painel_Leitura_Dados
 "qtde"}
 
 
-
 		' Chama a função para criar as colunas
 		CriarColunasDataGridView(dgvDataGridBOM, colunas)
 
 		TimerdgvDesenhos.Enabled = True
 
-		' TipoBanco = "SQLCLIENTE"
-		If TipoBanco = "SQL" Then
 
-			cl_BancoDados.ComboBoxDataSet("[View_SZ1010_GESTAO]", "Z1_NUM", "Z1_NUM", cboProjeto, "", "[MP12OFICIAL].[dbo].")
-
-			cl_BancoDados.ComboBoxDataSet("tratamento", "Id_Tratamento", "Tratamento", cboOpcoesAcabamento, "", "[MP12OFICIAL].[dbo].")
-
-			' Chama a função para carregar os dados no CheckedListBox
-			PreencherCheckedListBox("Select DescFamilia from " & ComplementoTipoBanco & "familia WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '') ORDER BY DescFamilia", chkBoxTipoDesenho)
-
-			' Chama a função para carregar os dados no CheckedListBox
-			PreencherCheckedListBox("Select DescAcabamento from " & ComplementoTipoBanco & "acabamento WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '') ORDER BY DescAcabamento ", chkBoxAcabamento)
+		AtualziarDadosSinco()
 
 
-		ElseIf TipoBanco = "MYSQL" Then
-
-			cl_BancoDados.ComboBoxDataSet("projetos", "idProjeto", "Projeto", cboProjeto, " WHERE (D_E_L_E_T_E Is NULL Or D_E_L_E_T_E = '') and (Finalizado = '' OR Finalizado Is NULL)")
-			cl_BancoDados.ComboBoxDataSet("acabamento", "IdAcabamento", "DescAcabamento", cboOpcoesAcabamento, "WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '')")
-			' Chama a função para carregar os dados no CheckedListBox
-			PreencherCheckedListBox("Select DescFamilia from " & ComplementoTipoBanco & "familia WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '') ORDER BY DescFamilia", chkBoxTipoDesenho)
-
-			' Chama a função para carregar os dados no CheckedListBox
-			PreencherCheckedListBox("Select DescAcabamento from " & ComplementoTipoBanco & "acabamento WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '') ORDER BY DescAcabamento ", chkBoxAcabamento)
-
-		End If
-
-
-
-		' Ocultar tabPage1
-		OcultarTabPage(tpgPrincipal, tpgPCP)
-
-		'edson 20-01-2025
-		'para verificar a necessidade processamento na abertura de cada arquivo
-		' Timerdgvos.Enabled = True
-
-		'edson 20-01-2025
-		'para verificar a necessidade processamento na abertura de cada arquivo
-		' TimerDGVListaMaterialSW.Enabled = True
-
-		Dim version As Version = Assembly.GetExecutingAssembly().GetName().Version
-
-		tslVersaoSistema.Text = My.Settings.BancoDadosAtivo.ToString & ": " & version.ToString()
-
-		'   TimerpcpAgrupamentoProjeto.Enabled = True
-
-
-		'edson 20-01-2025
-		'para verificar a necessidade processamento na abertura de cada arquivo
-		' TimerProdutos.Enabled = True
-
-
-
-
-
-		' CarregarDadosAgrupados()
 
 	End Sub
 	Private viewDadosmaterial As DataView
@@ -2232,11 +2221,13 @@ Public Class Painel_Leitura_Dados
 	''' Limpa os campos do formulário.
 	''' </summary>    
 	Private Sub LimparCamposFormulario()
-		Me.cboTitulo.Text = ""
+		'Me.cboTitulo.Text = ""
+		Me.txtTitulo.Clear()
 		Me.txtAssuntoSubiTitulo.Clear()
 		Me.txtComentarios.Clear()
 		Me.txtAuthor.Clear()
 		Me.txtPalavraChave.Clear()
+
 
 		Me.btnPendencias.Image = Nothing
 		'Me.txtDescricaoPendencia.Clear()
@@ -2315,7 +2306,7 @@ Public Class Painel_Leitura_Dados
 	''' <summary>
 	''' Limpa as propriedades do objeto DadosArquivoCorrente.
 	''' </summary>   
-Private Sub LimparDadosArquivoCorrente()
+	Private Sub LimparDadosArquivoCorrente()
 		With DadosArquivoCorrente
 			' Informações gerais
 			.IdMaterial = Nothing
@@ -2463,6 +2454,8 @@ and   (EnderecoArquivo <> '' AND StatusMat = 'A')
 
 
 
+		cl_BancoDados.FormatarDataGridView(dgvDesenhos, "SIM")
+
 
 
 
@@ -2496,7 +2489,7 @@ and   (EnderecoArquivo <> '' AND StatusMat = 'A')
 
 		Try
 
-			Dim ArquivoPdf As String = DGVListaMaterialSW.CurrentRow.Cells("EnderecoArquivo").Value.ToString()
+			Dim ArquivoPdf As String = DGVListaMaterialSW.CurrentRow.Cells("EnderecoArquivoItemOrdemServico").Value.ToString()
 
 			' Substitui extensões ".SLDASM" e ".SLDPRT" por ".DDF"
 			ArquivoPdf = Path.ChangeExtension(ArquivoPdf, ".PDF")
@@ -2510,7 +2503,7 @@ and   (EnderecoArquivo <> '' AND StatusMat = 'A')
 					p.StartInfo = New ProcessStartInfo(ArquivoPdf)
 
 					p.Start()
-					p.WaitForExit()
+					'p.WaitForExit()
 
 					DGVListaMaterialSW.CurrentRow.DefaultCellStyle.BackColor = Color.LightCyan
 				End Using
@@ -2576,43 +2569,10 @@ and   (EnderecoArquivo <> '' AND StatusMat = 'A')
 
 	End Sub
 
-	Private Sub txtAuthor_LostFocus(sender As Object, e As EventArgs) Handles txtAuthor.LostFocus
-		' Verifique se o swModel foi aberto com sucesso
 
-		Try
-
-
-			If Not swModel Is Nothing Then
-
-				swModel.SummaryInfo(swSummInfoField_e.swSumInfoAuthor) = Me.txtAuthor.Text
-				swModel.SaveSilent()
-
-			End If
-
-		Catch ex As Exception
-		Finally
-		End Try
-
-	End Sub
 
 	Private Sub txtPalavraChave_LostFocus(sender As Object, e As EventArgs) Handles txtPalavraChave.LostFocus
 
-		Try
-
-
-			' Verifique se o swModel foi aberto com sucesso
-			If Not swModel Is Nothing Then
-
-
-				swModel.SummaryInfo(swSummInfoField_e.swSumInfoKeywords) = Me.txtPalavraChave.Text
-
-				swModel.SaveSilent()
-
-			End If
-
-		Catch ex As Exception
-		Finally
-		End Try
 
 
 	End Sub
@@ -2641,21 +2601,6 @@ and   (EnderecoArquivo <> '' AND StatusMat = 'A')
 
 	Private Sub txtAssuntoSubiTitulo_LostFocus(sender As Object, e As EventArgs) Handles txtAssuntoSubiTitulo.LostFocus
 
-		Try
-
-
-			' Verifique se o swModel foi aberto com sucesso
-			If Not swModel Is Nothing Then
-
-				swModel.SummaryInfo(swSummInfoField_e.swSumInfoSubject) = Me.txtAssuntoSubiTitulo.Text
-
-				swModel.SaveSilent()
-			End If
-
-		Catch ex As Exception
-		Finally
-
-		End Try
 
 
 	End Sub
@@ -2702,7 +2647,7 @@ and   (EnderecoArquivo <> '' AND StatusMat = 'A')
 		' Dim pdfFilePath As String = Path.ChangeExtension(swModel.GetPathName.ToString, ".pdf")
 
 
-		' pdfsinco.EscreverPdf(pdfFilePath, "C:\bin", "testo no pdf")
+		'pdfsinco.EscreverPdf(pdfFilePath, "C:\bin", "testo no pdf")
 
 
 	End Sub
@@ -2827,6 +2772,10 @@ order by descdetal")
 		'''Next
 		TimerMontaPeca.Enabled = False
 
+		cl_BancoDados.FormatarDataGridView(DGVMontaPeca, "SIM")
+
+
+
 	End Sub
 
 	Private Sub cboProjeto_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cboProjeto.SelectedIndexChanged
@@ -2945,6 +2894,10 @@ order by descdetal")
 
 				' Tenta retornar a descrição da Tag
 				txtDescricaoTag.Text = cl_BancoDados.RetornaCampoDaPesquisa("SELECT DISTINCT(Z2_DESC) FROM [MP12OFICIAL].[dbo].[View_SZ2010_GESTAO] where Z2_PRODUTO = '" & OrdemServico.idTag & "'", "Z2_DESC")
+				' Tenta retornar a descrição da Tag
+				txtQtdeTag.Text = cl_BancoDados.RetornaCampoDaPesquisa("SELECT DISTINCT(QtdeTag) FROM [MP12OFICIAL].[dbo].[View_SZ2010_GESTAO] where Z2_PRODUTO = '" & OrdemServico.idTag & "'", "QtdeTag")
+
+
 
 				Try
 					OrdemServico.DataPrevisao = cl_BancoDados.RetornaCampoDaPesquisa("SELECT DataPrevisao FROM [MP12OFICIAL].[dbo].[View_SZ2010_GESTAO] where Z2_PRODUTO = '" & OrdemServico.idTag & "'", "DataPrevisao")
@@ -2957,19 +2910,28 @@ order by descdetal")
 
 			ElseIf TipoBanco = "MYSQL" Then
 
+				Me.txtQtdeLiberada.Clear()
+				Me.txtQtdeTag.Clear()
+				Me.txtSaldoTag.Clear()
+				txtDescricaoTag.Clear()
+
 				' Tenta retornar a descrição da Tag
 				txtDescricaoTag.Text = cl_BancoDados.RetornaCampoDaPesquisa("SELECT DescTag FROM  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "DescTag")
+				txtQtdeTag.Text = cl_BancoDados.RetornaCampoDaPesquisa("SELECT QtdeTag FROM  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "QtdeTag")
+				txtQtdeLiberada.Text = cl_BancoDados.RetornaCampoDaPesquisa("SELECT QtdeLiberada FROM  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "QtdeLiberada")
+				txtSaldoTag.Text = cl_BancoDados.RetornaCampoDaPesquisa("SELECT SaldoTag FROM  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "SaldoTag")
+
+				OrdemServico.DataPrevisao = cl_BancoDados.RetornaCampoDaPesquisa("SELECT DataPrevisao FROM  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "DataPrevisao")
+
+				OrdemServico.QtdeTag = txtQtdeTag.Text
+				OrdemServico.QtdeLiberada = txtQtdeLiberada.Text
+				OrdemServico.SaldoTag = txtSaldoTag.Text
 
 
 
-				Try
-					OrdemServico.DataPrevisao = cl_BancoDados.RetornaCampoDaPesquisa("SELECT DataPrevisao FROM  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "DataPrevisao")
 
-				Catch ex As Exception
 
-					OrdemServico.DataPrevisao = ""
 
-				End Try
 
 			End If
 
@@ -2979,6 +2941,7 @@ order by descdetal")
 		Catch ex As Exception
 			' Em caso de erro, limpa o campo de descrição
 			Me.txtDescricaoTag.Clear()
+			txtQtdeTag.Clear()
 
 			OrdemServico.Tag = Nothing
 			OrdemServico.idTag = Nothing
@@ -3009,26 +2972,39 @@ order by descdetal")
 												Descricao,
 												DescEmpresa,
 												replace(EnderecoOrdemServico,'##','\\') as ENDERECO,
-												CriadoPor as USUARIO,
-												DataCriacao as DATA,
+												CriadoPor as CriadoPor,
+												DataCriacao as DataCriacao,
 												Liberado_Engenharia,
 												Data_Liberacao_Engenharia,
 												Estatus,
-												DataPrevisao,ProdutoPadrao
+												DataPrevisao,
+                                                ProdutoPadrao,
+                                                Fator
 												FROM  " & ComplementoTipoBanco & "ordemservico WHERE (D_E_L_E_T_E <> '*' or D_E_L_E_T_E is null)" & Filtro &
-												" AND CriadoPor LIKE '%" & Me.txtPesqCriadoPor.Text & "%'")
+												" AND CriadoPor LIKE '%" & Me.txtPesqCriadoPor.Text & "%' order by IdOrdemServico desc")
 
 		' Configura a visibilidade das colunas
 		With dgvos.Columns
-			.Item("USUARIO").Visible = True
-			.Item("DATA").Visible = False
-			.Item("ENDERECO").Visible = True
+			.Item("CriadoPor").Visible = False
+			.Item("DataCriacao").Visible = False
+			.Item("ENDERECO").Visible = False
 			.Item("idTag").Visible = False
 			.Item("idProjeto").Visible = False
+			.Item("idProjeto").Frozen = True
 			.Item("Estatus").Visible = False
+			.Item("DataPrevisao").Visible = False
+			.Item("Data_Liberacao_Engenharia").Visible = False
+			'.Item("Liberado_Engenharia").Visible = False
+			.Item("Estatus").Visible = False
+			.Item("ProdutoPadrao").Visible = False
+			.Item("Fator").Visible = False
 		End With
 
 		Timerdgvos.Enabled = False
+
+
+		cl_BancoDados.FormatarDataGridView(dgvos, "SIM")
+
 
 	End Sub
 
@@ -3071,14 +3047,34 @@ order by descdetal")
 
 				OrdemServico.DataPrevisao = dgvos.CurrentRow.Cells("DataPrevisao").Value.ToString
 
+				OrdemServico.Fator = dgvos.CurrentRow.Cells("Fator").Value.ToString
+
+				'OrdemServico.Fator = dgvos.CurrentRow.Cells("Fator").Value.ToString
+				Me.txtQtdeLiberada.Clear()
+				Me.txtQtdeTag.Clear()
+				Me.txtSaldoTag.Clear()
+				Me.lblFator.Text = OrdemServico.Fator
+
+
 				Me.lblOrdemServicoAtiva.Text = "Projeto: " & OrdemServico.Projeto & " - Tag: " & OrdemServico.Tag & " - OS: " & OrdemServico.IdOrdemServico
 
 				Me.cboProjeto.Text = OrdemServico.Projeto
+				OrdemServico.idProjeto = dgvos.CurrentRow.Cells("idProjeto").Value.ToString
 				Me.txtCliente.Text = dgvos.CurrentRow.Cells("DescEmpresa").Value.ToString
 				Me.cboTag.Text = OrdemServico.Tag
+				OrdemServico.idTag = dgvos.CurrentRow.Cells("idTag").Value.ToString
 				Me.txtDescricaoTag.Text = OrdemServico.Tag
 				Me.txtDescricao.Text = dgvos.CurrentRow.Cells("Descricao").Value.ToString
 
+
+				txtQtdeTag.Text = cl_BancoDados.RetornaCampoDaPesquisa("SELECT QtdeTag FROM  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "QtdeTag")
+				txtQtdeLiberada.Text = cl_BancoDados.RetornaCampoDaPesquisa("SELECT QtdeLiberada FROM  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "QtdeLiberada")
+				txtSaldoTag.Text = cl_BancoDados.RetornaCampoDaPesquisa("SELECT SaldoTag FROM  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "SaldoTag")
+
+
+				OrdemServico.QtdeLiberada = Me.txtQtdeLiberada.Text  'dgvos.CurrentRow.Cells("QtdeLiberada").Value.ToString
+				OrdemServico.QtdeTag = Me.txtQtdeTag.Text  'dgvos.CurrentRow.Cells("QtdeTag").Value.ToString
+				OrdemServico.SaldoTag = Me.txtSaldoTag.Text  'dgvos.CurrentRow.Cells("SaldoTag").Value.ToString
 
 
 
@@ -3110,17 +3106,6 @@ order by descdetal")
 	Private Sub TimerDGVListaMaterialSW_Tick(sender As Object, e As EventArgs) Handles TimerDGVListaMaterialSW.Tick
 
 		Try
-			'If cl_BancoDados.AbrirBanco = False Then
-
-			'    cl_BancoDados.AbrirBanco()
-
-			'End If
-
-
-
-
-
-
 
 			DGVListaMaterialSW.DataSource = cl_BancoDados.CarregarDados("SELECT 
 			IdOrdemServicoItem,
@@ -3181,7 +3166,8 @@ order by descdetal")
 			txtItemEstoque,
 			AreaPinturaUnitario,
 			PesoUnitario, 
-			DataPrevisao
+			DataPrevisao,
+EnderecoArquivoItemOrdemServico 
 						   FROM
 				 " & ComplementoTipoBanco & "ordemservicoitem
 				WHERE
@@ -3265,6 +3251,10 @@ order by descdetal")
 		'CarregarDadosDGV()
 
 		TimerDGVListaMaterialSW.Enabled = False
+
+		cl_BancoDados.FormatarDataGridView(DGVListaMaterialSW, "SIM")
+
+
 
 	End Sub
 
@@ -4185,11 +4175,86 @@ order by descdetal")
 	Private Sub LiberarOrdemDeServiçoParaProduçãoToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LiberarOrdemDeServiçoParaProduçãoToolStripMenuItem.Click
 
 		Cursor.Current = Cursors.WaitCursor
-
 		'
 		Try
+
+			txtPesqNumeroDesenho.Clear()
+
+			txtPesqTipoDesenho.Clear()
+
+			txtPesqAcabamentoDesenho.Clear()
+
+			TimerDGVListaMaterialSW.Enabled = True
+
+
 			' Verifica se há uma linha selecionada no DataGridView
 			If dgvos.CurrentRow IsNot Nothing Then
+
+				OpcaoLiberacaoOrdemServico.ShowDialog()
+
+				If TipoLiberacaoOrdemServico = "Total" Then
+
+
+					If OrdemServico.SaldoTag < OrdemServico.Fator Then
+						MsgBox("A operação foi cancelada. O valor informado é maior que o saldo disponível, altere o fator multiplicador", vbInformation, "Atenação")
+						Exit Sub
+					End If
+
+
+					'Try
+
+					'	'Verificar a quantide de usuarios cadastrado no sistema
+					'	Fator = Convert.ToInt32(cl_BancoDados.RetornaCampoDaPesquisa("SELECT SaldoTag FROM  " & ComplementoTipoBanco & " tags where IdProjeto = '" & OrdemServico.idProjeto & "' and IdTag ='" & OrdemServico.idTag & "'", "SaldoTag"))
+
+					'Catch ex As Exception
+					'	Fator = 1
+					'End Try
+
+
+					cl_BancoDados.VerificaSaldoTag(OrdemServico.idTag, OrdemServico.idProjeto, OrdemServico.Fator)
+
+					If OrdemServico.QtdeTag >= OrdemServico.Fator + OrdemServico.QtdeLiberada Then
+
+						' Verifica se o usuário clicou em "Cancelar" (Fator será uma string vazia)
+						If OrdemServico.Fator = 0 Then
+
+							MsgBox("A Operação foi cancelda", vbInformation, "Atenação")
+
+							Exit Sub ' Sai do procedimento
+
+						End If
+
+						' Verifica se o valor inserido é numérico e maior que 0
+						If Not IsNumeric(OrdemServico.Fator) OrElse Convert.ToDouble(OrdemServico.Fator) <= 0 Then
+
+							MsgBox("A operação foi cancelada. O valor informado não é um número válido!", vbInformation, "Atenação")
+
+							Exit Sub
+							'End If
+
+						End If
+
+						'						cl_BancoDados.AlteracaoEspecifica("OrdemServico", "Fator", OrdemServico.Fator, "IdOrdemServico", OrdemServico.IdOrdemServico)
+
+						cl_BancoDados.AlteracaoEspecifica("Tags", "QtdeLiberada", (OrdemServico.QtdeLiberada + OrdemServico.Fator), "IdTag", OrdemServico.idTag)
+						cl_BancoDados.AlteracaoEspecifica("Tags", "SaldoTag", (OrdemServico.SaldoTag - OrdemServico.Fator), "IdTag", OrdemServico.idTag)
+						cl_BancoDados.AlteracaoEspecifica("Ordemservico", "TipoLiberacaoOrdemServico", "Total", "IdOrdemServico", OrdemServico.IdOrdemServico)
+
+					Else
+
+						MsgBox("A operação foi cancelada. O valor informado é maior que o saldo disponível!", vbInformation, "Atenação")
+						Exit Sub
+
+					End If
+
+				ElseIf TipoLiberacaoOrdemServico = "Parcial" Then
+
+					cl_BancoDados.AlteracaoEspecifica("Ordemservico", "TipoLiberacaoOrdemServico", "Parcial", "IdOrdemServico", OrdemServico.IdOrdemServico)
+
+
+				End If
+
+
 				' Verifica e obtém o valor da célula "Estatus"
 				If dgvos.CurrentRow.Cells("Estatus") IsNot Nothing AndAlso dgvos.CurrentRow.Cells("Estatus").Value IsNot DBNull.Value Then
 					OrdemServico.Estatus = dgvos.CurrentRow.Cells("Estatus").Value.ToString()
@@ -4240,10 +4305,10 @@ order by descdetal")
 
 
 
-				ImportarLXDSParaOS(DGVListaMaterialSW, "DXF", ProgressBarProcessoLiberacaoOrdemServico)
-				ImportarLXDSParaOS(DGVListaMaterialSW, "PDF", ProgressBarProcessoLiberacaoOrdemServico)
-				ImportarLXDSParaOS(DGVListaMaterialSW, "DFT", ProgressBarProcessoLiberacaoOrdemServico)
-				ImportarLXDSParaOS(DGVListaMaterialSW, "LXDS", ProgressBarProcessoLiberacaoOrdemServico)
+				ImportarLXDSParaOS(DGVListaMaterialSW, "DXF", ProgressBarProcessoLiberacaoOrdemServico, "")
+				ImportarLXDSParaOS(DGVListaMaterialSW, "PDF", ProgressBarProcessoLiberacaoOrdemServico, "IdOrdemServicoItem")
+				ImportarLXDSParaOS(DGVListaMaterialSW, "DFT", ProgressBarProcessoLiberacaoOrdemServico, "")
+				ImportarLXDSParaOS(DGVListaMaterialSW, "LXDS", ProgressBarProcessoLiberacaoOrdemServico, "")
 
 				' Try
 
@@ -4589,7 +4654,7 @@ order by descdetal")
 			TextoPdf = "OS: " & OS & " qtde: " & qtde
 
 
-			'  pdfsinco.EscreverPdf(Origem, Destino, TextoPdf)
+			pdfsinco.EscreverPdf(Origem, Destino, TextoPdf)
 
 			' Verifica se o arquivo de origem existe
 			If File.Exists(Origem) Then
@@ -4709,10 +4774,12 @@ order by descdetal")
 
 	End Function
 
-	Private Function ImportarLXDSParaOS(ByVal ObjetoDgv As DataGridView, ByVal Pasta As String, ByVal BarraProgresso As ProgressBar)
+	Private Function ImportarLXDSParaOS(ByVal ObjetoDgv As DataGridView, ByVal Pasta As String, ByVal BarraProgresso As ProgressBar, ByVal NomeidColuna As String)
 
-		Dim Origem, Destino, Prefixo, MaterialSW, QtdeTotal, Espessura, tipoDesenho As String
+		Dim Origem, Destino, Prefixo, MaterialSW, QtdeTotal, Espessura, tipoDesenho, Acabamento As String
 		Dim caminhoArquivoDestino As String
+
+
 
 
 		BarraProgresso.Minimum = 0
@@ -4724,91 +4791,125 @@ order by descdetal")
 		For i As Integer = 0 To ObjetoDgv.Rows.Count - 1
 
 
-			' Acessando os valores diretamente da linha
-			Origem = ObjetoDgv.Rows(i).Cells("EnderecoArquivo").Value.ToString
-			Origem = Replace(Origem, ".SLDPRT", "." & Pasta, , , CompareMethod.Text)
-			Origem = Replace(Origem, ".SLDASM", "." & Pasta, , , CompareMethod.Text)
-
 			Try
-				MaterialSW = ObjetoDgv.Rows(i).Cells("MaterialSW").Value.ToString
-			Catch ex As Exception
-				MaterialSW = "Sem material"
-			End Try
-
-			Try
-				QtdeTotal = ObjetoDgv.Rows(i).Cells("QtdeTotal").Value.ToString
-			Catch ex As Exception
-				QtdeTotal = "Sem Quantidade"
-			End Try
-
-			Try
-				Espessura = ObjetoDgv.Rows(i).Cells("Espessura").Value.ToString
-			Catch ex As Exception
-				Espessura = "Sem Espessura"
-			End Try
-
-			Try
-				tipoDesenho = ObjetoDgv.Rows(i).Cells("txtTipoDesenho").Value.ToString
-			Catch ex As Exception
-				tipoDesenho = "Sem Tipo Desenho"
-			End Try
 
 
+				Try
+					' Acessando os valores diretamente da linha
+					Origem = ObjetoDgv.Rows(i).Cells("EnderecoArquivo").Value.ToString
+					Origem = Replace(Origem, ".SLDPRT", "." & Pasta, , , CompareMethod.Text)
+					Origem = Replace(Origem, ".SLDASM", "." & Pasta, , , CompareMethod.Text)
 
-			Prefixo = Espessura & " - " & MaterialSW & " - " & QtdeTotal & " - "
+				Catch ex As Exception
+					Origem = ""
+				Finally
+				End Try
 
-			' Verifica se o arquivo de origem existe
-			If File.Exists(Origem) Then
+				Try
+					MaterialSW = ObjetoDgv.Rows(i).Cells("MaterialSW").Value.ToString
+				Catch ex As Exception
+					MaterialSW = "Sem material"
+				Finally
+				End Try
 
-				' Obtém o nome do arquivo sem a extensão
-				Dim nomeArquivoSemExtensao As String = Path.GetFileNameWithoutExtension(Origem)
+				Try
+					QtdeTotal = ObjetoDgv.Rows(i).Cells("QtdeTotal").Value.ToString
+				Catch ex As Exception
+					QtdeTotal = "Sem Quantidade"
+				Finally
+				End Try
 
-				' Obtém a extensão do arquivo
-				Dim extensaoArquivo As String = Path.GetExtension(Origem)
+				Try
+					Espessura = ObjetoDgv.Rows(i).Cells("Espessura").Value.ToString
+				Catch ex As Exception
+					Espessura = "Sem Espessura"
+				Finally
+				End Try
 
-				Dim novoNomeArquivo As String
+				Try
+					tipoDesenho = ObjetoDgv.Rows(i).Cells("txtTipoDesenho").Value.ToString
+				Catch ex As Exception
+					tipoDesenho = "Sem Tipo Desenho"
+				Finally
+				End Try
 
-				' Verifica qual formato de exportação foi selecionado
-				If My.Settings.ParametroExportarDXF = "1" Then
-					novoNomeArquivo = $"OS_{OrdemServico.IdOrdemServico} - {Espessura} - {MaterialSW} - {QtdeTotal} - {nomeArquivoSemExtensao}{extensaoArquivo}"
-				ElseIf My.Settings.ParametroExportarDXF = "2" Then
-					novoNomeArquivo = $"OS_{OrdemServico.IdOrdemServico} -{QtdeTotal} - {nomeArquivoSemExtensao} - {MaterialSW} - {Espessura}{extensaoArquivo}"
-				Else
-					MessageBox.Show("Nenhuma opção de exportação de LXDS selecionada. Vá nas configurações e selecione a opção desejada!")
-					Exit For ' Saída antecipada se não houver configuração válida
+				Try
+					Acabamento = ObjetoDgv.Rows(i).Cells("Acabamento").Value.ToString
+				Catch ex As Exception
+					Acabamento = "Sem Acabamento"
+				Finally
+				End Try
+
+
+
+				Prefixo = Espessura & " - " & MaterialSW & " - " & QtdeTotal & " - "
+
+				' Verifica se o arquivo de origem existe
+				If File.Exists(Origem) Then
+
+					' Obtém o nome do arquivo sem a extensão
+					Dim nomeArquivoSemExtensao As String = Path.GetFileNameWithoutExtension(Origem)
+
+					' Obtém a extensão do arquivo
+					Dim extensaoArquivo As String = Path.GetExtension(Origem)
+
+					Dim novoNomeArquivo As String
+
+					' Verifica qual formato de exportação foi selecionado
+					If My.Settings.ParametroExportarDXF = "1" Then
+						novoNomeArquivo = $"OS_{OrdemServico.IdOrdemServico} - {Espessura} - {MaterialSW} - {QtdeTotal} - {nomeArquivoSemExtensao}{extensaoArquivo}"
+					ElseIf My.Settings.ParametroExportarDXF = "2" Then
+						novoNomeArquivo = $"OS_{OrdemServico.IdOrdemServico} -{QtdeTotal} - {nomeArquivoSemExtensao} - {MaterialSW} - {Espessura}{extensaoArquivo}"
+					Else
+						MessageBox.Show("Nenhuma opção de exportação de LXDS selecionada. Vá nas configurações e selecione a opção desejada!")
+						Exit For ' Saída antecipada se não houver configuração válida
+					End If
+
+					If ObjetoDgv.Rows(i).Cells("EnderecoArquivo").Value.ToString.IndexOf(".SLDASM", StringComparison.OrdinalIgnoreCase) >= 0 Then
+						novoNomeArquivo = $"OS_{OrdemServico.IdOrdemServico} - {tipoDesenho} - {QtdeTotal} - {nomeArquivoSemExtensao}{extensaoArquivo}"
+					End If
+
+					caminhoArquivoDestino = Path.Combine(Destino, novoNomeArquivo)
+
+					If Pasta = "PDF" Then
+
+						Dim id As String
+
+						If NomeidColuna <> "" Then
+
+							id = ObjetoDgv.Rows(0).Cells(NomeidColuna).Value
+
+						End If
+
+
+						EditarPDFParaOs(Origem, caminhoArquivoDestino, novoNomeArquivo, QtdeTotal, OrdemServico.IdOrdemServico, Acabamento, "OS")
+
+
+						cl_BancoDados.AlteracaoEspecifica("OrdemServicoItem", "EnderecoArquivoItemOrdemServico", caminhoArquivoDestino, "IdOrdemServicoItem", id)
+
+
+					Else
+
+						' Copia o arquivo para o destino diretamente se não for PDF
+						File.Copy(Origem, caminhoArquivoDestino, True)
+
+					End If
+
+
 				End If
 
-				If ObjetoDgv.Rows(i).Cells("EnderecoArquivo").Value.ToString.IndexOf(".SLDASM", StringComparison.OrdinalIgnoreCase) >= 0 Then
-					novoNomeArquivo = $"OS_{OrdemServico.IdOrdemServico} - {tipoDesenho} - {QtdeTotal} - {nomeArquivoSemExtensao}{extensaoArquivo}"
-				End If
 
-				caminhoArquivoDestino = Path.Combine(Destino, novoNomeArquivo)
+				BarraProgresso.Value = i
+				Origem = ""
+				Prefixo = ""
+				MaterialSW = ""
+				QtdeTotal = ""
+				Espessura = ""
+				tipoDesenho = ""
 
-				If Pasta = "PDF" Then
-
-					' EditarPDF(Origem, caminhoArquivoDestino, novoNomeArquivo)
-
-					File.Copy(Origem, caminhoArquivoDestino, True)
-
-				Else
-
-					' Copia o arquivo para o destino diretamente se não for PDF
-					File.Copy(Origem, caminhoArquivoDestino, True)
-
-				End If
-
-
-			End If
-
-
-			BarraProgresso.Value = i
-			Origem = ""
-			Prefixo = ""
-			MaterialSW = ""
-			QtdeTotal = ""
-			Espessura = ""
-			tipoDesenho = ""
-
+			Catch ex As Exception
+				Continue For
+			End Try
 
 		Next
 
@@ -4816,71 +4917,75 @@ order by descdetal")
 
 	End Function
 
-	Public Sub EditarPDF(Origem As String, caminhoArquivoDestino As String, novoNomeArquivo As String)
-		Dim tentativas As Integer = 3 ' Número de tentativas em caso de erro
-		Dim sucesso As Boolean = False
-		Dim tentativasFeitas As Integer = 0
 
-		' Loop para tentar a operação várias vezes
-		While tentativasFeitas < tentativas And Not sucesso
+	Public Sub EditarPDFParaOs(Origem As String, caminhoArquivoDestino As String, novoNomeArquivo As String, QtdeTotal As String, Identificado As String, Acabamento As String, TipoIdentidicado As String)
+
+
+		Origem = System.Text.RegularExpressions.Regex.Replace(Origem, ".sldprt$|.sldasm$", ".pdf", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+
+
+		' Verifica se o arquivo de entrada existe
+		If System.IO.File.Exists(Origem) Then
 			Try
-				' Tenta abrir o arquivo com bloqueio exclusivo
-				Using fs As New FileStream(Origem, FileMode.Open, FileAccess.ReadWrite, FileShare.None)
-					' Arquivo pode ser manipulado, sem que outros processos possam acessá-lo simultaneamente
-					' Se a execução chegar aqui, significa que o arquivo está livre para ser editado
+				' Abre o PDF de entrada
+				Dim pdfReader As New PdfReader(Origem)
+				' Cria um escritor para o novo arquivo PDF
+				Dim pdfWriter As New PdfWriter(caminhoArquivoDestino)
+				' Abre o documento PDF para edição
+				Dim pdfDocument As New PdfDocument(pdfReader, pdfWriter)
 
-					' Agora, abre o PDF de origem diretamente no caminho de destino
-					Using pdfReader As New PdfReader(Origem)
-						' Inicializa o escritor para sobrescrever o arquivo no destino
-						Using pdfWriter As New PdfWriter(caminhoArquivoDestino)
-							' Abre o documento PDF para edição
-							Using pdfDocument As New PdfDocument(pdfReader, pdfWriter)
-								' Acessa a primeira página do PDF
-								Dim page As PdfPage = pdfDocument.GetPage(1)
-								' Cria um Canvas para desenhar na página
-								Dim canvas As New PdfCanvas(page)
+				' Acessa a primeira página do PDF
+				Dim page As PdfPage = pdfDocument.GetPage(1)
+				' Cria um Canvas para desenhar na página
+				Dim canvas As New PdfCanvas(page)
 
-								' Configura a fonte e insere o texto
-								Dim font As PdfFont = PdfFontFactory.CreateFont()
-								canvas.BeginText()
-								canvas.SetFontAndSize(font, 12)
-								canvas.MoveText(50, 800) ' Posição do texto no PDF
-								canvas.ShowText(novoNomeArquivo & " - Data de Emissão do desenho: " & Date.Now.ToString("dd/MM/yyyy"))
-								canvas.EndText()
+				'''''' Define a posição para inserir o texto (exemplo: 100, 700 na página)
+				'''''canvas.BeginText()
+				'''''canvas.SetFontAndSize(iText.Kernel.Font.PdfFontFactory.CreateFont(), 12)
+				'''''canvas.MoveText(10, 820)
+				'''''canvas.ShowText("OS: " & OS & " - Qtde: " & QtdeTotal & " - Acabamento: " & Acabamento & " - Data Emissão do desenho: " & Date.Now.Date)
+				'''''canvas.EndText()
+				'''
+				' Define a posição para inserir o texto no canto inferior direito
+				Dim pageWidth As Single = pdfDocument.GetDefaultPageSize().GetWidth() ' Largura da página
+				Dim marginRight As Single = 10 ' Margem direita
+				Dim posX As Single = pageWidth - marginRight ' Posição X no canto direito
+				Dim posY As Single = 1 ' Posição Y no rodapé
 
-								' Fecha o documento, salvando as alterações
-								pdfDocument.Close()
-							End Using
-						End Using
-					End Using
+				canvas.BeginText()
+				canvas.SetFontAndSize(iText.Kernel.Font.PdfFontFactory.CreateFont(), 12)
+				canvas.SetTextMatrix(posX, posY) ' Define a posição inicial do texto
+				canvas.ShowText(TipoIdentidicado & " " & Identificado & " - Qtde. " & QtdeTotal & " - Acab. " & Acabamento & " - Emissão " & Date.Now.Date).ToString()
+				canvas.EndText()
 
-					' Se chegou até aqui, a operação foi bem-sucedida
-					Console.WriteLine("Texto inserido com sucesso!")
-					sucesso = True ' Operação bem-sucedida
 
-				End Using ' FileStream
 
-			Catch ex As IOException
-				' Caso o arquivo esteja em uso, aguarda 3 segundos e tenta novamente
-				tentativasFeitas += 1
-				Console.WriteLine($"Erro ao manipular o arquivo PDF: {ex.Message}. Tentando novamente em 3 segundos...")
-				File.Copy(Origem, caminhoArquivoDestino, True)
-				' Espera 3 segundos antes de tentar novamente
-				'  Thread.Sleep(3000)
+				' Fecha o documento PDF
+				pdfDocument.Close()
 
+				' Pode adicionar um log ou mensagem de sucesso se necessário
+				' Console.WriteLine("Texto inserido com sucesso no arquivo: " & outputPdf)
 			Catch ex As Exception
-				' Tratar outras exceções
-				Console.WriteLine($"Erro inesperado: {ex.Message}")
-				tentativasFeitas += 1
-				Thread.Sleep(3000)
-			End Try
-		End While
+				' Em caso de erro, exibe uma mensagem
+				'  Console.WriteLine("Erro ao processar o PDF: " & ex.Message)
 
-		' Se o número máximo de tentativas for atingido e não tiver sido bem-sucedido
-		If Not sucesso Then
-			Console.WriteLine("Falha ao processar o arquivo após várias tentativas.")
+				File.Delete(caminhoArquivoDestino)
+				File.Copy(Origem, caminhoArquivoDestino, True)
+
+
+			Finally
+
+			End Try
+
 		End If
+
+
 	End Sub
+
+
+	''' </summary>
+	''' <param name="filePath"></param>
+	''' <returns></returns>
 
 	' Função que verifica se o arquivo está em uso
 	Private Function IsFileInUse(filePath As String) As Boolean
@@ -5194,10 +5299,13 @@ order by descdetal")
 						LimparDiretorio(diretorio & "\DFT")
 						LimparDiretorio(diretorio & "\LXDS")
 
-						ImportarLXDSParaOS(DGVListaMaterialSW, "DXF", ProgressBarProcessoLiberacaoOrdemServico)
-						ImportarLXDSParaOS(DGVListaMaterialSW, "PDF", ProgressBarProcessoLiberacaoOrdemServico)
-						ImportarLXDSParaOS(DGVListaMaterialSW, "DFT", ProgressBarProcessoLiberacaoOrdemServico)
-						ImportarLXDSParaOS(DGVListaMaterialSW, "LXDS", ProgressBarProcessoLiberacaoOrdemServico)
+						'OrdemServico.IDOrdemServicoItem = DGVListaMaterialSW.Rows(1).Cells("IdOrdemServicoItem").Value
+
+
+						ImportarLXDSParaOS(DGVListaMaterialSW, "DXF", ProgressBarProcessoLiberacaoOrdemServico, "")
+						ImportarLXDSParaOS(DGVListaMaterialSW, "PDF", ProgressBarProcessoLiberacaoOrdemServico, "IdOrdemservicoItem")
+						ImportarLXDSParaOS(DGVListaMaterialSW, "DFT", ProgressBarProcessoLiberacaoOrdemServico, "")
+						ImportarLXDSParaOS(DGVListaMaterialSW, "LXDS", ProgressBarProcessoLiberacaoOrdemServico, "")
 
 						MsgBox("Documentos enviado com sucesso!", vbInformation, "Atenção")
 
@@ -5314,7 +5422,18 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 	Private Sub GeralExcelDaOSToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles GeralExcelDaOSToolStripMenuItem.Click
 
+
+
+
 		Try
+
+			txtPesqNumeroDesenho.Clear()
+
+			txtPesqTipoDesenho.Clear()
+
+			txtPesqAcabamentoDesenho.Clear()
+
+			TimerDGVListaMaterialSW.Enabled = True
 
 			If My.Settings.BancoDadosAtivo = "mettapaineis" Then
 
@@ -5543,29 +5662,67 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 	End Sub
 
+	'Sub LimparDiretorio(ByVal diretorio As String)
+	'	' Verifica se o diretório existe
+	'	If Directory.Exists(diretorio) Then
+	'		' Limpa todos os arquivos no diretório
+	'		For Each arquivo As String In Directory.GetFiles(diretorio)
+	'			File.Delete(arquivo)
+	'		Next
+
+	'		' Limpa todos os subdiretórios, exceto aqueles chamados "Projeto"
+	'		For Each subdiretorio As String In Directory.GetDirectories(diretorio)
+	'			' Verifica se o nome do subdiretório é "Projeto"
+	'			If Path.GetFileName(subdiretorio).Equals("DXF", StringComparison.OrdinalIgnoreCase) Or
+	'					Path.GetFileName(subdiretorio).Equals("PDF", StringComparison.OrdinalIgnoreCase) Or
+	'					Path.GetFileName(subdiretorio).Equals("DFT", StringComparison.OrdinalIgnoreCase) Or
+	'					Path.GetFileName(subdiretorio).Equals("PUNC", StringComparison.OrdinalIgnoreCase) Or
+	'					Path.GetFileName(subdiretorio).Equals("LASER", StringComparison.OrdinalIgnoreCase) Then
+	'				LimparDiretorio(subdiretorio)
+
+
+	'			End If
+	'		Next
+	'	End If
+
+	'End Sub
+
 	Sub LimparDiretorio(ByVal diretorio As String)
 		' Verifica se o diretório existe
 		If Directory.Exists(diretorio) Then
+			' Remove o atributo somente leitura do diretório
+			Dim dirInfo As New DirectoryInfo(diretorio)
+			dirInfo.Attributes = dirInfo.Attributes And Not FileAttributes.ReadOnly
+
 			' Limpa todos os arquivos no diretório
 			For Each arquivo As String In Directory.GetFiles(diretorio)
+				' Remove o atributo somente leitura antes de excluir
+				Dim fileInfo As New FileInfo(arquivo)
+				fileInfo.Attributes = fileInfo.Attributes And Not FileAttributes.ReadOnly
 				File.Delete(arquivo)
 			Next
 
 			' Limpa todos os subdiretórios, exceto aqueles chamados "Projeto"
 			For Each subdiretorio As String In Directory.GetDirectories(diretorio)
-				' Verifica se o nome do subdiretório é "Projeto"
+				' Verifica se o nome do subdiretório corresponde a um dos nomes especificados
 				If Path.GetFileName(subdiretorio).Equals("DXF", StringComparison.OrdinalIgnoreCase) Or
-						Path.GetFileName(subdiretorio).Equals("PDF", StringComparison.OrdinalIgnoreCase) Or
-						Path.GetFileName(subdiretorio).Equals("DFT", StringComparison.OrdinalIgnoreCase) Or
-						Path.GetFileName(subdiretorio).Equals("PUNC", StringComparison.OrdinalIgnoreCase) Or
-						Path.GetFileName(subdiretorio).Equals("LASER", StringComparison.OrdinalIgnoreCase) Then
-					LimparDiretorio(subdiretorio)
+			   Path.GetFileName(subdiretorio).Equals("PDF", StringComparison.OrdinalIgnoreCase) Or
+			   Path.GetFileName(subdiretorio).Equals("DFT", StringComparison.OrdinalIgnoreCase) Or
+			   Path.GetFileName(subdiretorio).Equals("PUNC", StringComparison.OrdinalIgnoreCase) Or
+			   Path.GetFileName(subdiretorio).Equals("LASER", StringComparison.OrdinalIgnoreCase) Then
 
+					' Remove o atributo somente leitura do subdiretório antes de limpar
+					Dim subDirInfo As New DirectoryInfo(subdiretorio)
+					subDirInfo.Attributes = subDirInfo.Attributes And Not FileAttributes.ReadOnly
+
+					LimparDiretorio(subdiretorio)
 				End If
 			Next
 		End If
-
 	End Sub
+
+
+
 
 	Private Sub BuscarFormatoA3ToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles BuscarFormatoA3ToolStripMenuItem.Click
 
@@ -5784,40 +5941,6 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 	Private Sub dgvDesenhos_DataBindingComplete(sender As Object, e As DataGridViewBindingCompleteEventArgs) Handles dgvDesenhos.DataBindingComplete
 
-		'Try
-
-		'    For I As Integer = 0 To dgvDesenhos.Rows.Count - 1
-
-		'        If dgvDesenhos.Rows(I).Cells("RNC").Value.ToString = "S" Then
-
-		'            dgvDesenhos.Rows(I).Cells("Dgvrnc").Value = My.Resources.atencao
-
-		'        Else
-
-		'            dgvDesenhos.Rows(I).Cells("Dgvrnc").Value = My.Resources.verificado1
-
-		'        End If
-
-		'        ' Verifica se a string ".SLDASM" está contida na célula (ignora maiúsculas/minúsculas)
-		'        If dgvDesenhos.Rows(I).Cells("EnderecoArquivo").Value.ToString.IndexOf(".SLDASM", StringComparison.OrdinalIgnoreCase) >= 0 Then
-		'            ' Define a imagem na coluna "dgvIcone"
-		'            dgvDesenhos.Rows(I).Cells("dgvIcone").Value = My.Resources.IcopneMontagemSW ' Substitua pelo seu ícone
-
-		'        ElseIf dgvDesenhos.Rows(I).Cells("EnderecoArquivo").Value.ToString.IndexOf(".SLDPRT", StringComparison.OrdinalIgnoreCase) >= 0 Then
-
-		'            dgvDesenhos.Rows(I).Cells("dgvIcone").Value = My.Resources.IcopneMontagemPRT
-
-
-
-		'        End If
-
-		'    Next
-
-		'Catch ex As Exception
-
-		'Finally
-
-		'End Try
 
 		Try
 			' Verifica cada linha da DataGridView
@@ -5850,6 +5973,11 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 			MessageBox.Show($"Ocorreu um erro ao atualizar os desenhos: {ex.Message}",
 							"Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
 		End Try
+
+
+		cl_BancoDados.FormatarDataGridView(dgvDesenhos, "SIM")
+
+
 
 	End Sub
 
@@ -5967,7 +6095,7 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 					swModel.Visible = True
 					swModelDocExt = swModel.Extension
 
-					DadosArquivoCorrente.LendoDadosComunsPartAssembly(swModel)
+					DadosArquivoCorrente.LendoDadosComunsPartAssembly(swModel, chkBoxProcessos)
 					'Lista de corte
 
 					''''''If swModel.GetType() = swDocumentTypes_e.swDocPART Then
@@ -5978,8 +6106,8 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 					DadosArquivoCorrente.LerDadosCaixaDelimitadora(swModel)
 
 					DadosArquivoCorrente.VerificarProcessodaPecaCorrente(swModel, True)
-
-					AtualizaTela(swModel)
+					'edson 04/03/2025
+					'AtualizaTela(swModel)
 
 					'edson 15-09-2024
 					DadosArquivoCorrente.AtualizaDesenho(swModel)
@@ -5987,6 +6115,7 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 					swapp.CloseDoc(DadosArquivoCorrente.EnderecoArquivo)
 
 					dgvDesenhos.Rows(i).Cells("CodMatFabricante").Style.BackColor = Color.LightGreen
+
 				Catch ex As Exception
 
 					dgvDesenhos.Rows(i).Cells("CodMatFabricante").Style.BackColor = Color.LightPink
@@ -6197,9 +6326,7 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 	End Sub
 
-	Private Sub Button1_Click(sender As Object, e As EventArgs)
-		GetCutLists(swModel)
-	End Sub
+
 
 	Function GetCutLists(ByVal model As ModelDoc2) As List(Of Feature)
 
@@ -6278,144 +6405,8 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 	End Function
 
-	Private Sub OPTEstoqueNao_CheckedChanged(sender As Object, e As EventArgs) Handles OPTEstoqueNao.CheckedChanged
-
-		'Try
 
 
-
-		'    ' Verifica se o swModel não é nulo
-		'    If swModel Is Nothing Then
-		'        ' MessageBox.Show("Erro: Modelo não está aberto ou não foi carregado corretamente.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
-		'        Return
-		'        Exit Sub
-		'    End If
-
-		'    IntanciaSolidWorks.ConectarSolidWorks()
-		'    ' swApparq = CreateObject("SldWorks.Application")
-
-		'    swModel = swapp.ActiveDoc
-		'    'swModel = swApparq.ActiveDoc
-
-		'    ' Define o valor baseado na seleção do usuário
-		'    If OPTEstoqueNao.Checked = True Then
-		'        DadosArquivoCorrente.ItemEstoque = "NÃO"
-		'        DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtEstoque", DadosArquivoCorrente.ItemEstoque, DadosArquivoCorrente.ItemEstoque)
-		'    Else
-		'        DadosArquivoCorrente.ItemEstoque = "SIM"
-		'        DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtEstoque", DadosArquivoCorrente.ItemEstoque, DadosArquivoCorrente.ItemEstoque)
-		'    End If
-
-		'    ' Tenta salvar o modelo silenciosamente
-		'    Dim saveResult As Boolean = swModel.SaveSilent()
-
-		'    swModel.SaveSilent()
-		'    'cl_BancoDados.AlteracaoEspecifica("material", "txtitemEstoque", DadosArquivoCorrente.ItemEstoque, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
-
-
-		'    '' Verifica se o modelo foi salvo com sucesso
-		'    'If Not saveResult Then
-		'    '    MessageBox.Show("O modelo não pôde ser salvo.", "Erro ao Salvar", MessageBoxButtons.OK, MessageBoxIcon.Error)
-		'    'End If
-
-		'Catch ex As Exception
-		'    ' Exibe mensagem de erro caso ocorra uma exceção
-		'    ' MessageBox.Show("Erro: " & ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
-		'Finally
-
-		'End Try
-
-	End Sub
-
-
-
-	'Private Sub cboTipoDesenho_LostFocus(sender As Object, e As EventArgs) Handles cboTipoDesenho.LostFocus
-
-	'    DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtTipoDesenho", cboTipoDesenho.Text, cboTipoDesenho.Text)
-
-	'    swModel.SaveSilent()
-
-	'End Sub
-
-	'Private Sub OPTEstoqueSim_CheckedChanged(sender As Object, e As EventArgs) Handles OPTEstoqueSim.CheckedChanged
-
-	'    If OPTEstoqueSim.Checked = True Then
-
-	'        DadosArquivoCorrente.ItemEstoque = "SIM"
-	'        DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtEstoque", "SIM", "SIM")
-
-	'    Else
-
-	'        DadosArquivoCorrente.ItemEstoque = "NÃO"
-	'        DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtEstoque", "NÃO", "NÃO")
-
-	'    End If
-
-	'    swModel.SaveSilent()
-
-
-	'End Sub
-
-	'Private Sub optProcessoSoldagemSim_CheckedChanged(sender As Object, e As EventArgs) Handles optProcessoSoldagemSim.CheckedChanged
-
-	'    If optProcessoSoldagemSim.Checked = True Then
-
-	'        DadosArquivoCorrente.soldagem = "SIM"
-	'        DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtsoldagem", "SIM", "SIM")
-
-	'    Else
-
-	'        DadosArquivoCorrente.soldagem = "NÃO"
-	'        DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtsoldagem", "NÃO", "NÃO")
-
-	'    End If
-
-	'    swModel.SaveSilent()
-
-	'End Sub
-
-	'Private Sub optProcessoSoldagemNao_CheckedChanged(sender As Object, e As EventArgs) Handles optProcessoSoldagemNao.CheckedChanged
-
-	'    If optProcessoSoldagemNao.Checked = True Then
-
-	'        DadosArquivoCorrente.soldagem = "NÃO"
-	'        DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtsoldagem", "NÃO", "NÃO")
-
-	'    Else
-
-	'        DadosArquivoCorrente.soldagem = "SIM"
-	'        DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtsoldagem", "SIM", "SIM")
-
-	'    End If
-
-	'    swModel.SaveSilent()
-
-	'End Sub
-
-
-
-
-
-	Private Sub cboTitulo_LostFocus(sender As Object, e As EventArgs) Handles cboTitulo.LostFocus
-
-		Try
-
-			' Verifique se o swModel foi aberto com sucesso
-			If Not swModel Is Nothing Then
-
-
-				swModel.SummaryInfo(swSummInfoField_e.swSumInfoTitle) = Me.cboTitulo.Text
-
-				swModel.SaveSilent()
-			End If
-
-
-		Catch ex As Exception
-		Finally
-		End Try
-
-
-	End Sub
 
 
 
@@ -6429,6 +6420,10 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 				DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtItemEstoque", "SIM", "SIM")
 				swModel.SaveSilent()
+
+				cl_BancoDados.AlteracaoEspecifica("material", "txtItemEstoque", "SIM", "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
+
+
 
 			End If
 
@@ -6447,6 +6442,8 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 			DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtItemEstoque", "NÃO", "NÃO")
 			swModel.SaveSilent()
+			cl_BancoDados.AlteracaoEspecifica("material", "txtItemEstoque", "NÃO", "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
+
 
 		End If
 
@@ -6484,103 +6481,118 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 
 	Private Sub chkCorte_Click(sender As Object, e As EventArgs) Handles chkCorte.Click
-		Try
+		'Try
 
 
-			' Verifique se o swModel foi aberto com sucesso
-			If Not swModel Is Nothing Then
+		'	' Verifique se o swModel foi aberto com sucesso
+		'	If Not swModel Is Nothing Then
 
-				DadosArquivoCorrente.Corte = If(chkCorte.Checked, "1", "")
-				DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtCorte", DadosArquivoCorrente.Corte, DadosArquivoCorrente.Corte)
+		'		DadosArquivoCorrente.Corte = If(chkCorte.Checked, "1", "")
+		'		DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtCorte", DadosArquivoCorrente.Corte, DadosArquivoCorrente.Corte)
 
-				swModel.SaveSilent()
+		'		cl_BancoDados.AlteracaoEspecifica("material", "txtCorte", DadosArquivoCorrente.Corte, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
 
-			End If
-		Catch ex As Exception
-		Finally
-		End Try
+
+		'		swModel.SaveSilent()
+
+		'	End If
+		'Catch ex As Exception
+		'Finally
+		'End Try
 
 
 	End Sub
 
 	Private Sub chkDobra_Click(sender As Object, e As EventArgs) Handles chkDobra.Click
 
-		Try
+		'Try
 
 
 
-			' Verifique se o swModel foi aberto com sucesso
-			If Not swModel Is Nothing Then
+		'	' Verifique se o swModel foi aberto com sucesso
+		'	If Not swModel Is Nothing Then
 
-				DadosArquivoCorrente.Dobra = If(chkDobra.Checked, "1", "")
-				DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtDobra", DadosArquivoCorrente.Dobra, DadosArquivoCorrente.Dobra)
+		'		DadosArquivoCorrente.Dobra = If(chkDobra.Checked, "1", "")
+		'		DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtDobra", DadosArquivoCorrente.Dobra, DadosArquivoCorrente.Dobra)
 
-				swModel.SaveSilent()
+		'		cl_BancoDados.AlteracaoEspecifica("material", "txtDobra", DadosArquivoCorrente.Dobra, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
 
-			End If
-		Catch ex As Exception
-		Finally
 
-		End Try
+		'		swModel.SaveSilent()
+
+		'	End If
+		'Catch ex As Exception
+		'Finally
+
+		'End Try
 
 	End Sub
 
 
 	Private Sub chkSolda_Click(sender As Object, e As EventArgs) Handles chkSolda.Click
 
-		Try
+		'Try
 
 
 
-			' Verifique se o swModel foi aberto com sucesso
-			If Not swModel Is Nothing Then
+		'	' Verifique se o swModel foi aberto com sucesso
+		'	If Not swModel Is Nothing Then
 
-				DadosArquivoCorrente.Solda = If(chkSolda.Checked, "1", "")
-				DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtSolda", DadosArquivoCorrente.Solda, DadosArquivoCorrente.Solda)
+		'		DadosArquivoCorrente.Solda = If(chkSolda.Checked, "1", "")
+		'		DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtSolda", DadosArquivoCorrente.Solda, DadosArquivoCorrente.Solda)
 
-				swModel.SaveSilent()
+		'		cl_BancoDados.AlteracaoEspecifica("material", "txtSolda", DadosArquivoCorrente.Solda, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
 
-			End If
-		Catch ex As Exception
-		Finally
-		End Try
+
+		'		swModel.SaveSilent()
+
+		'	End If
+		'Catch ex As Exception
+		'Finally
+		'End Try
 	End Sub
 	Private Sub chkPintura_Click(sender As Object, e As EventArgs) Handles chkPintura.Click
 
-		Try
+		'Try
 
 
-			' Verifique se o swModel foi aberto com sucesso
-			If Not swModel Is Nothing Then
+		'	' Verifique se o swModel foi aberto com sucesso
+		'	If Not swModel Is Nothing Then
 
-				DadosArquivoCorrente.Pintura = If(chkPintura.Checked, "1", "")
-				DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtPintura", DadosArquivoCorrente.Pintura, DadosArquivoCorrente.Pintura)
+		'		DadosArquivoCorrente.Pintura = If(chkPintura.Checked, "1", "")
+		'		DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtPintura", DadosArquivoCorrente.Pintura, DadosArquivoCorrente.Pintura)
 
-				swModel.SaveSilent()
+		'		cl_BancoDados.AlteracaoEspecifica("material", "txtPintura", DadosArquivoCorrente.Pintura, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
 
-			End If
-		Catch ex As Exception
-		Finally
-		End Try
+
+		'		swModel.SaveSilent()
+
+		'	End If
+		'Catch ex As Exception
+		'Finally
+		'End Try
 
 	End Sub
 
 	Private Sub chkMontagem_Click(sender As Object, e As EventArgs) Handles chkMontagem.Click
 
-		Try
+		'Try
 
-			' Verifique se o swModel foi aberto com sucesso
-			If Not swModel Is Nothing Then
+		'	' Verifique se o swModel foi aberto com sucesso
+		'	If Not swModel Is Nothing Then
 
-				DadosArquivoCorrente.Montagem = If(chkMontagem.Checked, "1", "")
-				DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtMontagem", DadosArquivoCorrente.Montagem, DadosArquivoCorrente.Montagem)
+		'		DadosArquivoCorrente.Montagem = If(chkMontagem.Checked, "1", "")
+		'		DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtMontagem", DadosArquivoCorrente.Montagem, DadosArquivoCorrente.Montagem)
 
-				swModel.SaveSilent()
+		'		cl_BancoDados.AlteracaoEspecifica("material", "txtMontagem", DadosArquivoCorrente.Montagem, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
 
-			End If
-		Catch ex As Exception
-		Finally
-		End Try
+
+		'		swModel.SaveSilent()
+
+		'	End If
+		'Catch ex As Exception
+		'Finally
+		'End Try
 
 	End Sub
 
@@ -6730,7 +6742,7 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 				If swModel IsNot Nothing Then
 					' Processa o arquivo
-					DadosArquivoCorrente.ArquivoCorrente(swModel)
+					DadosArquivoCorrente.ArquivoCorrente(swModel, chkBoxProcessos)
 
 					' Salva o modelo
 					swModel.Save()
@@ -7083,7 +7095,7 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 			'  cl_BancoDados.ComboBoxDataSet("familia", "idfamilia", "Descfamilia", cboTipoDesenho, "")
 			'  cl_BancoDados.ComboBoxDataSet("familia", "idfamilia", "Descfamilia", cboTipoDesenhoArvore, "")
 
-			cl_BancoDados.ComboBoxDataSet("tipoproduto", "idtipoproduto", "tipoproduto", cboTitulo, "")
+			'	cl_BancoDados.ComboBoxDataSet("tipoproduto", "idtipoproduto", "tipoproduto", cboTitulo, "")
 			'  cl_BancoDados.ComboBoxDataSet("tipoproduto", "idtipoproduto", "tipoproduto", cboTituloArvore, "")
 
 
@@ -7106,7 +7118,18 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 	Private Sub AlterarOFatorMultipçlicadorDaOSToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles AlterarOFatorMultipçlicadorDaOSToolStripMenuItem.Click
 
+
+		If OrdemServico.Liberado_Engenharia = "S" Then
+
+			MsgBox("Ordem de Serviço já Liberada para Produção, não pode mais ser modificada!", vbCritical, "Atenção")
+
+			Exit Sub
+
+		End If
+
 		If DGVListaMaterialSW.Rows.Count <= 0 Then
+
+			MsgBox("Não há itens na Ordem de Serviço!", vbInformation, "Atenção")
 
 			Exit Sub
 
@@ -7114,40 +7137,56 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 		Try
 
-			If OrdemServico.Liberado_Engenharia <> "" Then
 
-				MsgBox("Ordem de Serviço já Liberada para Produção, não pode mais ser modificada!", vbCritical, "Atenção")
+			Try
 
+				'Verificar a quantide de usuarios cadastrado no sistema
+				OrdemServico.Fator = Convert.ToInt32(cl_BancoDados.RetornaCampoDaPesquisa("SELECT SaldoTag FROM  " & ComplementoTipoBanco & " tags where IdTag ='" & OrdemServico.idTag & "'", "SaldoTag"))
+
+				'FatorMultiplicador = SaldoTag
+
+			Catch ex As Exception
+				OrdemServico.Fator = 1
+			End Try
+
+			OrdemServico.Fator = InputBox("Informe o Valor Multiplicador para fabricação, o Valor informado como 
+                                              padrão é a quantidade de 
+                                        conjuntos solicitados pelo PCP no ato do cadasro da Tag", "Fator de Multiplicação", OrdemServico.Fator)
+
+
+			If OrdemServico.Fator <= 0 Then
+
+				MsgBox("A operação foi cancelada. O valor informado não é válido!", vbInformation, "Atenção")
 				Exit Sub
 
-			Else
+			End If
 
-				Dim FatorMultiplicador As Double
 
-				FatorMultiplicador = InputBox("Informe o novo valor Multiplicador", "Alteração de Quantidade", 1)
+			If IsNumeric(OrdemServico.Fator) And OrdemServico.Fator > 0 Then
 
-				If IsNumeric(FatorMultiplicador) And FatorMultiplicador > 0 Then
 
-					For i As Integer = 0 To DGVListaMaterialSW.Rows.Count - 1
 
-						Dim Peso, AreaPintura, qtde, QtdeTotal, Fator As String
 
-						Try
-							Fator = DGVListaMaterialSW.Rows(i).Cells("Fator").Value
-						Catch ex As Exception
-							Fator = 0
-						End Try
+				For i As Integer = 0 To DGVListaMaterialSW.Rows.Count - 1
+
+					Try
+
+
+
+						Dim Peso, AreaPintura, qtde, QtdeTotal As String
 
 						Try
 							qtde = DGVListaMaterialSW.Rows(i).Cells("qtde").Value
 						Catch ex As Exception
 							qtde = 0
+						Finally
 						End Try
 
 						Try
 							AreaPintura = DGVListaMaterialSW.Rows(i).Cells("AreaPinturaUnitario").Value
 						Catch ex As Exception
 							AreaPintura = DGVListaMaterialSW.Rows(i).Cells("AreaPintura").Value / qtde
+						Finally
 						End Try
 
 
@@ -7155,23 +7194,24 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 							Peso = DGVListaMaterialSW.Rows(i).Cells("PesoUnitario").Value
 						Catch ex As Exception
 							Peso = DGVListaMaterialSW.Rows(i).Cells("Peso").Value / qtde
+						Finally
 						End Try
 
 
 						OrdemServico.IDOrdemServicoItem = DGVListaMaterialSW.Rows(i).Cells("IDOrdemServicoItem").Value.ToString
 
 
-						Peso = Peso * FatorMultiplicador
+						Peso = Peso * OrdemServico.Fator
 
-						AreaPintura = AreaPintura * FatorMultiplicador
+						AreaPintura = AreaPintura * OrdemServico.Fator
 
-						QtdeTotal = qtde * FatorMultiplicador
+						QtdeTotal = qtde * OrdemServico.Fator
 
 						' cl_BancoDados.AlteracaoEspecifica("ordemservicoitem", "QtdeTotal", QtdeTotal, "IDOrdemServicoItem", DGVListaMaterialSW.Rows(i).Cells("IDOrdemServicoItem").Value.ToString)
 						' cl_BancoDados.AlteracaoEspecifica("ordemservicoitem", "AreaPintura", AreaPintura, "IDOrdemServicoItem", DGVListaMaterialSW.Rows(i).Cells("IDOrdemServicoItem").Value.ToString)
 						' cl_BancoDados.AlteracaoEspecifica("ordemservicoitem", "Peso", Peso, "IDOrdemServicoItem", DGVListaMaterialSW.Rows(i).Cells("IDOrdemServicoItem").Value.ToString)
 
-						cl_BancoDados.AlteracaoEspecificaDadosOS(OrdemServico.IDOrdemServicoItem, QtdeTotal, AreaPintura, Peso)
+						cl_BancoDados.AlteracaoEspecificaDadosOS(OrdemServico.IDOrdemServicoItem, QtdeTotal, AreaPintura, Peso, OrdemServico.Fator)
 
 						DGVListaMaterialSW.Rows(i).Cells("QtdeTotal").Value = QtdeTotal
 						'DGVListaMaterialSW.CurrentRow.Cells("qtde").Value = novaqtde
@@ -7179,6 +7219,8 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 						DGVListaMaterialSW.Rows(i).Cells("AreaPintura").Value = AreaPintura
 
 						DGVListaMaterialSW.Rows(i).Cells("Peso").Value = Peso
+
+						DGVListaMaterialSW.Rows(i).Cells("Fator").Value = OrdemServico.Fator
 
 						DGVListaMaterialSW.Rows(i).Cells("QtdeTotal").Value = QtdeTotal
 
@@ -7188,7 +7230,15 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 						DGVListaMaterialSW.Rows(i).Cells("Peso").Style.BackColor = Color.LightGreen
 
-					Next
+						DGVListaMaterialSW.Rows(i).Cells("Fator").Style.BackColor = Color.LightGreen
+					Catch ex As Exception
+						Continue For
+					End Try
+
+
+				Next
+
+					dgvos.CurrentRow.Cells("Fator").Value = OrdemServico.Fator
 
 					Dim diretorio As String = OrdemServico.EnderecoOrdemServico
 
@@ -7197,11 +7247,42 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 					LimparDiretorio(diretorio & "\DFT")
 					LimparDiretorio(diretorio & "\LXDS")
 
-					ImportarLXDSParaOS(DGVListaMaterialSW, "DXF", ProgressBarProcessoLiberacaoOrdemServico)
-					ImportarLXDSParaOS(DGVListaMaterialSW, "PDF", ProgressBarProcessoLiberacaoOrdemServico)
-					ImportarLXDSParaOS(DGVListaMaterialSW, "DFT", ProgressBarProcessoLiberacaoOrdemServico)
-					ImportarLXDSParaOS(DGVListaMaterialSW, "LXDS", ProgressBarProcessoLiberacaoOrdemServico)
+				Try
 
+
+					ImportarLXDSParaOS(DGVListaMaterialSW, "DXF", ProgressBarProcessoLiberacaoOrdemServico, "")
+
+				Catch ex As Exception
+				Finally
+				End Try
+
+				Try
+
+					ImportarLXDSParaOS(DGVListaMaterialSW, "PDF", ProgressBarProcessoLiberacaoOrdemServico, "IdOrdemServicoItem")
+				Catch ex As Exception
+				Finally
+				End Try
+				Try
+
+
+					ImportarLXDSParaOS(DGVListaMaterialSW, "DFT", ProgressBarProcessoLiberacaoOrdemServico, "")
+				Catch ex As Exception
+				Finally
+				End Try
+
+				Try
+
+					ImportarLXDSParaOS(DGVListaMaterialSW, "LXDS", ProgressBarProcessoLiberacaoOrdemServico, "")
+				Catch ex As Exception
+				Finally
+				End Try
+
+				cl_BancoDados.AlteracaoEspecifica("OrdemServico", "Fator", OrdemServico.Fator, "IdOrdemServico", OrdemServico.IdOrdemServico)
+
+					Me.lblFator.Text = OrdemServico.Fator
+
+
+					MsgBox("Fator alterado com sucesso!", vbInformation, "Atenção")
 
 				Else
 
@@ -7209,7 +7290,8 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 
 				End If
 
-			End If
+
+
 
 		Catch ex As Exception
 		Finally
@@ -7250,8 +7332,8 @@ And  CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
 				OrdemServico.CriadoPor = Usuario.NomeCompleto
 				OrdemServico.DataCriacao = Date.Now.Date
 				OrdemServico.Estatus = "A".ToUpper
-				OrdemServico.idProjeto = cboProjeto.SelectedValue
-				OrdemServico.idTag = cboTag.SelectedValue
+				OrdemServico.idProjeto = OrdemServico.idProjeto
+				OrdemServico.idTag = OrdemServico.idTag
 				OrdemServico.DescEmpresa = txtCliente.Text
 
 
@@ -7288,6 +7370,7 @@ Projeto,
 idTag,
 Tag,
 Descricao,
+Fator,
 EnderecoOrdemServico,
 CriadoPor,
 DataCriacao,
@@ -7299,6 +7382,7 @@ DescEmpresa) values
 	   & OrdemServico.idTag & "','" _
 	   & OrdemServico.Tag & "','" _
 	   & OrdemServico.Descricao & "','" _
+		& OrdemServico.Fator & "','" _
 	   & OrdemServico.EnderecoOrdemServico & "','" _
 	   & OrdemServico.CriadoPor.ToString().ToUpper() & "','" _
 	   & OrdemServico.DataCriacao & "','" _
@@ -7580,6 +7664,18 @@ DescEmpresa) values
 
 					End Try
 
+
+
+					Try
+						OrdemServico.ProdutoPrincipal = DGVListaMaterialSW.Rows(A).Cells("ProdutoPrincipal").Value.ToString
+					Catch ex As Exception
+
+						OrdemServico.ProdutoPrincipal = ""
+
+					End Try
+
+
+
 					OrdemServico.IdOrdemServico = NovoIdOrdemServicoDB
 
 					ProgressBarProcessoLiberacaoOrdemServico.Value = A
@@ -7597,7 +7693,7 @@ DescEmpresa) values
 							txtPintura, txtMontagem, tttxtCorte, tttxtDobra, tttxtSolda, 
 							tttxtPintura, tttxtMontagem, Comprimentocaixadelimitadora, 
 							Larguracaixadelimitadora, Espessuracaixadelimitadora, 
-							AreaPinturaUnitario, PesoUnitario, txtItemEstoque,OrdemServicoItemFinalizado
+							AreaPinturaUnitario, PesoUnitario, txtItemEstoque,OrdemServicoItemFinalizado,ProdutoPrincipal
 						   ) VALUES (
 							@IdOrdemServico, @idProjeto, @Projeto, @idTag, @Tag, 
 							@ESTATUS_OrdemServico, @IdMaterial, @DescResumo, @DescDetal, 
@@ -7611,7 +7707,7 @@ DescEmpresa) values
 							@txtPintura, @txtMontagem, @tttxtCorte, @tttxtDobra, @tttxtSolda, 
 							@tttxtPintura, @tttxtMontagem, @Comprimentocaixadelimitadora, 
 							@Larguracaixadelimitadora, @Espessuracaixadelimitadora, 
-							@AreaPinturaUnitario, @PesoUnitario, @txtItemEstoque,@OrdemServicoItemFinalizado
+							@AreaPinturaUnitario, @PesoUnitario, @txtItemEstoque,@OrdemServicoItemFinalizado,@ProdutoPrincipal
 						   );"
 
 					Using command As New MySqlCommand(query, myconect)
@@ -7652,7 +7748,7 @@ DescEmpresa) values
 						command.Parameters.AddWithValue("@Estatus", "A")
 						command.Parameters.AddWithValue("@Acabamento", OrdemServico.txtAcabamento)
 						command.Parameters.AddWithValue("@D_E_L_E_T_E", "")
-						command.Parameters.AddWithValue("@fator", fator)
+						command.Parameters.AddWithValue("@fator", OrdemServico.Fator)
 						command.Parameters.AddWithValue("@qtde", OrdemServico.qtde)
 						command.Parameters.AddWithValue("@txtSoldagem", OrdemServico.txtSoldagem)
 						command.Parameters.AddWithValue("@txtTipoDesenho", OrdemServico.txtTipoDesenho)
@@ -7672,16 +7768,18 @@ DescEmpresa) values
 						command.Parameters.AddWithValue("@AreaPinturaUnitario", OrdemServico.AreaPinturaUnitario)
 						command.Parameters.AddWithValue("@PesoUnitario", OrdemServico.PesoUnitario)
 						command.Parameters.AddWithValue("@txtItemEstoque", OrdemServico.txtItemEstoque)
+						command.Parameters.AddWithValue("@ProdutoPrincipal", OrdemServico.ProdutoPrincipal)
 						command.Parameters.AddWithValue("@OrdemServicoItemFinalizado", "")
 
 						' Abrir conexão e executar comando
 
-						'If cl_BancoDados.AbrirBanco = False Then
-						'    cl_BancoDados.AbrirBanco()
+						Try
+							command.ExecuteNonQuery()
+						Catch ex As Exception
+							MsgBox(ex.Message)
+						End Try
 
-						'End If
-						'myconect.Open()
-						command.ExecuteNonQuery()
+
 					End Using
 
 				Next
@@ -7707,7 +7805,8 @@ DescEmpresa) values
 
 			ProgressBarProcessoLiberacaoOrdemServico.Value = 0
 
-			MessageBox.Show("Operação finalizada com sucesso, os itens foram inseridos na OS!, porem não foram importados os aquivos para OS.")
+			MsgBox("Operação finalizada com sucesso, os itens foram inseridos na OS: " & OrdemServico.IdOrdemServico & "!," & vbCrLf &
+							  " porem não foram importados os aquivos para OS.", vbInformation, "Criando OS")
 
 		End If
 
@@ -8091,7 +8190,7 @@ DescEmpresa) values
 
 							OrdemServico.AreaPinturaUnitario = Replace(DadosArquivoCorrente.AreaPintura, ",", ".")
 
-							''''''''''''''''''''  ImportarPDFParaOSIndividual(OrdemServico.EnderecoArquivo, novaqtde)
+							ImportarPDFParaOSIndividual(OrdemServico.EnderecoArquivo, novaqtde)
 
 
 
@@ -8444,7 +8543,7 @@ DescEmpresa) values
 
 						OrdemServico.AreaPinturaUnitario = Replace(DadosArquivoCorrente.AreaPintura, ",", ".")
 
-						''''''''''''''''''''  ImportarPDFParaOSIndividual(OrdemServico.EnderecoArquivo, novaqtde)
+						'''''ImportarPDFParaOSIndividual(OrdemServico.EnderecoArquivo, novaqtde)
 
 
 
@@ -8734,24 +8833,11 @@ DescEmpresa) values
 
 	Private Sub txtAuthor_TextChanged(sender As Object, e As EventArgs) Handles txtAuthor.TextChanged
 
-		Try
-
-
-			' Verifique se o swModel foi aberto com sucesso
-			If Not swModel Is Nothing Then
-
-				swModel.SummaryInfo(swSummInfoField_e.swSumInfoAuthor) = Me.txtAuthor.Text
-				swModel.SaveSilent()
-
-			End If
-
-		Catch ex As Exception
-		Finally
-		End Try
 
 	End Sub
 
 	Private Sub CancelarLiberaçãoDaOSToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles CancelarLiberaçãoDaOSToolStripMenuItem.Click
+
 
 		If OrdemServico.IdOrdemServico.ToString = Nothing Or OrdemServico.IdOrdemServico.ToString = "" Then
 
@@ -8801,6 +8887,8 @@ DescEmpresa) values
 			End If
 
 
+
+
 			OrdemServico.EnderecoOrdemServico = dgvos.CurrentRow.Cells("Endereco").Value.ToString
 
 			'       cl_BancoDados.AlteracaoEspecifica("ordemservicoitem", "D_E_L_E_T_E", "*", "IdOrdemServico", OrdemServico.IdOrdemServico)
@@ -8820,28 +8908,45 @@ DescEmpresa) values
 						Data_Liberacao_Engenharia = '' 
 						where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'")
 
-			dgvos.CurrentRow.Cells("Liberado_Engenharia").Value = ""
-			dgvos.CurrentRow.Cells("Data_Liberacao_Engenharia").Value = ""
-			dgvos.CurrentRow.Cells("dgvStatus").Value = My.Resources.atencao
-			dgvos.Refresh()
 
-			If Usuario.EnviarEmailLiberacaoOS <> "" Then
+			'OrdemServico.SaldoTag
+			'OrdemServico.QtdeLiberada
+			'OrdemServico.Fator
+			If cl_BancoDados.RetornaCampoDaPesquisa("Select TipoLiberacaoOrdemServico from ordemservico where idordemservico = '" & OrdemServico.IdOrdemServico & "'", "TipoLiberacaoOrdemServico").ToString = "Total" Then
 
-				Dim resultado As MsgBoxResult = MessageBox.Show("Deseja enviar o e-mail para o PCP, de comunicado o cancelamento da Ordem de Serviço: " & OrdemServico.IdOrdemServico, "Cancelamento", MessageBoxButtons.YesNo)
 
-				If resultado = DialogResult.Yes Then
+				cl_BancoDados.Salvar("Update tags set QtdeLiberada = '" & (OrdemServico.QtdeLiberada - OrdemServico.Fator) & "',
+                                                  SaldoTag = '" & (OrdemServico.SaldoTag + OrdemServico.Fator) & "'
+												where IdTag = '" & OrdemServico.idTag & "'")
 
-					ClasseEmail.EmailCancelamentoOS()
-
-				End If
 
 			End If
 
-			TimerFiltroPecaAtivaOS.Enabled = True
 
-		Else
+			Timerdgvos.Enabled = True
 
-			MsgBox("Esta opração não e valida para OS: " & OrdemServico.IdOrdemServico & ", há processo ja executados, a opção será o cancelamento!", vbCritical, "Atenção")
+				dgvos.CurrentRow.Cells("Liberado_Engenharia").Value = ""
+				dgvos.CurrentRow.Cells("Data_Liberacao_Engenharia").Value = ""
+				dgvos.CurrentRow.Cells("dgvStatus").Value = My.Resources.atencao
+				dgvos.Refresh()
+
+				If Usuario.EnviarEmailLiberacaoOS <> "" Then
+
+					Dim resultado As MsgBoxResult = MessageBox.Show("Deseja enviar o e-mail para o PCP, de cancelamento da Ordem de Serviço: " & OrdemServico.IdOrdemServico, "Cancelamento", MessageBoxButtons.YesNo)
+
+					If resultado = DialogResult.Yes Then
+
+						ClasseEmail.EmailCancelamentoOS()
+
+					End If
+
+				End If
+
+				TimerFiltroPecaAtivaOS.Enabled = True
+
+			Else
+
+				MsgBox("Esta operação não é valida para OS: " & OrdemServico.IdOrdemServico & ", há processos executados!", vbCritical, "Atenção")
 
 		End If
 
@@ -8959,31 +9064,11 @@ DescEmpresa) values
 
 	End Sub
 
-	Private Sub cboTitulo_SelectedValueChanged(sender As Object, e As EventArgs) Handles cboTitulo.SelectedValueChanged
-		Try
-
-		Catch ex As Exception
-		Finally
-		End Try
-	End Sub
-
-	Private Sub cboTitulo_Click(sender As Object, e As EventArgs) Handles cboTitulo.Click
-		Try
-
-		Catch ex As Exception
-		Finally
-		End Try
-	End Sub
-
-
 
 	Private Sub btnPendencias_Click(sender As Object, e As EventArgs) Handles btnPendencias.Click
 
 
-
 		PendenciasRNC.ShowDialog()
-
-
 
 	End Sub
 
@@ -9045,22 +9130,39 @@ DescEmpresa) values
 	Private Sub DGVListaMaterialSW_DataBindingComplete(sender As Object, e As DataGridViewBindingCompleteEventArgs) Handles DGVListaMaterialSW.DataBindingComplete
 
 		For Each row As DataGridViewRow In DGVListaMaterialSW.Rows
+
+			iconeDXF = My.Resources.Sem_Incone
+			iconePDF = My.Resources.Sem_Incone
+			iconeTipoArquivo = My.Resources.Sem_Incone
+			iconeAtencao = My.Resources.Sem_Incone
+
+
 			Dim valorEnderecoArquivo As String = If(row.Cells("EnderecoArquivo").Value, "").ToString()
 			Dim valorProdutoPrincipal As String = If(row.Cells("ProdutoPrincipal").Value, "").ToString()
+			Dim EnderecoArquivo As String = If(row.Cells("EnderecoArquivo").Value, "").ToString()
 
-			' Verifica se a string ".SLDASM" está contida na célula e se "ProdutoPrincipal" é "SIM" (ignora maiúsculas/minúsculas)
-			If valorEnderecoArquivo.IndexOf(".SLDASM", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso
-		   valorProdutoPrincipal.IndexOf("SIM", StringComparison.OrdinalIgnoreCase) >= 0 Then
-				row.Cells("dgvIconeItemOS").Value = My.Resources.IconeswPrincipal ' Substitua pelo seu ícone
-			ElseIf valorEnderecoArquivo.IndexOf(".SLDASM", StringComparison.OrdinalIgnoreCase) >= 0 Then
+
+
+			If valorEnderecoArquivo.IndexOf(".SLDASM", StringComparison.OrdinalIgnoreCase) >= 0 Then
 				' Define a imagem na coluna "dgvIconeItemOS" se for .SLDASM
 				row.Cells("dgvIconeItemOS").Value = My.Resources.IcopneMontagemSW ' Substitua pelo seu ícone
+
+			End If
+
+			If valorEnderecoArquivo.IndexOf(".SLDASM", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso
+				valorProdutoPrincipal.IndexOf("SIM", StringComparison.OrdinalIgnoreCase) >= 0 Then
+				row.Cells("dgvIconeItemOS").Value = My.Resources.IconeswPrincipal ' Substitua pelo seu ícone
+
 			ElseIf valorEnderecoArquivo.IndexOf(".SLDPRT", StringComparison.OrdinalIgnoreCase) >= 0 Then
 				' Define outra imagem se for .SLDPRT
 				row.Cells("dgvIconeItemOS").Value = My.Resources.IcopneMontagemPRT
-			Else
+
+			ElseIf EnderecoArquivo.ToString = "" Then
+
 				row.Cells("dgvIconeItemOS").Value = My.Resources.material_escolar_32
+
 			End If
+
 
 
 			Dim dxf, pdf As String
@@ -9094,6 +9196,10 @@ DescEmpresa) values
 				End If
 			End If
 
+			If valorEnderecoArquivo = "" Then
+				row.Cells("DGVPDF").Value = My.Resources.Sem_Incone
+				row.Cells("DGVDXF").Value = My.Resources.Sem_Incone
+			End If
 
 
 		Next
@@ -9168,7 +9274,7 @@ DescEmpresa) values
 
 		Try
 
-			DadosArquivoCorrente.ArquivoCorrente(swModel)
+			DadosArquivoCorrente.ArquivoCorrente(swModel, chkBoxProcessos)
 
 
 
@@ -9177,10 +9283,23 @@ DescEmpresa) values
 			'dados da caixa delimitadora
 			DadosArquivoCorrente.LerDadosCaixaDelimitadora(swModel)
 
-			DadosArquivoCorrente.VerificarProcessodaPecaCorrente(swModel, True)
+
+			'edson 04/03/2025
+			AtualizaTela(swModel, chkBoxProcessos)
+
+			If DadosArquivoCorrente.VerificarProcessodaPecaCorrente(swModel, True) = False Then
+
+				btnPendencias.Enabled = False
+
+			Else
+				btnPendencias.Enabled = True
+			End If
 
 
-			AtualizaTela(swModel)
+			swModel.Save()
+
+			DadosArquivoCorrente.AtualizaDesenho(swModel)
+
 
 		Catch ex As Exception
 		Finally
@@ -9190,84 +9309,153 @@ DescEmpresa) values
 
 	Private Sub tsbSalvar_Click(sender As Object, e As EventArgs) Handles tsbSalvar.Click
 
-		If DadosArquivoCorrente.VerificarProcessodaPecaCorrente(swModel, True) = True Then
+		IntanciaSolidWorks.ConectarSolidWorks()
+		' swApparq = CreateObject("SldWorks.Application")
 
-			DadosArquivoCorrente.AtualizaDesenho(swModel)
+		swModel = swapp.ActiveDoc
+		'swModel = swApparq.ActiveDoc
 
-			'If swModel Is Nothing Then
+		If swModel Is Nothing Then
 
-			'    Exit Sub
-
-			'End If
-
-			'    swModel.GraphicsRedraw2()
-
-			' Salva o arquivo com as opções de salvamento padrão e com a miniatura
-			'  swModel.Save3(CInt(swSaveAsOptions_e.swSaveAsOptions_SaveReferenced), 0, 0)
-
-
-
-			'Verifica se o desenhop atualizado esta carregado na BOM se sim, atualiza os dados do desenho'
-			If dgvDataGridBOM.Rows.Count > 0 Then
-
-
-				For i As Integer = 0 To dgvDataGridBOM.Rows.Count - 1
-
-					If DadosArquivoCorrente.NomeArquivoSemExtensao.ToString.Trim = dgvDataGridBOM.Rows(i).Cells("CodMatFabricante").Value.ToString.Trim Then
-
-						' Adicione os parâmetros ao comando
-						dgvDataGridBOM.Rows(i).Cells("DescResumo").Value = Me.cboTitulo.Text ' UCase(DadosArquivoCorrente.Titulo)
-						dgvDataGridBOM.Rows(i).Cells("DescDetal").Value = Me.txtAssuntoSubiTitulo.Text ' UCase(DadosArquivoCorrente.AssuntoSubiTitulo)
-						dgvDataGridBOM.Rows(i).Cells("Autor").Value = Me.txtAuthor.Text ' UCase(DadosArquivoCorrente.Author)
-						dgvDataGridBOM.Rows(i).Cells("Palavrachave").Value = Me.txtPalavraChave.Text ' UCase(DadosArquivoCorrente.PalavraChave)
-						dgvDataGridBOM.Rows(i).Cells("Notas").Value = Me.txtComentarios.Text ' UCase(DadosArquivoCorrente.Comentarios)
-						dgvDataGridBOM.Rows(i).Cells("Espessura").Value = Me.lblEspessura.Text '  UCase(DadosArquivoCorrente.Espessura)
-						dgvDataGridBOM.Rows(i).Cells("AreaPintura").Value = Me.lblAreaPintura.Text ' UCase(DadosArquivoCorrente.AreaPintura)
-						dgvDataGridBOM.Rows(i).Cells("NumeroDobras").Value = Me.lblNumeroDobra.Text ' UCase(DadosArquivoCorrente.NumeroDobras)
-						dgvDataGridBOM.Rows(i).Cells("Peso").Value = Me.lblPeso.Text  ' UCase(DadosArquivoCorrente.Massa)
-						'dgvDataGridBOM.Rows(i).Cells("Unidade").Value = "PC"
-						dgvDataGridBOM.Rows(i).Cells("Altura").Value = Me.lblComprimento.Text ' UCase(DadosArquivoCorrente.ComprimentoBlank)
-						dgvDataGridBOM.Rows(i).Cells("Largura").Value = Me.lblLargura.Text ' UCase(DadosArquivoCorrente.LarguraBlank)
-						'dgvDataGridBOM.Rows(i).Cells("Profundidade").Value = ""
-						dgvDataGridBOM.Rows(i).Cells("material").Value = Me.lblMaterial.Text ' UCase(DadosArquivoCorrente.material)
-						dgvDataGridBOM.Rows(i).Cells("Acabamento").Value = UCase(DadosArquivoCorrente.Acabamento)
-						dgvDataGridBOM.Rows(i).Cells("txtSoldagem").Value = UCase(DadosArquivoCorrente.soldagem)
-						dgvDataGridBOM.Rows(i).Cells("txtTipoDesenho").Value = UCase(DadosArquivoCorrente.TipoDesenho)
-						dgvDataGridBOM.Rows(i).Cells("txtCorte").Value = UCase(DadosArquivoCorrente.Corte)
-						dgvDataGridBOM.Rows(i).Cells("txtDobra").Value = UCase(DadosArquivoCorrente.Dobra)
-						dgvDataGridBOM.Rows(i).Cells("txtSolda").Value = UCase(DadosArquivoCorrente.Solda)
-						dgvDataGridBOM.Rows(i).Cells("txtPintura").Value = UCase(DadosArquivoCorrente.Pintura)
-						dgvDataGridBOM.Rows(i).Cells("txtMontagem").Value = UCase(DadosArquivoCorrente.Montagem)
-						dgvDataGridBOM.Rows(i).Cells("Comprimentocaixadelimitadora").Value = Me.lblAlturaTotalCaixaDelimitadora.Text '  DadosArquivoCorrente.Alturacaixadelimitadora
-						dgvDataGridBOM.Rows(i).Cells("Larguracaixadelimitadora").Value = Me.lblProfundidadeTotalCaixaDelimitadora.Text ' DadosArquivoCorrente.Larguracaixadelimitadora
-						dgvDataGridBOM.Rows(i).Cells("Espessuracaixadelimitadora").Value = Me.lblProfundidadeTotalCaixaDelimitadora.Text ' DadosArquivoCorrente.Profundidadeaixadelimitadora
-						dgvDataGridBOM.Rows(i).Cells("txtItemEstoque").Value = DadosArquivoCorrente.ItemEstoque
-
-						dgvDataGridBOM.Rows(i).Cells("RNC").Value = ""
-
-						dgvDataGridBOM.Rows(i).Cells("Dgvrnc").Value = My.Resources.verificado1
-
-						' dgvDataGridBOM.Rows(i).DefaultCellStyle.BackColor = Color.LightGreen
-
-						Exit Sub
-
-					End If
-
-				Next
-
-			End If
+			Exit Sub
 
 		Else
 
-			' Salva o arquivo com as opções de salvamento padrão e com a miniatura
-			swModel.Save3(CInt(swSaveAsOptions_e.swSaveAsOptions_SaveReferenced), 0, 0)
 
+			If DadosArquivoCorrente.VerificarProcessodaPecaCorrente(swModel, True) = False Then
+
+				swModel.Save()
+
+				If DadosArquivoCorrente.AtualizaDesenho(swModel) = True Then
+
+
+					'Verifica se o desenhop atualizado esta carregado na BOM se sim, atualiza os dados do desenho'
+					If dgvDataGridBOM.Rows.Count > 0 Then
+
+						For i As Integer = 0 To dgvDataGridBOM.Rows.Count - 1
+
+							If DadosArquivoCorrente.NomeArquivoSemExtensao.ToString.Trim = dgvDataGridBOM.Rows(i).Cells("CodMatFabricante").Value.ToString.Trim Then
+
+								' Adicione os parâmetros ao comando
+								'  dgvDataGridBOM.Rows(i).Cells("DescResumo").Value = Me.cboTitulo.Text ' UCase(DadosArquivoCorrente.Titulo)
+								dgvDataGridBOM.Rows(i).Cells("DescDetal").Value = Me.txtAssuntoSubiTitulo.Text ' UCase(DadosArquivoCorrente.AssuntoSubiTitulo)
+								dgvDataGridBOM.Rows(i).Cells("Autor").Value = Me.txtAuthor.Text ' UCase(DadosArquivoCorrente.Author)
+								dgvDataGridBOM.Rows(i).Cells("Palavrachave").Value = Me.txtPalavraChave.Text ' UCase(DadosArquivoCorrente.PalavraChave)
+								dgvDataGridBOM.Rows(i).Cells("Notas").Value = Me.txtComentarios.Text ' UCase(DadosArquivoCorrente.Comentarios)
+								dgvDataGridBOM.Rows(i).Cells("Espessura").Value = Me.lblEspessura.Text '  UCase(DadosArquivoCorrente.Espessura)
+								dgvDataGridBOM.Rows(i).Cells("AreaPintura").Value = Me.lblAreaPintura.Text ' UCase(DadosArquivoCorrente.AreaPintura)
+								dgvDataGridBOM.Rows(i).Cells("NumeroDobras").Value = Me.lblNumeroDobra.Text ' UCase(DadosArquivoCorrente.NumeroDobras)
+								dgvDataGridBOM.Rows(i).Cells("Peso").Value = Me.lblPeso.Text  ' UCase(DadosArquivoCorrente.Massa)
+								'dgvDataGridBOM.Rows(i).Cells("Unidade").Value = "PC"
+								dgvDataGridBOM.Rows(i).Cells("Altura").Value = Me.lblComprimento.Text ' UCase(DadosArquivoCorrente.ComprimentoBlank)
+								dgvDataGridBOM.Rows(i).Cells("Largura").Value = Me.lblLargura.Text ' UCase(DadosArquivoCorrente.LarguraBlank)
+								'dgvDataGridBOM.Rows(i).Cells("Profundidade").Value = ""
+								dgvDataGridBOM.Rows(i).Cells("material").Value = Me.lblMaterial.Text ' UCase(DadosArquivoCorrente.material)
+								dgvDataGridBOM.Rows(i).Cells("Acabamento").Value = UCase(DadosArquivoCorrente.Acabamento)
+								dgvDataGridBOM.Rows(i).Cells("txtSoldagem").Value = UCase(DadosArquivoCorrente.soldagem)
+								dgvDataGridBOM.Rows(i).Cells("txtTipoDesenho").Value = UCase(DadosArquivoCorrente.TipoDesenho)
+								dgvDataGridBOM.Rows(i).Cells("txtCorte").Value = UCase(DadosArquivoCorrente.Corte)
+								dgvDataGridBOM.Rows(i).Cells("txtDobra").Value = UCase(DadosArquivoCorrente.Dobra)
+								dgvDataGridBOM.Rows(i).Cells("txtSolda").Value = UCase(DadosArquivoCorrente.Solda)
+								dgvDataGridBOM.Rows(i).Cells("txtPintura").Value = UCase(DadosArquivoCorrente.Pintura)
+								dgvDataGridBOM.Rows(i).Cells("txtMontagem").Value = UCase(DadosArquivoCorrente.Montagem)
+								dgvDataGridBOM.Rows(i).Cells("Comprimentocaixadelimitadora").Value = Me.lblAlturaTotalCaixaDelimitadora.Text '  DadosArquivoCorrente.Alturacaixadelimitadora
+								dgvDataGridBOM.Rows(i).Cells("Larguracaixadelimitadora").Value = Me.lblProfundidadeTotalCaixaDelimitadora.Text ' DadosArquivoCorrente.Larguracaixadelimitadora
+								dgvDataGridBOM.Rows(i).Cells("Espessuracaixadelimitadora").Value = Me.lblProfundidadeTotalCaixaDelimitadora.Text ' DadosArquivoCorrente.Profundidadeaixadelimitadora
+								dgvDataGridBOM.Rows(i).Cells("txtItemEstoque").Value = DadosArquivoCorrente.ItemEstoque
+
+								dgvDataGridBOM.Rows(i).Cells("RNC").Value = ""
+
+								dgvDataGridBOM.Rows(i).Cells("Dgvrnc").Value = My.Resources.verificado1
+
+								' dgvDataGridBOM.Rows(i).DefaultCellStyle.BackColor = Color.LightGreen
+
+								Exit Sub
+
+							End If
+
+						Next
+
+					End If
+
+
+					Dim TabelaProcesso As System.Data.DataTable
+
+					' Carrega os dados do banco
+					TabelaProcesso = cl_BancoDados.CarregarDados("select processofabricacao,D_E_L_E_T_E  from materialprocessofabricacao 
+                     WHERE codmatfabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'
+					 and D_E_L_E_T_E <> '*'")
+
+					' Converte os valores da tabela para uma lista para facilitar a busca
+					Dim processosNoBanco As New List(Of String)
+					For Each row As DataRow In TabelaProcesso.Rows
+						processosNoBanco.Add(row("processofabricacao").ToString())
+					Next
+
+					For Each item As Object In chkBoxProcessos.Items
+						Dim processo As String = item.ToString()
+						Dim selecionado As Boolean = chkBoxProcessos.CheckedItems.Contains(item)
+
+						If processosNoBanco.Contains(processo) Then
+							' O processo já existe no banco
+							If Not selecionado Then
+								' Se existir no banco, mas não estiver selecionado, marcar como deletado
+								cl_BancoDados.Salvar("UPDATE materialprocessofabricacao SET D_E_L_E_T_E = '*' WHERE processofabricacao = '" & processo & "' AND codmatfabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'")
+							End If
+						Else
+							' Se não existir no banco e estiver selecionado, inserir novo registro
+							If selecionado Then
+								cl_BancoDados.Salvar("INSERT INTO materialprocessofabricacao (ProcessoFabricacao, CodMatFabricante, D_E_L_E_T_E) VALUES ('" & processo & "', '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "', '')")
+							End If
+
+						End If
+
+					Next
+
+
+				End If
+
+				'	AtualizaTela(swModel)
+
+			End If
 
 		End If
 
-
-
 	End Sub
+
+
+	Public Sub DesvincularEAdicionarItem(combo As ComboBox, novoItem As String)
+		' Armazena os itens do ComboBox em uma lista temporária
+		Dim listaItens As New List(Of String)
+
+		' Se o ComboBox estiver vinculado a uma fonte de dados, desvincula
+		If combo.DataSource IsNot Nothing Then
+			Dim dt As DataTable = TryCast(combo.DataSource, DataTable)
+			If dt IsNot Nothing Then
+				' Copia os itens do DataTable antes de desvincular
+				For Each row As DataRow In dt.Rows
+					listaItens.Add(row(combo.DisplayMember).ToString())
+				Next
+			Else
+				' Se for outro tipo de fonte de dados, apenas desvincula
+				listaItens.AddRange(combo.Items.Cast(Of Object)().Select(Function(i) i.ToString()))
+			End If
+			combo.DataSource = Nothing
+		Else
+			' Caso já não tenha um DataSource, apenas copia os itens atuais
+			listaItens.AddRange(combo.Items.Cast(Of Object)().Select(Function(i) i.ToString()))
+		End If
+
+		' Adiciona o novo item apenas se não existir (ignorando maiúsculas/minúsculas)
+		If Not listaItens.Any(Function(i) i.Equals(novoItem, StringComparison.OrdinalIgnoreCase)) Then
+			listaItens.Add(novoItem)
+		End If
+
+		' Atualiza o ComboBox com os itens armazenados
+		combo.Items.Clear()
+		combo.Items.AddRange(listaItens.ToArray())
+	End Sub
+
 
 	Private Sub tsbConverterDXF_Click(sender As Object, e As EventArgs) Handles tsbConverterDXF.Click
 
@@ -9290,11 +9478,22 @@ DescEmpresa) values
 
 					Try
 
-						DadosArquivoCorrente.ExportDXF(swModel, True, True)
+						If DadosArquivoCorrente.ExportDXF(swModel, True, True) = True Then
+
+							chkVerificarDXF.Checked = True
+							chkVerificarLXDS.Checked = False
+
+						Else
+
+							chkVerificarDXF.Checked = False
+							chkVerificarLXDS.Checked = False
+
+						End If
+
+						'  Me.cboTitulo.Text = DadosArquivoCorrente.Titulo
 
 						' DadosArquivoCorrente.ExportSheetMetalBlankToDXF(swModel.GetPathName, Path.ChangeExtension(swModel.GetPathName, ".dxf"))
 
-						chkVerificarDXF.Checked = True
 
 					Catch ex As Exception
 
@@ -9362,24 +9561,56 @@ DescEmpresa) values
 
 	Private Sub TSBAssociarMaterial_Click(sender As Object, e As EventArgs) Handles TSBAssociarMaterial.Click
 
-		If String.IsNullOrWhiteSpace(DadosArquivoCorrente.NomeArquivoSemExtensao) Then
 
-			MessageBox.Show("Não há desenho ativo para associar material.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+		If swModel Is Nothing Then
 
 			Exit Sub
 
 		Else
-			Using formMateriaisAlmoxarifado As New frmMateriaisAlmoxarifado ' MateriaisAlmoxarifado
 
-				DadosArquivoCorrente.IdMaterial = cl_BancoDados.RetornaCampoDaPesquisa("Select IdMaterial from  " & ComplementoTipoBanco & "material where CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'", "IdMaterial")
 
-				formMateriaisAlmoxarifado.ShowDialog()
+			DadosArquivoCorrente.AtualizaDesenho(swModel)
 
-				TimerMontaPeca.Enabled = True
 
-			End Using
+			If String.IsNullOrWhiteSpace(DadosArquivoCorrente.NomeArquivoSemExtensao) Then
+
+				MessageBox.Show("Não há desenho ativo para associar material.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+
+				Exit Sub
+
+			Else
+
+				If TipoBanco = "MYSQL" Then
+
+					Using formMateriaisAlmoxarifado As New frmMateriaisAlmoxarifado ' MateriaisAlmoxarifado
+
+						DadosArquivoCorrente.IdMaterial = cl_BancoDados.RetornaCampoDaPesquisa("Select IdMaterial from  " & ComplementoTipoBanco & "material where CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'", "IdMaterial")
+
+						formMateriaisAlmoxarifado.ShowDialog()
+
+						TimerMontaPeca.Enabled = True
+
+					End Using
+
+
+				End If
+
+
+				'If My.Settings.SQLServerProtheus <> "" Then
+
+
+				'	Using formMateriaisProtheus As New frmMateriaisProtheusa
+				'		DadosArquivoCorrente.IdMaterial = cl_BancoDados.RetornaCampoDaPesquisa("Select IdMaterial from  " & ComplementoTipoBanco & "material where CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExtensao & "'", "IdMaterial")
+				'		formMateriaisProtheus.ShowDialog()
+				'		TimerMontaPeca.Enabled = True
+				'	End Using
+
+				'End If
+
+			End If
 
 		End If
+
 	End Sub
 
 	Private Sub tsbInserirNaOS_Click(sender As Object, e As EventArgs) Handles tsbInserirNaOS.Click
@@ -10228,6 +10459,7 @@ DescEmpresa) values
 	End Sub
 
 	Private Sub ConfiguraçãoToolStripMenuItem2_Click(sender As Object, e As EventArgs) Handles ConfiguraçãoToolStripMenuItem2.Click
+
 		If InputBox("Senha de acesso", "Administrador", "") = "99678982" Then
 			Dim OpenfileConfiguracao As New OpenFileDialog
 
@@ -10245,7 +10477,7 @@ DescEmpresa) values
 						' Variáveis para armazenar os parâmetros
 						Dim endereco, usuario, banco, senha As String
 						Dim EnderecoPastaRaizOS, EnderecoTemplateExcel, CopiaBancoDados As String
-						Dim EnderecoPastaRaizRomaneio, EnderecoTemplateExcelRomaneio, ParametroExportarDXF As String
+						Dim EnderecoPastaRaizRomaneio, EnderecoTemplateExcelRomaneio, ParametroExportarDXF, SQLServerProtheus As String
 
 						' Codificação utilizada na leitura do arquivo
 						Dim codificacao As Encoding = Encoding.GetEncoding("ISO-8859-1") ' Ajustável conforme o arquivo
@@ -10290,11 +10522,29 @@ DescEmpresa) values
 						My.Settings.EnderecoPastaRaizOS = parametrosEncontrados("EnderecoPastaRaizOS")
 						My.Settings.EnderecoTemplateExcel = parametrosEncontrados("EnderecoTemplateExcelOrdemServico")
 						My.Settings.ParametroExportarDXF = parametrosEncontrados("ParametroExportarDXF")
+						'My.Settings.SQLServerProtheus = parametrosEncontrados("SQLServerProtheus")
+
 
 						' Salva as configurações
 						My.Settings.Save()
 
 						MsgBox("Configurações carregadas com sucesso!", MsgBoxStyle.Information)
+
+
+						' Obtém a instância do SolidWorks se estiver aberta
+						swApp = TryCast(Marshal.GetActiveObject("SldWorks.Application"), SldWorks)
+
+						If swApp IsNot Nothing Then
+							'	Console.WriteLine("SolidWorks encontrado! Fechando...")
+
+							' Fecha o SolidWorks
+							swApp.ExitApp()
+
+							' Libera a referência da memória
+							Marshal.ReleaseComObject(swApp)
+							swApp = Nothing
+
+						End If
 
 					Catch ex As Exception
 						MsgBox($"Erro ao processar o arquivo de configuração: {ex.Message}", MsgBoxStyle.Critical)
@@ -10632,8 +10882,11 @@ DescEmpresa) values
 
 
 	Private Sub AtualziarDadosSinco()
+
 		Try
 
+
+			' TipoBanco = "SQLCLIENTE"
 			If TipoBanco = "SQL" Then
 
 				cl_BancoDados.ComboBoxDataSet("[View_SZ1010_GESTAO]", "Z1_NUM", "Z1_NUM", cboProjeto, "", "[MP12OFICIAL].[dbo].")
@@ -10649,15 +10902,31 @@ DescEmpresa) values
 
 			ElseIf TipoBanco = "MYSQL" Then
 
-				cl_BancoDados.ComboBoxDataSet("projetos", "idProjeto", "Projeto", cboProjeto, " WHERE (D_E_L_E_T_E Is NULL Or D_E_L_E_T_E = '')  AND (liberado = 'S')  and (Finalizado = '' OR Finalizado Is NULL)")
+				cl_BancoDados.ComboBoxDataSet("projetos", "idProjeto", "Projeto", cboProjeto, " WHERE (D_E_L_E_T_E Is NULL Or D_E_L_E_T_E = '') and (Finalizado = '' OR Finalizado Is NULL)")
 				cl_BancoDados.ComboBoxDataSet("acabamento", "IdAcabamento", "DescAcabamento", cboOpcoesAcabamento, "WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '')")
+
+
 				' Chama a função para carregar os dados no CheckedListBox
 				PreencherCheckedListBox("Select DescFamilia from " & ComplementoTipoBanco & "familia WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '') ORDER BY DescFamilia", chkBoxTipoDesenho)
 
 				' Chama a função para carregar os dados no CheckedListBox
 				PreencherCheckedListBox("Select DescAcabamento from " & ComplementoTipoBanco & "acabamento WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '') ORDER BY DescAcabamento ", chkBoxAcabamento)
 
+				' Chama a função para carregar os dados no CheckedListBox
+				PreencherCheckedListBox("Select ProcessoFabricacao from " & ComplementoTipoBanco & "processofabricacao WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '') ORDER BY processofabricacao ", chkBoxProcessos)
+
+
 			End If
+
+
+
+			' Ocultar tabPage1
+			OcultarTabPage(tpgPrincipal, tpgPCP)
+
+
+			Dim version As Version = Assembly.GetExecutingAssembly().GetName().Version
+
+			tslVersaoSistema.Text = My.Settings.BancoDadosAtivo.ToString & ": " & version.ToString()
 
 
 		Catch ex As Exception
@@ -10741,19 +11010,19 @@ DescEmpresa) values
 				End If
 
 
-				If DadosArquivoCorrente.VerificarProcessodaPecaCorrente(swModel, False) = False Then
+				If DadosArquivoCorrente.VerificarProcessodaPecaCorrente(swModel, False) = True Then
 
-						DadosArquivoCorrente.rnc = "S"
+					DadosArquivoCorrente.rnc = "S"
 
-					End If
+				End If
 
-					FormatarColunaIconeDGVListaBom()
-
-
+				FormatarColunaIconeDGVListaBom()
 
 
-					' Preencher o DataGridView com os dados da peça
-					dgvDataGridBOM.Rows.Add(My.Resources.Sem_Incone,
+
+
+				' Preencher o DataGridView com os dados da peça
+				dgvDataGridBOM.Rows.Add(My.Resources.Sem_Incone,
 										iconeDXF,
 										iconePDF,
 										iconeTipoArquivo,
@@ -10790,28 +11059,35 @@ DescEmpresa) values
 
 
 
-					' Ler dados da view de montagem
-					LerDadosViewMontaPeca()
+				iconeDXF = My.Resources.Sem_Incone
+				iconePDF = My.Resources.Sem_Incone
+				iconeTipoArquivo = My.Resources.Sem_Incone
+				iconeAtencao = My.Resources.Sem_Incone
 
-					Try
 
 
-						' Fechar o documento
-						swapp.CloseDoc(DadosArquivoCorrente.EnderecoArquivo)
-						cl_BancoDados.FecharArquivoMemoria()
-						IntanciaSolidWorks.LiberarRecurso(swModel)
+				' Ler dados da view de montagem
+				LerDadosViewMontaPeca()
 
-					Catch ex As Exception
+				Try
 
-					Finally
 
-					End Try
+					' Fechar o documento
+					swapp.CloseDoc(DadosArquivoCorrente.EnderecoArquivo)
+					cl_BancoDados.FecharArquivoMemoria()
+					IntanciaSolidWorks.LiberarRecurso(swModel)
 
-					' Processar a lista de material
-					ProcessarListaMaterial(swModel)
+				Catch ex As Exception
 
-				End If
-        Catch ex As Exception
+				Finally
+
+				End Try
+
+				' Processar a lista de material
+				ProcessarListaMaterial(swModel)
+
+			End If
+		Catch ex As Exception
 			MsgBox("Erro: " & ex.Message, vbCritical, "Erro")
 			' Fechar o documento
 			swapp.CloseDoc(DadosArquivoCorrente.EnderecoArquivo)
@@ -11010,388 +11286,388 @@ DescEmpresa) values
 
 	End Sub
 
-	Private Sub ToolStripButton7_Click(sender As Object, e As EventArgs) Handles ToolStripButton7.Click
+    Private Sub ToolStripButton7_Click(sender As Object, e As EventArgs) Handles ToolStripButton7.Click
 
-		Cursor.Current = Cursors.WaitCursor
+        Cursor.Current = Cursors.WaitCursor
 
-		Dim verificaRnc As Boolean = False
+        Dim verificaRnc As Boolean = False
 
-		Dim result As DialogResult = MessageBox.Show("Deseja Realmente Inserir os itens da lista BOM na OS: " & Me.lblOrdemServicoAtiva.Text, "Inserção de Itens da OS", MessageBoxButtons.YesNo)
+        Dim result As DialogResult = MessageBox.Show("Deseja Realmente Inserir os itens da lista BOM na OS: " & Me.lblOrdemServicoAtiva.Text, "Inserção de Itens da OS", MessageBoxButtons.YesNo)
 
-		If result = DialogResult.Yes Then
+        If result = DialogResult.Yes Then
 
-			Dim rnc As String
+            Dim rnc As String
 
-			Dim Fator As Double
-			'  Try
+            Dim Fator As Double
+            '  Try
 
-			ProgressBarListaSW.Minimum = 0
-			ProgressBarListaSW.Maximum = dgvDataGridBOM.Rows.Count
+            ProgressBarListaSW.Minimum = 0
+            ProgressBarListaSW.Maximum = dgvDataGridBOM.Rows.Count
 
-			If dgvDataGridBOM.Rows.Count > 0 Then
+            If dgvDataGridBOM.Rows.Count > 0 Then
 
-				For b As Integer = 0 To dgvDataGridBOM.Rows.Count - 1
+                For b As Integer = 0 To dgvDataGridBOM.Rows.Count - 1
 
-					Try
-						rnc = dgvDataGridBOM.Rows(b).Cells("RNC").Value.ToString
-					Catch ex As Exception
-						rnc = ""
-					End Try
-					If rnc = "S" Then
+                    Try
+                        rnc = dgvDataGridBOM.Rows(b).Cells("RNC").Value.ToString
+                    Catch ex As Exception
+                        rnc = ""
+                    End Try
+                    If rnc = "S" Then
 
-						MsgBox("Na lista, há peças com RNC pendente; para prosseguir com o processo de liberação, é necessário remover a peça da lista ou resolver a RNC.", vbCritical, "Atenção")
+                        MsgBox("Na lista, há peças com RNC pendente; para prosseguir com o processo de liberação, é necessário remover a peça da lista ou resolver a RNC.", vbCritical, "Atenção")
 
-						rnc = dgvDataGridBOM.Rows(b).DefaultCellStyle.BackColor = Color.LightSalmon
+                        rnc = dgvDataGridBOM.Rows(b).DefaultCellStyle.BackColor = Color.LightSalmon
 
-						verificaRnc = True
+                        verificaRnc = True
 
-						Exit For
+                        Exit For
 
-					End If
+                    End If
 
-				Next
+                Next
 
-			End If
+            End If
 
-			If verificaRnc = False Then
+            ProgressBarListaSW.Minimum = 0
 
-				If dgvDataGridBOM.Rows.Count > 0 Then
+            Try
 
-					If OrdemServico.IdOrdemServico = Nothing Or OrdemServico.IdOrdemServico = 0 Then
+                'Verificar a quantide de usuarios cadastrado no sistema
+                OrdemServico.Fator = Convert.ToInt32(cl_BancoDados.RetornaCampoDaPesquisa("SELECT SaldoTag FROM  " & ComplementoTipoBanco & " tags where IdProjeto = '" & OrdemServico.idProjeto & "' and IdTag ='" & OrdemServico.idTag & "'", "SaldoTag"))
 
-						MsgBox("A Ordem de Serviço deve ser selecionada", vbCritical, "Atenção")
+            Catch ex As Exception
+                OrdemServico.Fator = 1
+            End Try
 
-						Exit Sub
-					Else
 
-						Try
-							Fator = InputBox("Informe o Valor Multiplicado de fabricação", "Fator de Multiplicação", 1)
+            OrdemServico.Fator = InputBox("Informe o Valor Multiplicador para fabricação, o Valor informado como 
+                                              padrão é a quantidade de 
+                                        conjuntos solicitado pelo PCP no ato do cadasro da Tag", "Fator de Multiplicação", OrdemServico.Fator)
 
-							' Verifica se o usuário clicou em "Cancelar" (Fator será uma string vazia)
-							If Fator = "" Then
+            If OrdemServico.Fator <= 0 Then
 
-								MsgBox("A Operação foi cancelda", vbInformation, "Atenação")
+                MsgBox("O Fator de Multiplicação deve ser maior que zero", vbCritical, "Atenção")
 
-								Exit Sub ' Sai do procedimento
-							End If
+                Exit Sub
 
-							' Verifica se o valor inserido é numérico e maior que 0
-							If Not IsNumeric(Fator) OrElse Convert.ToDouble(Fator) <= 0 Then
+            End If
 
-								MsgBox("A operação foi cancelada. O valor informado não é um número válido!", vbInformation, "Atenação")
 
-								Exit Sub
-							End If
-						Catch ex As Exception
-							' Fator = "1"
-						Finally
-							' Código adicional, se necessário
-						End Try
+            cl_BancoDados.AlteracaoEspecifica("OrdemServico", "Fator", OrdemServico.Fator, "IdOrdemServico", OrdemServico.IdOrdemServico)
 
+            dgvos.CurrentRow.Cells("Fator").Value = OrdemServico.Fator
 
-						For A As Integer = 0 To dgvDataGridBOM.Rows.Count - 1
 
-							Try
+            If verificaRnc = True Then
 
-								If dgvDataGridBOM.Rows(A).Cells("CodMatFabricante").Value.ToString <> "" Or dgvDataGridBOM.Rows(A).Cells("CodMatFabricante").Value.ToString <> Nothing Then
+                MsgBox("Há Itens com RNC em aberto ou cadastro incompleto, favor verificar os itens em vermelho", vbCritical, "Atenção")
 
+                Exit Sub
 
-									Try
-										OrdemServico.EnderecoArquivo = dgvDataGridBOM.Rows(A).Cells("EnderecoArquivo").Value.ToString.ToUpper
+            End If
 
-									Catch ex As Exception
+            If dgvDataGridBOM.Rows.Count > 0 AndAlso OrdemServico.IdOrdemServico <> 0 Then
 
-										OrdemServico.EnderecoArquivo = ""
 
-									End Try
 
+                For A As Integer = 0 To dgvDataGridBOM.Rows.Count - 1
 
-									Try
-										OrdemServico.CodMatFabricante = dgvDataGridBOM.Rows(A).Cells("CodMatFabricante").Value.ToString.ToUpper
-									Catch ex As Exception
-										OrdemServico.CodMatFabricante = ""
-										' MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("CodMatFabricante").Value.ToString.ToUpper)
-									End Try
+                    Try
 
-									Try
-										OrdemServico.DescResumo = dgvDataGridBOM.Rows(A).Cells("DescResumo").Value.ToString.ToUpper
-									Catch ex As Exception
-										OrdemServico.DescResumo = ""
-										' MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("DescResumo").Value.ToString.ToUpper)
-									End Try
+                        If dgvDataGridBOM.Rows(A).Cells("CodMatFabricante").Value.ToString <> "" Or dgvDataGridBOM.Rows(A).Cells("CodMatFabricante").Value.ToString <> Nothing Then
 
-									Try
-										OrdemServico.DescDetal = dgvDataGridBOM.Rows(A).Cells("DescDetal").Value.ToString.ToUpper
-									Catch ex As Exception
 
-										OrdemServico.DescDetal = ""
-										'  MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("DescDetal").Value.ToString.ToUpper)
-									End Try
+                            Try
+                                OrdemServico.EnderecoArquivo = dgvDataGridBOM.Rows(A).Cells("EnderecoArquivo").Value.ToString.ToUpper
 
-									Try
-										OrdemServico.Autor = dgvDataGridBOM.Rows(A).Cells("Autor").Value.ToString.ToUpper
-									Catch ex As Exception
+                            Catch ex As Exception
 
-										OrdemServico.Autor = ""
-										' MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Autor").Value.ToString.ToUpper)
-									End Try
+                                OrdemServico.EnderecoArquivo = ""
 
-									Try
-										OrdemServico.Palavrachave = dgvDataGridBOM.Rows(A).Cells("Palavrachave").Value.ToString.ToUpper
-									Catch ex As Exception
+                            End Try
 
-										OrdemServico.Palavrachave = ""
-										' MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Palavrachave").Value.ToString.ToUpper)
-									End Try
 
-									Try
-										OrdemServico.Notas = dgvDataGridBOM.Rows(A).Cells("Notas").Value.ToString.ToUpper
-									Catch ex As Exception
+                            Try
+                                OrdemServico.CodMatFabricante = dgvDataGridBOM.Rows(A).Cells("CodMatFabricante").Value.ToString.ToUpper
+                            Catch ex As Exception
+                                OrdemServico.CodMatFabricante = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("CodMatFabricante").Value.ToString.ToUpper)
+                            End Try
 
-										OrdemServico.Notas = ""
-										'  MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Notas").Value.ToString.ToUpper)
-									End Try
+                            Try
+                                OrdemServico.DescResumo = dgvDataGridBOM.Rows(A).Cells("DescResumo").Value.ToString.ToUpper
+                            Catch ex As Exception
+                                OrdemServico.DescResumo = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("DescResumo").Value.ToString.ToUpper)
+                            End Try
 
-									Try
-										OrdemServico.Espessura = dgvDataGridBOM.Rows(A).Cells("Espessura").Value.ToString
-									Catch ex As Exception
+                            Try
+                                OrdemServico.DescDetal = dgvDataGridBOM.Rows(A).Cells("DescDetal").Value.ToString.ToUpper
+                            Catch ex As Exception
 
-										OrdemServico.Espessura = ""
-										' MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Espessura").Value.ToString.ToUpper)
-									End Try
+                                OrdemServico.DescDetal = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("DescDetal").Value.ToString.ToUpper)
+                            End Try
 
-									Try
-										OrdemServico.NumeroDobras = dgvDataGridBOM.Rows(A).Cells("NumeroDobras").Value.ToString
-									Catch ex As Exception
+                            Try
+                                OrdemServico.Autor = dgvDataGridBOM.Rows(A).Cells("Autor").Value.ToString.ToUpper
+                            Catch ex As Exception
 
-										OrdemServico.NumeroDobras = ""
-										' MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("NumeroDobras").Value.ToString.ToUpper)
+                                OrdemServico.Autor = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Autor").Value.ToString.ToUpper)
+                            End Try
 
-									End Try
+                            Try
+                                OrdemServico.Palavrachave = dgvDataGridBOM.Rows(A).Cells("Palavrachave").Value.ToString.ToUpper
+                            Catch ex As Exception
 
-									If dgvDesenhos.Rows(A).Cells("EnderecoArquivo").Value.ToString().IndexOf(".SLDASM", StringComparison.OrdinalIgnoreCase) >= 0 Then
+                                OrdemServico.Palavrachave = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Palavrachave").Value.ToString.ToUpper)
+                            End Try
 
-										OrdemServico.Unidade = "CONJ"
-										OrdemServico.UnidadeSW = "CONJ"
-									Else
+                            Try
+                                OrdemServico.Notas = dgvDataGridBOM.Rows(A).Cells("Notas").Value.ToString.ToUpper
+                            Catch ex As Exception
 
-										OrdemServico.Unidade = "PC"
-										OrdemServico.UnidadeSW = "PC"
+                                OrdemServico.Notas = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Notas").Value.ToString.ToUpper)
+                            End Try
 
-									End If
+                            Try
+                                OrdemServico.Espessura = dgvDataGridBOM.Rows(A).Cells("Espessura").Value.ToString
+                            Catch ex As Exception
 
-									OrdemServico.ValorSW = ""
+                                OrdemServico.Espessura = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Espessura").Value.ToString.ToUpper)
+                            End Try
 
-									Try
-										OrdemServico.Altura = Replace(dgvDataGridBOM.Rows(A).Cells("Altura").Value.ToString, ",", "")
-									Catch ex As Exception
+                            Try
+                                OrdemServico.NumeroDobras = dgvDataGridBOM.Rows(A).Cells("NumeroDobras").Value.ToString
+                            Catch ex As Exception
 
-										OrdemServico.Altura = ""
-										'MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Altura").Value.ToString.ToUpper)
-									End Try
+                                OrdemServico.NumeroDobras = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("NumeroDobras").Value.ToString.ToUpper)
 
-									Try
-										OrdemServico.Largura = Replace(dgvDataGridBOM.Rows(A).Cells("Largura").Value.ToString, ",", "")
-									Catch ex As Exception
+                            End Try
 
-										OrdemServico.Largura = ""
-										' MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Largura").Value.ToString.ToUpper)
+                            Try
 
-									End Try
 
-									OrdemServico.DtCad = ""
-									OrdemServico.UsuarioCriacao = ""
-									OrdemServico.UsuarioAlteracao = ""
-									OrdemServico.DtAlteracao = ""
+                                If dgvDesenhos.Rows(A).Cells("EnderecoArquivo").Value.ToString().IndexOf(".SLDASM", StringComparison.OrdinalIgnoreCase) >= 0 Then
 
-									Try
-										OrdemServico.MaterialSW = dgvDataGridBOM.Rows(A).Cells("material").Value.ToString.ToUpper
-									Catch ex As Exception
+                                    OrdemServico.Unidade = "CONJ"
+                                    OrdemServico.UnidadeSW = "CONJ"
+                                Else
 
-										OrdemServico.MaterialSW = ""
-										' MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("material").Value.ToString.ToUpper)
+                                    OrdemServico.Unidade = "PC"
+                                    OrdemServico.UnidadeSW = "PC"
 
-									End Try
+                                End If
+                            Catch ex As Exception
+                                MsgBox(OrdemServico.Unidade & " - " & OrdemServico.UnidadeSW & ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("EnderecoArquivo").Value.ToString.ToUpper)
 
-									Try
-										OrdemServico.qtde = dgvDataGridBOM.Rows(A).Cells("qtde").Value.ToString
-									Catch ex As Exception
+                            End Try
 
-										OrdemServico.qtde = 0
-										'MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("qtde").Value.ToString.ToUpper)
 
-									End Try
+                            OrdemServico.ValorSW = ""
 
-									Try
-										OrdemServico.AreaPintura = Replace(dgvDataGridBOM.Rows(A).Cells("AreaPintura").Value.ToString, ".", ",")
-										OrdemServico.AreaPintura = OrdemServico.AreaPintura * OrdemServico.qtde * Fator
-										OrdemServico.AreaPintura = Replace(OrdemServico.AreaPintura, ",", ".")
-									Catch ex As Exception
+                            Try
+                                OrdemServico.Altura = Replace(dgvDataGridBOM.Rows(A).Cells("Altura").Value.ToString, ",", "")
+                            Catch ex As Exception
 
-										OrdemServico.AreaPintura = ""
-										'  MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("AreaPintura").Value.ToString.ToUpper)
+                                OrdemServico.Altura = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Altura").Value.ToString.ToUpper)
+                            End Try
 
-									End Try
+                            Try
+                                OrdemServico.Largura = Replace(dgvDataGridBOM.Rows(A).Cells("Largura").Value.ToString, ",", "")
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.AreaPinturaUnitario = Replace(dgvDataGridBOM.Rows(A).Cells("AreaPintura").Value.ToString, ".", ",")
-										OrdemServico.AreaPinturaUnitario = Replace(OrdemServico.AreaPinturaUnitario, ",", ".")
+                                OrdemServico.Largura = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Largura").Value.ToString.ToUpper)
 
-									Catch ex As Exception
+                            End Try
 
-										OrdemServico.AreaPinturaUnitario = ""
-										' MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("AreaPintura").Value.ToString.ToUpper)
+                            OrdemServico.DtCad = ""
+                            OrdemServico.UsuarioCriacao = ""
+                            OrdemServico.UsuarioAlteracao = ""
+                            OrdemServico.DtAlteracao = ""
 
-									End Try
+                            Try
+                                OrdemServico.MaterialSW = dgvDataGridBOM.Rows(A).Cells("material").Value.ToString.ToUpper
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.Peso = Replace(dgvDataGridBOM.Rows(A).Cells("Peso").Value.ToString, ".", ",")
+                                OrdemServico.MaterialSW = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("material").Value.ToString.ToUpper)
 
-										OrdemServico.Peso = OrdemServico.Peso * OrdemServico.qtde * Fator
-										OrdemServico.Peso = Replace(OrdemServico.Peso, ",", ".")
+                            End Try
 
-									Catch ex As Exception
+                            Try
+                                OrdemServico.qtde = Replace(dgvDataGridBOM.Rows(A).Cells("qtde").Value.ToString, ".", ",")
 
-										OrdemServico.Peso = 0
-										'  MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Peso").Value.ToString.ToUpper)
-									End Try
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.PesoUnitario = Replace(dgvDataGridBOM.Rows(A).Cells("Peso").Value.ToString, ".", ",")
-										OrdemServico.PesoUnitario = Replace(OrdemServico.PesoUnitario, ",", ".")
-									Catch ex As Exception
+                                OrdemServico.qtde = 0
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("qtde").Value.ToString.ToUpper)
 
-										OrdemServico.PesoUnitario = 0
-										'  MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Peso").Value.ToString.ToUpper)
-									End Try
+                            End Try
 
-									Try
-										OrdemServico.txtSoldagem = dgvDataGridBOM.Rows(A).Cells("txtSoldagem").Value.ToString
-									Catch ex As Exception
 
-										OrdemServico.txtSoldagem = ""
-										' MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtSoldagem").Value.ToString.ToUpper)
-									End Try
+                            Try
+                                OrdemServico.Peso = Replace(dgvDataGridBOM.Rows(A).Cells("Peso").Value.ToString, ".", ",")
 
-									Try
-										OrdemServico.QtdeTotal = Replace(OrdemServico.QtdeTotal, ".", ",")
-										OrdemServico.QtdeTotal = OrdemServico.qtde * Fator
-										OrdemServico.QtdeTotal = Replace(OrdemServico.QtdeTotal, ",", ".")
 
-									Catch ex As Exception
+                            Catch ex As Exception
 
-										OrdemServico.QtdeTotal = 0
+                                OrdemServico.Peso = 0
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Peso").Value.ToString.ToUpper)
+                            End Try
 
-										'  MsgBox(ex.Message & ": qtdetotal")
 
-									End Try
+                            Try
+                                OrdemServico.txtSoldagem = dgvDataGridBOM.Rows(A).Cells("txtSoldagem").Value.ToString
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.txtTipoDesenho = dgvDataGridBOM.Rows(A).Cells("txtTipoDesenho").Value.ToString
-									Catch ex As Exception
+                                OrdemServico.txtSoldagem = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtSoldagem").Value.ToString.ToUpper)
+                            End Try
 
-										OrdemServico.txtTipoDesenho = ""
-										'  MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtTipoDesenho").Value.ToString.ToUpper)
 
-									End Try
+                            Try
+                                OrdemServico.txtTipoDesenho = dgvDataGridBOM.Rows(A).Cells("txtTipoDesenho").Value.ToString
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.txtCorte = dgvDataGridBOM.Rows(A).Cells("txtCorte").Value.ToString
+                                OrdemServico.txtTipoDesenho = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtTipoDesenho").Value.ToString.ToUpper)
 
-									Catch ex As Exception
+                            End Try
 
-										OrdemServico.txtCorte = ""
-										'  MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtCorte").Value.ToString.ToUpper)
+                            Try
+                                OrdemServico.txtCorte = dgvDataGridBOM.Rows(A).Cells("txtCorte").Value.ToString
 
-									End Try
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.txtDobra = dgvDataGridBOM.Rows(A).Cells("txtDobra").Value.ToString
-									Catch ex As Exception
+                                OrdemServico.txtCorte = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtCorte").Value.ToString.ToUpper)
 
-										OrdemServico.txtDobra = ""
-										'  MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtDobra").Value.ToString.ToUpper)
+                            End Try
 
-									End Try
+                            Try
+                                OrdemServico.txtDobra = dgvDataGridBOM.Rows(A).Cells("txtDobra").Value.ToString
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.txtSolda = dgvDataGridBOM.Rows(A).Cells("txtSolda").Value.ToString
-									Catch ex As Exception
+                                OrdemServico.txtDobra = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtDobra").Value.ToString.ToUpper)
 
-										OrdemServico.txtSolda = ""
-										'   MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtSolda").Value.ToString.ToUpper)
+                            End Try
 
-									End Try
+                            Try
+                                OrdemServico.txtSolda = dgvDataGridBOM.Rows(A).Cells("txtSolda").Value.ToString
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.txtPintura = dgvDataGridBOM.Rows(A).Cells("txtPintura").Value.ToString
-									Catch ex As Exception
+                                OrdemServico.txtSolda = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtSolda").Value.ToString.ToUpper)
 
-										OrdemServico.txtPintura = ""
-										'  MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtPintura").Value.ToString.ToUpper)
+                            End Try
 
-									End Try
+                            Try
+                                OrdemServico.txtPintura = dgvDataGridBOM.Rows(A).Cells("txtPintura").Value.ToString
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.txtMontagem = dgvDataGridBOM.Rows(A).Cells("txtMontagem").Value.ToString
-									Catch ex As Exception
+                                OrdemServico.txtPintura = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtPintura").Value.ToString.ToUpper)
 
-										OrdemServico.txtMontagem = ""
-										'  MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtMontagem").Value.ToString.ToUpper)
+                            End Try
 
-									End Try
+                            Try
+                                OrdemServico.txtMontagem = dgvDataGridBOM.Rows(A).Cells("txtMontagem").Value.ToString
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.Comprimentocaixadelimitadora = dgvDataGridBOM.Rows(A).Cells("Comprimentocaixadelimitadora").Value.ToString
-										'  OrdemServico.Comprimentocaixadelimitadora = Replace(OrdemServico.Comprimentocaixadelimitadora, ",", "")
-									Catch ex As Exception
+                                OrdemServico.txtMontagem = ""
+                                MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtMontagem").Value.ToString.ToUpper)
 
-										OrdemServico.Comprimentocaixadelimitadora = ""
+                            End Try
 
-									End Try
+                            Try
+                                OrdemServico.Comprimentocaixadelimitadora = dgvDataGridBOM.Rows(A).Cells("Comprimentocaixadelimitadora").Value.ToString
+                                OrdemServico.Comprimentocaixadelimitadora = Replace(OrdemServico.Comprimentocaixadelimitadora, ",", ".")
+                            Catch ex As Exception
 
-									Try
-										OrdemServico.Larguracaixadelimitadora = dgvDataGridBOM.Rows(A).Cells("Larguracaixadelimitadora").Value.ToString
-										OrdemServico.Larguracaixadelimitadora = Replace(OrdemServico.Larguracaixadelimitadora, ",", "")
-									Catch ex As Exception
+                                OrdemServico.Comprimentocaixadelimitadora = ""
+                                'MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Comprimentocaixadelimitadora").Value.ToString.ToUpper)
+                            Finally
+                            End Try
 
-										OrdemServico.Larguracaixadelimitadora = ""
+                            Try
+                                OrdemServico.Larguracaixadelimitadora = dgvDataGridBOM.Rows(A).Cells("Larguracaixadelimitadora").Value.ToString
+                                OrdemServico.Larguracaixadelimitadora = Replace(OrdemServico.Larguracaixadelimitadora, ",", ".")
+                            Catch ex As Exception
 
-									End Try
+                                OrdemServico.Larguracaixadelimitadora = ""
+                                '	MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Larguracaixadelimitadora").Value.ToString.ToUpper)
+                            Finally
 
-									Try
-										OrdemServico.Espessuracaixadelimitadora = dgvDataGridBOM.Rows(A).Cells("Espessuracaixadelimitadora ").Value.ToString
-										OrdemServico.Espessuracaixadelimitadora = Replace(OrdemServico.Espessuracaixadelimitadora, ",", "")
-									Catch ex As Exception
+                            End Try
 
-										OrdemServico.Espessuracaixadelimitadora = ""
+                            Try
+                                OrdemServico.Espessuracaixadelimitadora = dgvDataGridBOM.Rows(A).Cells("Espessuracaixadelimitadora ").Value.ToString
+                                OrdemServico.Espessuracaixadelimitadora = Replace(OrdemServico.Espessuracaixadelimitadora, ",", ".")
+                            Catch ex As Exception
 
-									End Try
+                                OrdemServico.Espessuracaixadelimitadora = ""
+                                'MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Espessuracaixadelimitadora").Value.ToString.ToUpper)
+                            Finally
 
-									Try
-										OrdemServico.txtItemEstoque = dgvDataGridBOM.Rows(A).Cells("txtItemEstoque").Value.ToString.ToUpper
-									Catch ex As Exception
+                            End Try
 
-										OrdemServico.txtItemEstoque = ""
+                            Try
+                                OrdemServico.txtItemEstoque = dgvDataGridBOM.Rows(A).Cells("txtItemEstoque").Value.ToString.ToUpper
+                            Catch ex As Exception
 
-									End Try
+                                OrdemServico.txtItemEstoque = ""
+                                'MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("txtItemEstoque").Value.ToString.ToUpper)
+                            Finally
 
+                            End Try
 
-									Try
-										OrdemServico.txtAcabamento = dgvDataGridBOM.Rows(A).Cells("Acabamento").Value.ToString.ToUpper
-									Catch ex As Exception
+                            Try
+                                OrdemServico.txtAcabamento = dgvDataGridBOM.Rows(A).Cells("Acabamento").Value.ToString.ToUpper
+                            Catch ex As Exception
 
-										OrdemServico.txtAcabamento = ""
+                                OrdemServico.txtAcabamento = ""
+                                'MsgBox(ex.Message & ": " & dgvDataGridBOM.Rows(A).Cells("Acabamento").Value.ToString.ToUpper)
+                            Finally
 
-									End Try
+                            End Try
 
-									OrdemServico.QtdeTotal = Replace(OrdemServico.QtdeTotal, ",", "")
+                            'contas''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                            Try
 
-									ProgressBarListaSW.Value = A
+                                OrdemServico.PesoUnitario = OrdemServico.Peso / OrdemServico.qtde
 
-									If TipoBanco = "MYSQL" Then
+                                OrdemServico.AreaPinturaUnitario = OrdemServico.AreaPintura / OrdemServico.qtde
 
-										Dim query As String = "INSERT INTO ordemservicoitem (
+                                'OrdemServico.AreaPintura = Replace(dgvDataGridBOM.Rows(A).Cells("AreaPintura").Value.ToString, ".", ",")
+                                OrdemServico.AreaPintura = OrdemServico.AreaPinturaUnitario * OrdemServico.qtde * OrdemServico.Fator
+
+                                OrdemServico.Peso = OrdemServico.PesoUnitario * OrdemServico.qtde * OrdemServico.Fator
+
+                                OrdemServico.QtdeTotal = OrdemServico.qtde * OrdemServico.Fator
+
+                                'OrdemServico.AreaPintura = Replace(OrdemServico.AreaPintura, ",", ".")
+                            Catch ex As Exception
+
+
+
+                            End Try
+
+
+                            'ProgressBarListaSW.Value = A
+
+                            If TipoBanco = "MYSQL" Then
+
+                                Dim query As String = "INSERT INTO ordemservicoitem (
 							IdOrdemServico, idProjeto, Projeto, idTag, Tag, 
 							ESTATUS_OrdemServico, IdMaterial, DescResumo, DescDetal, 
 							Autor, Palavrachave, Notas, Espessura, AreaPintura, 
@@ -11432,121 +11708,133 @@ DescEmpresa) values
 							@sttxtMontagem,@Montagemtotalexecutado, @Montagemtotalexecutar,
 							@ORDEMSERVICOITEMFINALIZADO,@IdPlanodecorte);"
 
-										Using command As New MySqlCommand(query, myconect)
-											' Adicionando os parâmetros
-											command.Parameters.AddWithValue("@IdOrdemServico", OrdemServico.IdOrdemServico)
-											command.Parameters.AddWithValue("@idProjeto", OrdemServico.idProjeto)
-											command.Parameters.AddWithValue("@Projeto", OrdemServico.Projeto)
-											command.Parameters.AddWithValue("@idTag", OrdemServico.idTag)
-											command.Parameters.AddWithValue("@Tag", OrdemServico.Tag)
-											command.Parameters.AddWithValue("@ESTATUS_OrdemServico", OrdemServico.Estatus)
-											command.Parameters.AddWithValue("@IdMaterial", OrdemServico.IdMaterial)
-											command.Parameters.AddWithValue("@DescResumo", OrdemServico.DescResumo)
-											command.Parameters.AddWithValue("@DescDetal", OrdemServico.DescDetal)
-											command.Parameters.AddWithValue("@Autor", OrdemServico.Autor)
-											command.Parameters.AddWithValue("@Palavrachave", OrdemServico.Palavrachave)
-											command.Parameters.AddWithValue("@Notas", OrdemServico.Notas)
-											command.Parameters.AddWithValue("@Espessura", OrdemServico.Espessura)
-											command.Parameters.AddWithValue("@AreaPintura", OrdemServico.AreaPintura)
-											command.Parameters.AddWithValue("@NumeroDobras", OrdemServico.NumeroDobras)
-											command.Parameters.AddWithValue("@Peso", OrdemServico.Peso)
-											command.Parameters.AddWithValue("@Unidade", OrdemServico.Unidade)
-											command.Parameters.AddWithValue("@UnidadeSW", OrdemServico.UnidadeSW)
-											command.Parameters.AddWithValue("@ValorSW", OrdemServico.ValorSW)
-											command.Parameters.AddWithValue("@Altura", OrdemServico.Altura)
-											command.Parameters.AddWithValue("@Largura", OrdemServico.Largura)
-											command.Parameters.AddWithValue("@CodMatFabricante", OrdemServico.CodMatFabricante)
-											command.Parameters.AddWithValue("@DtCad", Date.Now.Date.ToShortDateString)
-											command.Parameters.AddWithValue("@UsuarioCriacao", Usuario.NomeCompleto)
-											command.Parameters.AddWithValue("@UsuarioAlteracao", "")
-											command.Parameters.AddWithValue("@DtAlteracao", "")
-											command.Parameters.AddWithValue("@EnderecoArquivo", OrdemServico.EnderecoArquivo)
-											command.Parameters.AddWithValue("@MaterialSW", OrdemServico.MaterialSW)
-											command.Parameters.AddWithValue("@QtdeTotal", OrdemServico.QtdeTotal)
-											command.Parameters.AddWithValue("@QtdeProduzida", "")
-											command.Parameters.AddWithValue("@QtdeFaltante", "")
-											command.Parameters.AddWithValue("@CriadoPor", Usuario.NomeCompleto.ToString)
-											command.Parameters.AddWithValue("@DataCriacao", Date.Now)
-											command.Parameters.AddWithValue("@Estatus", "A")
-											command.Parameters.AddWithValue("@Acabamento", OrdemServico.txtAcabamento)
-											command.Parameters.AddWithValue("@D_E_L_E_T_E", "")
-											command.Parameters.AddWithValue("@fator", Fator)
-											command.Parameters.AddWithValue("@qtde", OrdemServico.qtde)
-											command.Parameters.AddWithValue("@txtSoldagem", OrdemServico.txtSoldagem)
-											command.Parameters.AddWithValue("@txtTipoDesenho", OrdemServico.txtTipoDesenho)
-											command.Parameters.AddWithValue("@txtCorte", OrdemServico.txtCorte)
-											command.Parameters.AddWithValue("@txtDobra", OrdemServico.txtDobra)
-											command.Parameters.AddWithValue("@txtSolda", OrdemServico.txtSolda)
-											command.Parameters.AddWithValue("@txtPintura", OrdemServico.txtPintura)
-											command.Parameters.AddWithValue("@txtMontagem", OrdemServico.txtMontagem)
-											command.Parameters.AddWithValue("@tttxtCorte", OrdemServico.tttxtCorte)
-											command.Parameters.AddWithValue("@tttxtDobra", OrdemServico.tttxtDobra)
-											command.Parameters.AddWithValue("@tttxtSolda", OrdemServico.tttxtSolda)
-											command.Parameters.AddWithValue("@tttxtPintura", OrdemServico.tttxtPintura)
-											command.Parameters.AddWithValue("@tttxtMontagem", OrdemServico.tttxtMontagem)
-											command.Parameters.AddWithValue("@Comprimentocaixadelimitadora", OrdemServico.Comprimentocaixadelimitadora)
-											command.Parameters.AddWithValue("@Larguracaixadelimitadora", OrdemServico.Larguracaixadelimitadora)
-											command.Parameters.AddWithValue("@Espessuracaixadelimitadora", OrdemServico.Espessuracaixadelimitadora)
-											command.Parameters.AddWithValue("@AreaPinturaUnitario", OrdemServico.AreaPinturaUnitario)
-											command.Parameters.AddWithValue("@PesoUnitario", OrdemServico.PesoUnitario)
-											command.Parameters.AddWithValue("@txtItemEstoque", OrdemServico.txtItemEstoque)
-											command.Parameters.AddWithValue("@DataPrevisao", OrdemServico.DataPrevisao)
-											command.Parameters.AddWithValue("@sttxtcorte", "")
-											command.Parameters.AddWithValue("@cortetotalexecutado", "")
-											command.Parameters.AddWithValue("@cortetotalexecutar", "")
+                                Using command As New MySqlCommand(query, myconect)
+                                    ' Adicionando os parâmetros
+                                    command.Parameters.AddWithValue("@IdOrdemServico", OrdemServico.IdOrdemServico)
+                                    command.Parameters.AddWithValue("@idProjeto", OrdemServico.idProjeto)
+                                    command.Parameters.AddWithValue("@Projeto", OrdemServico.Projeto)
+                                    command.Parameters.AddWithValue("@idTag", OrdemServico.idTag)
+                                    command.Parameters.AddWithValue("@Tag", OrdemServico.Tag)
+                                    command.Parameters.AddWithValue("@ESTATUS_OrdemServico", OrdemServico.Estatus)
+                                    command.Parameters.AddWithValue("@IdMaterial", OrdemServico.IdMaterial)
+                                    command.Parameters.AddWithValue("@DescResumo", OrdemServico.DescResumo)
+                                    command.Parameters.AddWithValue("@DescDetal", OrdemServico.DescDetal)
+                                    command.Parameters.AddWithValue("@Autor", OrdemServico.Autor)
+                                    command.Parameters.AddWithValue("@Palavrachave", OrdemServico.Palavrachave)
+                                    command.Parameters.AddWithValue("@Notas", OrdemServico.Notas)
+                                    command.Parameters.AddWithValue("@Espessura", OrdemServico.Espessura)
+                                    command.Parameters.AddWithValue("@AreaPintura", OrdemServico.AreaPintura)
+                                    command.Parameters.AddWithValue("@NumeroDobras", OrdemServico.NumeroDobras)
+                                    command.Parameters.AddWithValue("@Peso", Replace(OrdemServico.Peso, ",", "."))
+                                    command.Parameters.AddWithValue("@Unidade", OrdemServico.Unidade)
+                                    command.Parameters.AddWithValue("@UnidadeSW", OrdemServico.UnidadeSW)
+                                    command.Parameters.AddWithValue("@ValorSW", OrdemServico.ValorSW)
+                                    command.Parameters.AddWithValue("@Altura", OrdemServico.Altura)
+                                    command.Parameters.AddWithValue("@Largura", OrdemServico.Largura)
+                                    command.Parameters.AddWithValue("@CodMatFabricante", OrdemServico.CodMatFabricante)
+                                    command.Parameters.AddWithValue("@DtCad", Date.Now.Date.ToShortDateString)
+                                    command.Parameters.AddWithValue("@UsuarioCriacao", Usuario.NomeCompleto)
+                                    command.Parameters.AddWithValue("@UsuarioAlteracao", "")
+                                    command.Parameters.AddWithValue("@DtAlteracao", "")
+                                    command.Parameters.AddWithValue("@EnderecoArquivo", OrdemServico.EnderecoArquivo)
+                                    command.Parameters.AddWithValue("@MaterialSW", OrdemServico.MaterialSW)
+                                    command.Parameters.AddWithValue("@QtdeTotal", Replace(OrdemServico.QtdeTotal, ",", "."))
+                                    command.Parameters.AddWithValue("@QtdeProduzida", "")
+                                    command.Parameters.AddWithValue("@QtdeFaltante", "")
+                                    command.Parameters.AddWithValue("@CriadoPor", Usuario.NomeCompleto.ToString)
+                                    command.Parameters.AddWithValue("@DataCriacao", Date.Now)
+                                    command.Parameters.AddWithValue("@Estatus", "A")
+                                    command.Parameters.AddWithValue("@Acabamento", OrdemServico.txtAcabamento)
+                                    command.Parameters.AddWithValue("@D_E_L_E_T_E", "")
+                                    command.Parameters.AddWithValue("@fator", Replace(OrdemServico.Fator, ",", "."))
+                                    command.Parameters.AddWithValue("@qtde", Replace(OrdemServico.qtde, ",", "."))
+                                    command.Parameters.AddWithValue("@txtSoldagem", OrdemServico.txtSoldagem)
+                                    command.Parameters.AddWithValue("@txtTipoDesenho", OrdemServico.txtTipoDesenho)
+                                    command.Parameters.AddWithValue("@txtCorte", OrdemServico.txtCorte)
+                                    command.Parameters.AddWithValue("@txtDobra", OrdemServico.txtDobra)
+                                    command.Parameters.AddWithValue("@txtSolda", OrdemServico.txtSolda)
+                                    command.Parameters.AddWithValue("@txtPintura", OrdemServico.txtPintura)
+                                    command.Parameters.AddWithValue("@txtMontagem", OrdemServico.txtMontagem)
+                                    command.Parameters.AddWithValue("@tttxtCorte", OrdemServico.tttxtCorte)
+                                    command.Parameters.AddWithValue("@tttxtDobra", OrdemServico.tttxtDobra)
+                                    command.Parameters.AddWithValue("@tttxtSolda", OrdemServico.tttxtSolda)
+                                    command.Parameters.AddWithValue("@tttxtPintura", OrdemServico.tttxtPintura)
+                                    command.Parameters.AddWithValue("@tttxtMontagem", OrdemServico.tttxtMontagem)
+                                    command.Parameters.AddWithValue("@Comprimentocaixadelimitadora", OrdemServico.Comprimentocaixadelimitadora)
+                                    command.Parameters.AddWithValue("@Larguracaixadelimitadora", OrdemServico.Larguracaixadelimitadora)
+                                    command.Parameters.AddWithValue("@Espessuracaixadelimitadora", OrdemServico.Espessuracaixadelimitadora)
+                                    command.Parameters.AddWithValue("@AreaPinturaUnitario", Replace(OrdemServico.AreaPinturaUnitario, ",", "."))
+                                    command.Parameters.AddWithValue("@PesoUnitario", Replace(OrdemServico.PesoUnitario, ",", "."))
+                                    command.Parameters.AddWithValue("@txtItemEstoque", OrdemServico.txtItemEstoque)
+                                    command.Parameters.AddWithValue("@DataPrevisao", OrdemServico.DataPrevisao)
+                                    command.Parameters.AddWithValue("@sttxtcorte", "")
+                                    command.Parameters.AddWithValue("@cortetotalexecutado", "")
+                                    command.Parameters.AddWithValue("@cortetotalexecutar", "")
 
-											command.Parameters.AddWithValue("@sttxtDobra", "")
-											command.Parameters.AddWithValue("@Dobratotalexecutado", "")
-											command.Parameters.AddWithValue("@Dobratotalexecutar", "")
+                                    command.Parameters.AddWithValue("@sttxtDobra", "")
+                                    command.Parameters.AddWithValue("@Dobratotalexecutado", "")
+                                    command.Parameters.AddWithValue("@Dobratotalexecutar", "")
 
-											command.Parameters.AddWithValue("@sttxtSolda", "")
-											command.Parameters.AddWithValue("@Soldatotalexecutado", "")
-											command.Parameters.AddWithValue("@Soldatotalexecutar", "")
+                                    command.Parameters.AddWithValue("@sttxtSolda", "")
+                                    command.Parameters.AddWithValue("@Soldatotalexecutado", "")
+                                    command.Parameters.AddWithValue("@Soldatotalexecutar", "")
 
-											command.Parameters.AddWithValue("@sttxtPintura", "")
-											command.Parameters.AddWithValue("@Pinturatotalexecutado", "")
-											command.Parameters.AddWithValue("@Pinturatotalexecutar", "")
+                                    command.Parameters.AddWithValue("@sttxtPintura", "")
+                                    command.Parameters.AddWithValue("@Pinturatotalexecutado", "")
+                                    command.Parameters.AddWithValue("@Pinturatotalexecutar", "")
 
-											command.Parameters.AddWithValue("@sttxtMontagem", "")
-											command.Parameters.AddWithValue("@Montagemtotalexecutado", "")
-											command.Parameters.AddWithValue("@Montagemtotalexecutar", "")
+                                    command.Parameters.AddWithValue("@sttxtMontagem", "")
+                                    command.Parameters.AddWithValue("@Montagemtotalexecutado", "")
+                                    command.Parameters.AddWithValue("@Montagemtotalexecutar", "")
 
-											command.Parameters.AddWithValue("@ORDEMSERVICOITEMFINALIZADO", "")
-											command.Parameters.AddWithValue("@IdPlanodecorte", "")
+                                    command.Parameters.AddWithValue("@ORDEMSERVICOITEMFINALIZADO", "")
+                                    command.Parameters.AddWithValue("@IdPlanodecorte", "")
 
-											' command.ExecuteNonQuery()
-											' Tentativas de execução
-											Dim maxTentativas As Integer = 3 ' Quantidade máxima de tentativas
-											Dim tentativaAtual As Integer = 0
-											Dim sucesso As Boolean = False
+                                    command.ExecuteNonQuery()
 
-											Do While Not sucesso And tentativaAtual < maxTentativas
-												Try
-													command.ExecuteNonQuery()
-													sucesso = True ' Se chegou aqui, a execução foi bem-sucedida
-												Catch ex As Exception
-													tentativaAtual += 1
-													If tentativaAtual < maxTentativas Then
-														' MsgBox($"Erro na execução. Tentando novamente em 30 segundos... ({tentativaAtual}/{maxTentativas})")
+                                    SalvarProcessoOrdemServicoItem(OrdemServico.CodMatFabricante)
 
 
+                                    'Dim IdOrdItem As String
 
-														Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
-														cl_BancoDados.AbrirBanco()
+                                    'IdOrdItem = cl_BancoDados.RetornaCampoDaPesquisa("Select Max(IdOrdemServicoItem) as IdOrdemServicoItem from  " & ComplementoTipoBanco & "ordemservicoitem ", "IdOrdemServicoItem")
 
 
-													End If
-												End Try
-											Loop
+                                    '' Verifica se há dados na tabela antes de iterar
+                                    'If tabelaprocesso IsNot Nothing AndAlso tabelaprocesso.Rows.Count > 0 Then
 
-										End Using
+                                    '	For I As Integer = 0 To tabelaprocesso.Rows.Count - 1
+                                    '		' Acessar os dados da coluna "processofabricacao"
+                                    '		Dim processo As String = "txt" & Replace(tabelaprocesso.Rows(I)("processofabricacao").ToString(), " ", "")
+                                    '		'Console.WriteLine("Processo: " & processo)
 
-										' Esperar 30 segundos após o final do bloco Using
-										Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
 
-									ElseIf TipoBanco = "SQL" Then
+                                    '		Dim ValorProcesso As String
 
-										Dim query As String = "INSERT INTO " & ComplementoTipoBanco & "ordemservicoitem (
+                                    '		ValorProcesso = cl_BancoDados.RetornaCampoDaPesquisa("Select " & processo & " from material where CodMatFabricante = '" & UCase(OrdemServico.CodMatFabricante & "'"), processo).ToString
+
+                                    '		If ValorProcesso = "1" Then
+
+                                    '			cl_BancoDados.AlteracaoEspecifica("ordemservicoitem", processo, "1", "IdOrdemServicoItem", IdOrdItem)
+
+                                    '		Else
+
+                                    '			cl_BancoDados.AlteracaoEspecifica("ordemservicoitem", processo, "", "IdOrdemServicoItem", IdOrdItem)
+
+                                    '		End If
+
+                                    '	Next
+
+                                    'End If
+
+                                End Using
+
+                                ' Esperar 30 segundos após o final do bloco Using
+                                Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
+
+                            ElseIf TipoBanco = "SQL" Then
+
+                                Dim query As String = "INSERT INTO " & ComplementoTipoBanco & "ordemservicoitem (
 							IdOrdemServico, idProjeto, Projeto, idTag, Tag, 
 							ESTATUS_OrdemServico, IdMaterial, DescResumo, DescDetal, 
 							Autor, Palavrachave, Notas, Espessura, AreaPintura, 
@@ -11587,168 +11875,202 @@ DescEmpresa) values
 							@sttxtMontagem,@Montagemtotalexecutado, @Montagemtotalexecutar,
 							@ORDEMSERVICOITEMFINALIZADO,@IdPlanodecorte);"
 
-										Using command As New SqlCommand(query, myconectSQL)
-											' Adicionando os parâmetros
-											command.Parameters.AddWithValue("@IdOrdemServico", OrdemServico.IdOrdemServico)
-											command.Parameters.AddWithValue("@idProjeto", OrdemServico.idProjeto)
-											command.Parameters.AddWithValue("@Projeto", OrdemServico.Projeto)
-											command.Parameters.AddWithValue("@idTag", OrdemServico.idTag)
-											command.Parameters.AddWithValue("@Tag", OrdemServico.Tag)
-											command.Parameters.AddWithValue("@ESTATUS_OrdemServico", OrdemServico.Estatus)
-											command.Parameters.AddWithValue("@IdMaterial", OrdemServico.IdMaterial)
-											command.Parameters.AddWithValue("@DescResumo", OrdemServico.DescResumo)
-											command.Parameters.AddWithValue("@DescDetal", OrdemServico.DescDetal)
-											command.Parameters.AddWithValue("@Autor", OrdemServico.Autor)
-											command.Parameters.AddWithValue("@Palavrachave", OrdemServico.Palavrachave)
-											command.Parameters.AddWithValue("@Notas", OrdemServico.Notas)
-											command.Parameters.AddWithValue("@Espessura", OrdemServico.Espessura)
-											command.Parameters.AddWithValue("@AreaPintura", OrdemServico.AreaPintura)
-											command.Parameters.AddWithValue("@NumeroDobras", OrdemServico.NumeroDobras)
-											command.Parameters.AddWithValue("@Peso", OrdemServico.Peso)
-											command.Parameters.AddWithValue("@Unidade", OrdemServico.Unidade)
-											command.Parameters.AddWithValue("@UnidadeSW", OrdemServico.UnidadeSW)
-											command.Parameters.AddWithValue("@ValorSW", OrdemServico.ValorSW)
-											command.Parameters.AddWithValue("@Altura", OrdemServico.Altura)
-											command.Parameters.AddWithValue("@Largura", OrdemServico.Largura)
-											command.Parameters.AddWithValue("@CodMatFabricante", OrdemServico.CodMatFabricante)
-											command.Parameters.AddWithValue("@DtCad", Date.Now.Date.ToShortDateString)
-											command.Parameters.AddWithValue("@UsuarioCriacao", Usuario.NomeCompleto)
-											command.Parameters.AddWithValue("@UsuarioAlteracao", "")
-											command.Parameters.AddWithValue("@DtAlteracao", "")
-											command.Parameters.AddWithValue("@EnderecoArquivo", OrdemServico.EnderecoArquivo)
-											command.Parameters.AddWithValue("@MaterialSW", OrdemServico.MaterialSW)
-											command.Parameters.AddWithValue("@QtdeTotal", OrdemServico.QtdeTotal)
-											command.Parameters.AddWithValue("@QtdeProduzida", "")
-											command.Parameters.AddWithValue("@QtdeFaltante", "")
-											command.Parameters.AddWithValue("@CriadoPor", Usuario.NomeCompleto.ToString)
-											command.Parameters.AddWithValue("@DataCriacao", Date.Now)
-											command.Parameters.AddWithValue("@Estatus", "A")
-											command.Parameters.AddWithValue("@Acabamento", OrdemServico.txtAcabamento)
-											command.Parameters.AddWithValue("@D_E_L_E_T_E", "")
-											command.Parameters.AddWithValue("@fator", Fator)
-											command.Parameters.AddWithValue("@qtde", OrdemServico.qtde)
-											command.Parameters.AddWithValue("@txtSoldagem", OrdemServico.txtSoldagem)
-											command.Parameters.AddWithValue("@txtTipoDesenho", OrdemServico.txtTipoDesenho)
-											command.Parameters.AddWithValue("@txtCorte", OrdemServico.txtCorte)
-											command.Parameters.AddWithValue("@txtDobra", OrdemServico.txtDobra)
-											command.Parameters.AddWithValue("@txtSolda", OrdemServico.txtSolda)
-											command.Parameters.AddWithValue("@txtPintura", OrdemServico.txtPintura)
-											command.Parameters.AddWithValue("@txtMontagem", OrdemServico.txtMontagem)
-											command.Parameters.AddWithValue("@tttxtCorte", OrdemServico.tttxtCorte)
-											command.Parameters.AddWithValue("@tttxtDobra", OrdemServico.tttxtDobra)
-											command.Parameters.AddWithValue("@tttxtSolda", OrdemServico.tttxtSolda)
-											command.Parameters.AddWithValue("@tttxtPintura", OrdemServico.tttxtPintura)
-											command.Parameters.AddWithValue("@tttxtMontagem", OrdemServico.tttxtMontagem)
-											command.Parameters.AddWithValue("@Comprimentocaixadelimitadora", OrdemServico.Comprimentocaixadelimitadora)
-											command.Parameters.AddWithValue("@Larguracaixadelimitadora", OrdemServico.Larguracaixadelimitadora)
-											command.Parameters.AddWithValue("@Espessuracaixadelimitadora", OrdemServico.Espessuracaixadelimitadora)
-											command.Parameters.AddWithValue("@AreaPinturaUnitario", OrdemServico.AreaPinturaUnitario)
-											command.Parameters.AddWithValue("@PesoUnitario", OrdemServico.PesoUnitario)
-											command.Parameters.AddWithValue("@txtItemEstoque", OrdemServico.txtItemEstoque)
-											command.Parameters.AddWithValue("@DataPrevisao", OrdemServico.DataPrevisao)
-											command.Parameters.AddWithValue("@sttxtcorte", "")
-											command.Parameters.AddWithValue("@cortetotalexecutado", "")
-											command.Parameters.AddWithValue("@cortetotalexecutar", "")
+                                Using command As New SqlCommand(query, myconectSQL)
+                                    ' Adicionando os parâmetros
+                                    command.Parameters.AddWithValue("@IdOrdemServico", OrdemServico.IdOrdemServico)
+                                    command.Parameters.AddWithValue("@idProjeto", OrdemServico.idProjeto)
+                                    command.Parameters.AddWithValue("@Projeto", OrdemServico.Projeto)
+                                    command.Parameters.AddWithValue("@idTag", OrdemServico.idTag)
+                                    command.Parameters.AddWithValue("@Tag", OrdemServico.Tag)
+                                    command.Parameters.AddWithValue("@ESTATUS_OrdemServico", OrdemServico.Estatus)
+                                    command.Parameters.AddWithValue("@IdMaterial", OrdemServico.IdMaterial)
+                                    command.Parameters.AddWithValue("@DescResumo", OrdemServico.DescResumo)
+                                    command.Parameters.AddWithValue("@DescDetal", OrdemServico.DescDetal)
+                                    command.Parameters.AddWithValue("@Autor", OrdemServico.Autor)
+                                    command.Parameters.AddWithValue("@Palavrachave", OrdemServico.Palavrachave)
+                                    command.Parameters.AddWithValue("@Notas", OrdemServico.Notas)
+                                    command.Parameters.AddWithValue("@Espessura", OrdemServico.Espessura)
+                                    command.Parameters.AddWithValue("@AreaPintura", OrdemServico.AreaPintura)
+                                    command.Parameters.AddWithValue("@NumeroDobras", OrdemServico.NumeroDobras)
+                                    command.Parameters.AddWithValue("@Peso", OrdemServico.Peso)
+                                    command.Parameters.AddWithValue("@Unidade", OrdemServico.Unidade)
+                                    command.Parameters.AddWithValue("@UnidadeSW", OrdemServico.UnidadeSW)
+                                    command.Parameters.AddWithValue("@ValorSW", OrdemServico.ValorSW)
+                                    command.Parameters.AddWithValue("@Altura", OrdemServico.Altura)
+                                    command.Parameters.AddWithValue("@Largura", OrdemServico.Largura)
+                                    command.Parameters.AddWithValue("@CodMatFabricante", OrdemServico.CodMatFabricante)
+                                    command.Parameters.AddWithValue("@DtCad", Date.Now.Date.ToShortDateString)
+                                    command.Parameters.AddWithValue("@UsuarioCriacao", Usuario.NomeCompleto)
+                                    command.Parameters.AddWithValue("@UsuarioAlteracao", "")
+                                    command.Parameters.AddWithValue("@DtAlteracao", "")
+                                    command.Parameters.AddWithValue("@EnderecoArquivo", OrdemServico.EnderecoArquivo)
+                                    command.Parameters.AddWithValue("@MaterialSW", OrdemServico.MaterialSW)
+                                    command.Parameters.AddWithValue("@QtdeTotal", OrdemServico.QtdeTotal)
+                                    command.Parameters.AddWithValue("@QtdeProduzida", "")
+                                    command.Parameters.AddWithValue("@QtdeFaltante", "")
+                                    command.Parameters.AddWithValue("@CriadoPor", Usuario.NomeCompleto.ToString)
+                                    command.Parameters.AddWithValue("@DataCriacao", Date.Now)
+                                    command.Parameters.AddWithValue("@Estatus", "A")
+                                    command.Parameters.AddWithValue("@Acabamento", OrdemServico.txtAcabamento)
+                                    command.Parameters.AddWithValue("@D_E_L_E_T_E", "")
+                                    command.Parameters.AddWithValue("@fator", Fator)
+                                    command.Parameters.AddWithValue("@qtde", OrdemServico.qtde)
+                                    command.Parameters.AddWithValue("@txtSoldagem", OrdemServico.txtSoldagem)
+                                    command.Parameters.AddWithValue("@txtTipoDesenho", OrdemServico.txtTipoDesenho)
+                                    command.Parameters.AddWithValue("@txtCorte", OrdemServico.txtCorte)
+                                    command.Parameters.AddWithValue("@txtDobra", OrdemServico.txtDobra)
+                                    command.Parameters.AddWithValue("@txtSolda", OrdemServico.txtSolda)
+                                    command.Parameters.AddWithValue("@txtPintura", OrdemServico.txtPintura)
+                                    command.Parameters.AddWithValue("@txtMontagem", OrdemServico.txtMontagem)
+                                    command.Parameters.AddWithValue("@tttxtCorte", OrdemServico.tttxtCorte)
+                                    command.Parameters.AddWithValue("@tttxtDobra", OrdemServico.tttxtDobra)
+                                    command.Parameters.AddWithValue("@tttxtSolda", OrdemServico.tttxtSolda)
+                                    command.Parameters.AddWithValue("@tttxtPintura", OrdemServico.tttxtPintura)
+                                    command.Parameters.AddWithValue("@tttxtMontagem", OrdemServico.tttxtMontagem)
+                                    command.Parameters.AddWithValue("@Comprimentocaixadelimitadora", OrdemServico.Comprimentocaixadelimitadora)
+                                    command.Parameters.AddWithValue("@Larguracaixadelimitadora", OrdemServico.Larguracaixadelimitadora)
+                                    command.Parameters.AddWithValue("@Espessuracaixadelimitadora", OrdemServico.Espessuracaixadelimitadora)
+                                    command.Parameters.AddWithValue("@AreaPinturaUnitario", OrdemServico.AreaPinturaUnitario)
+                                    command.Parameters.AddWithValue("@PesoUnitario", OrdemServico.PesoUnitario)
+                                    command.Parameters.AddWithValue("@txtItemEstoque", OrdemServico.txtItemEstoque)
+                                    command.Parameters.AddWithValue("@DataPrevisao", OrdemServico.DataPrevisao)
+                                    command.Parameters.AddWithValue("@sttxtcorte", "")
+                                    command.Parameters.AddWithValue("@cortetotalexecutado", "")
+                                    command.Parameters.AddWithValue("@cortetotalexecutar", "")
 
-											command.Parameters.AddWithValue("@sttxtDobra", "")
-											command.Parameters.AddWithValue("@Dobratotalexecutado", "")
-											command.Parameters.AddWithValue("@Dobratotalexecutar", "")
+                                    command.Parameters.AddWithValue("@sttxtDobra", "")
+                                    command.Parameters.AddWithValue("@Dobratotalexecutado", "")
+                                    command.Parameters.AddWithValue("@Dobratotalexecutar", "")
 
-											command.Parameters.AddWithValue("@sttxtSolda", "")
-											command.Parameters.AddWithValue("@Soldatotalexecutado", "")
-											command.Parameters.AddWithValue("@Soldatotalexecutar", "")
+                                    command.Parameters.AddWithValue("@sttxtSolda", "")
+                                    command.Parameters.AddWithValue("@Soldatotalexecutado", "")
+                                    command.Parameters.AddWithValue("@Soldatotalexecutar", "")
 
-											command.Parameters.AddWithValue("@sttxtPintura", "")
-											command.Parameters.AddWithValue("@Pinturatotalexecutado", "")
-											command.Parameters.AddWithValue("@Pinturatotalexecutar", "")
+                                    command.Parameters.AddWithValue("@sttxtPintura", "")
+                                    command.Parameters.AddWithValue("@Pinturatotalexecutado", "")
+                                    command.Parameters.AddWithValue("@Pinturatotalexecutar", "")
 
-											command.Parameters.AddWithValue("@sttxtMontagem", "")
-											command.Parameters.AddWithValue("@Montagemtotalexecutado", "")
-											command.Parameters.AddWithValue("@Montagemtotalexecutar", "")
+                                    command.Parameters.AddWithValue("@sttxtMontagem", "")
+                                    command.Parameters.AddWithValue("@Montagemtotalexecutado", "")
+                                    command.Parameters.AddWithValue("@Montagemtotalexecutar", "")
 
-											command.Parameters.AddWithValue("@ORDEMSERVICOITEMFINALIZADO", "")
-											command.Parameters.AddWithValue("@IdPlanodecorte", "")
+                                    command.Parameters.AddWithValue("@ORDEMSERVICOITEMFINALIZADO", "")
+                                    command.Parameters.AddWithValue("@IdPlanodecorte", "")
 
-											' command.ExecuteNonQuery()
-											' Tentativas de execução
-											Dim maxTentativas As Integer = 3 ' Quantidade máxima de tentativas
-											Dim tentativaAtual As Integer = 0
-											Dim sucesso As Boolean = False
+                                    ' command.ExecuteNonQuery()
+                                    ' Tentativas de execução
+                                    Dim maxTentativas As Integer = 3 ' Quantidade máxima de tentativas
+                                    Dim tentativaAtual As Integer = 0
+                                    Dim sucesso As Boolean = False
 
-											Do While Not sucesso And tentativaAtual < maxTentativas
-												Try
-													command.ExecuteNonQuery()
-													sucesso = True ' Se chegou aqui, a execução foi bem-sucedida
-												Catch ex As Exception
-													tentativaAtual += 1
-													If tentativaAtual < maxTentativas Then
-														'MsgBox($"Erro na execução. Tentando novamente em 30 segundos... ({tentativaAtual}/{maxTentativas})")
-														Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
-														cl_BancoDados.AbrirBanco()
-													End If
-												End Try
-											Loop
+                                    Do While Not sucesso And tentativaAtual < maxTentativas
+                                        Try
+                                            command.ExecuteNonQuery()
+                                            sucesso = True ' Se chegou aqui, a execução foi bem-sucedida
+                                        Catch ex As Exception
+                                            tentativaAtual += 1
+                                            If tentativaAtual < maxTentativas Then
+                                                'MsgBox($"Erro na execução. Tentando novamente em 30 segundos... ({tentativaAtual}/{maxTentativas})")
+                                                Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
+                                                cl_BancoDados.AbrirBanco()
+                                            End If
+                                        End Try
+                                    Loop
 
-										End Using
+                                End Using
 
-										' Esperar 30 segundos após o final do bloco Using
-										Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
+                                ' Esperar 30 segundos após o final do bloco Using
+                                Threading.Thread.Sleep(CInt(My.Settings.TempoRespostaServidor))
 
-									ElseIf TipoBanco = "ACCESS" Then
+                            ElseIf TipoBanco = "ACCESS" Then
 
 
-									End If
+                            End If
 
-								End If
 
-								ProgressBarListaSW.Value = A
-							Catch ex As Exception
 
-								MsgBox(ex.Message & " ERRO ao ler o arquivo: " & OrdemServico.EnderecoArquivo, MsgBoxStyle.Critical, "Atenção")
+                        End If
 
-								Continue For
+                        ProgressBarListaSW.Value = A
 
-								'Catch ex As MySqlException
+                    Catch ex As Exception
 
-								'    MsgBox(ex.Message)
+                        MsgBox(ex.Message & " ERRO ao ler o arquivo: " & OrdemServico.EnderecoArquivo, MsgBoxStyle.Critical, "Atenção")
 
-								'    '  cl_BancoDados.AbrirBanco()
+                        Continue For
 
-							End Try
+                    End Try
 
-						Next A
 
-						''''''''''''''cl_BancoDados.Salvar(SQL)
+                Next A
 
-						''''''''''''''SQL = Nothing
+                ProgressBarListaSW.Minimum = 0
 
-					End If
+            End If
 
+
+
+
+            MessageBox.Show("Operação finalizada com sucesso, os itens foram inseridos na OS!")
+
+            ProgressBarListaSW.Value = 0
+            TimerDGVListaMaterialSW.Enabled = True
+        Else
+
+            MsgBox("Operação cancelada, os itens não serão inseridos na OS!", vbCritical, "Atenção")
+
+        End If
+
+
+
+
+
+        ' Retornar o cursor ao normal
+        Cursor.Current = Cursors.Default
+
+
+    End Sub
+
+
+
+	'Conforme novos processos de fabricação são inseridos os dados na tabela ordemservicoitem são criado e marcado conforme o cadastro de material
+	Public Function SalvarProcessoOrdemServicoItem(CodMatFabricante As String)
+
+		' Carregar os dados da tabela "processofabricacao"
+		Dim tabelaprocesso As System.Data.DataTable
+		tabelaprocesso = cl_BancoDados.CarregarDados("SELECT processofabricacao FROM processofabricacao WHERE D_E_L_E_T_E <> '*' OR D_E_L_E_T_E IS NULL;")
+
+		Dim IdOrdItem As String
+
+		IdOrdItem = cl_BancoDados.RetornaCampoDaPesquisa("Select Max(IdOrdemServicoItem) as IdOrdemServicoItem from  " & ComplementoTipoBanco & "ordemservicoitem ", "IdOrdemServicoItem")
+
+		' Verifica se há dados na tabela antes de iterar
+		If tabelaprocesso IsNot Nothing AndAlso tabelaprocesso.Rows.Count > 0 Then
+
+			For I As Integer = 0 To tabelaprocesso.Rows.Count - 1
+				' Acessar os dados da coluna "processofabricacao"
+				Dim processo As String = "txt" & Replace(tabelaprocesso.Rows(I)("processofabricacao").ToString(), " ", "")
+
+				'Console.WriteLine("Processo: " & processo)
+				Dim ValorProcesso As String
+
+				ValorProcesso = cl_BancoDados.RetornaCampoDaPesquisa("Select " & processo & " from material where CodMatFabricante = '" & UCase(CodMatFabricante & "'"), processo).ToString
+
+				If ValorProcesso = "1" Then
+
+					cl_BancoDados.AlteracaoEspecifica("ordemservicoitem", processo, "1", "IdOrdemServicoItem", IdOrdItem)
+
+				Else
+
+					cl_BancoDados.AlteracaoEspecifica("ordemservicoitem", processo, "", "IdOrdemServicoItem", IdOrdItem)
 
 				End If
 
-				MessageBox.Show("Operação finalizada com sucesso, os itens foram inseridos na OS!")
-
-				ProgressBarListaSW.Value = 0
-				TimerDGVListaMaterialSW.Enabled = True
-			Else
-
-				MsgBox("Operação cancelada, os itens não serão inseridos na OS! Existem RNC em aberto, verificar as linhas marcadas", vbCritical, "Atenção")
-
-			End If
+			Next
 
 		End If
 
-		' Retornar o cursor ao normal
-		Cursor.Current = Cursors.Default
-
-
-	End Sub
-	Private Sub cboTitulo_KeyPress(sender As Object, e As KeyPressEventArgs) Handles cboTitulo.KeyPress
-
-		e.KeyChar = Char.ToUpper(e.KeyChar)
-
-	End Sub
+	End Function
 
 	Private Sub AtualizarDesenhoPeloDiretorioToolStripMenuItem1_Click_1(sender As Object, e As EventArgs) Handles AtualizarDesenhoPeloDiretorioToolStripMenuItem1.Click
 
@@ -11803,6 +12125,10 @@ ORDER BY
 	Projeto, Tag limit 1")
 
 		TimerpcpAgrupamentoProjeto.Enabled = False
+
+		cl_BancoDados.FormatarDataGridView(dgvTimerpcpAgrupamentoProjeto, "SIM")
+
+
 
 	End Sub
 
@@ -12178,6 +12504,8 @@ ORDER BY CodDesenhoProduto"
 		'CarregarDadosDGV()
 
 		TimerProdutoItens.Enabled = False
+		cl_BancoDados.FormatarDataGridView(dgvTimerProdutosItens, "SIM")
+
 
 
 	End Sub
@@ -12485,6 +12813,9 @@ ORDER BY CodDesenhoProduto"
 				DadosArquivoCorrente.Acabamento = Me.chkBoxAcabamento.Text
 				DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txtacabamento", DadosArquivoCorrente.Acabamento, DadosArquivoCorrente.Acabamento)
 
+				cl_BancoDados.AlteracaoEspecifica("material", "txtacabamento", DadosArquivoCorrente.Acabamento, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
+
+
 				swModel.SaveSilent()
 
 			End If
@@ -12503,6 +12834,9 @@ ORDER BY CodDesenhoProduto"
 
 				DadosArquivoCorrente.TipoDesenho = chkBoxTipoDesenho.Text
 				DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, "txttipodesenho", DadosArquivoCorrente.TipoDesenho, DadosArquivoCorrente.TipoDesenho)
+
+				cl_BancoDados.AlteracaoEspecifica("material", "txttipodesenho", DadosArquivoCorrente.TipoDesenho, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
+
 
 				swModel.SaveSilent()
 
@@ -12858,7 +13192,34 @@ ORDER BY CodDesenhoProduto"
 
 	Private Sub ToolStripButton9_Click(sender As Object, e As EventArgs) Handles ToolStripButton9.Click
 
+		Dim TipoDesenhoMarcado, AcabamentoMarcado As String
+		TipoDesenhoMarcado = chkBoxTipoDesenho.Text
+		AcabamentoMarcado = chkBoxAcabamento.Text
+
 		AtualziarDadosSinco()
+
+		For i As Integer = 0 To chkBoxAcabamento.Items.Count - 1
+			If chkBoxAcabamento.Items(i).ToString() = AcabamentoMarcado.ToString() Then
+				chkBoxAcabamento.SetItemChecked(i, True)
+				Exit For
+			End If
+		Next
+
+		For i As Integer = 0 To chkBoxTipoDesenho.Items.Count - 1
+			If chkBoxTipoDesenho.Items(i).ToString() = TipoDesenhoMarcado.ToString() Then
+				chkBoxTipoDesenho.SetItemChecked(i, True)
+				Exit For
+			End If
+		Next
+
+		' Chama a função para carregar os dados no CheckedListBox
+		'PreencherCheckedListBox("Select ProcessoFabricacao from " & ComplementoTipoBanco & "processofabricacao WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '') ORDER BY processofabricacao ", chkBoxProcessos)
+
+
+		'edson 04/03/2025
+		AtualizaTela(swModel, chkBoxProcessos)
+
+
 
 	End Sub
 
@@ -12914,6 +13275,435 @@ ORDER BY CodDesenhoProduto"
 		Finally
 
 		End Try
+
+	End Sub
+
+
+	Dim swAssembly As AssemblyDoc
+	Dim componentCounts As New Dictionary(Of String, Integer) ' Dicionário para contar quantidades
+	Dim componentList As New List(Of String) ' Lista para armazenar os componentes e quantidades
+
+	Private Sub txtTitulo_Leave(sender As Object, e As EventArgs) Handles txtTitulo.Leave
+
+		Try
+
+
+			' Verifique se o swModel foi aberto com sucesso
+			If Not swModel Is Nothing Then
+
+
+				swModel.SummaryInfo(swSummInfoField_e.swSumInfoTitle) = Me.txtTitulo.Text
+
+				DadosArquivoCorrente.Titulo = txtTitulo.Text
+
+				swModel.Save()
+
+				cl_BancoDados.AlteracaoEspecifica("material", "DescResumo", Me.txtTitulo.Text, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
+
+			End If
+
+
+		Catch ex As Exception
+		Finally
+
+		End Try
+
+	End Sub
+
+	Private Sub txtAssuntoSubiTitulo_Leave(sender As Object, e As EventArgs) Handles txtAssuntoSubiTitulo.Leave
+
+
+
+		Try
+
+
+			' Verifique se o swModel foi aberto com sucesso
+			If Not swModel Is Nothing Then
+
+				swModel.SummaryInfo(swSummInfoField_e.swSumInfoSubject) = Me.txtAssuntoSubiTitulo.Text
+
+
+				DadosArquivoCorrente.AssuntoSubiTitulo = txtAssuntoSubiTitulo.Text
+
+
+				swModel.SaveSilent()
+
+				cl_BancoDados.AlteracaoEspecifica("material", "DescDetal", Me.txtAssuntoSubiTitulo.Text, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
+
+
+
+			End If
+
+		Catch ex As Exception
+		Finally
+
+		End Try
+
+	End Sub
+
+	Private Sub txtAuthor_Leave(sender As Object, e As EventArgs) Handles txtAuthor.Leave
+
+
+		Try
+
+
+			' Verifique se o swModel foi aberto com sucesso
+			If Not swModel Is Nothing Then
+
+				swModel.SummaryInfo(swSummInfoField_e.swSumInfoAuthor) = Me.txtAuthor.Text
+
+				DadosArquivoCorrente.Author = Me.txtAuthor.Text
+
+
+				cl_BancoDados.AlteracaoEspecifica("material", "Autor", Me.txtAuthor.Text, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
+				swModel.Save()
+
+
+
+			End If
+
+		Catch ex As Exception
+		Finally
+		End Try
+
+	End Sub
+
+	Private Sub txtPalavraChave_Leave(sender As Object, e As EventArgs) Handles txtPalavraChave.Leave
+
+
+		Try
+
+
+			' Verifique se o swModel foi aberto com sucesso
+			If Not swModel Is Nothing Then
+
+
+				swModel.SummaryInfo(swSummInfoField_e.swSumInfoKeywords) = Me.txtPalavraChave.Text
+
+				DadosArquivoCorrente.PalavraChave = Me.txtPalavraChave.Text
+
+				cl_BancoDados.AlteracaoEspecifica("material", "Palavrachave", Me.txtPalavraChave.Text, "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
+
+
+				swModel.SaveSilent()
+
+
+			End If
+
+		Catch ex As Exception
+		Finally
+		End Try
+
+	End Sub
+
+
+	Private Sub dgvDataGridBOM_DataError(sender As Object, e As DataGridViewDataErrorEventArgs) Handles dgvDataGridBOM.DataError
+		Try
+
+		Catch ex As Exception
+		Finally
+		End Try
+	End Sub
+
+	Private Sub ToolStripButton10_Click(sender As Object, e As EventArgs) Handles tsbEspecial.Click
+
+		Dim Pasta As New FolderBrowserDialog With {
+		.Description = "Selecione uma pasta",
+		.ShowNewFolderButton = True
+	}
+
+		' Verifica se o usuário selecionou uma pasta válida
+		If Pasta.ShowDialog() <> DialogResult.OK OrElse String.IsNullOrEmpty(Pasta.SelectedPath) Then
+			MessageBox.Show("Nenhuma pasta selecionada.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+			Exit Sub
+		End If
+
+		Dim directoryPath As String = Pasta.SelectedPath
+		Dim files As String() = Directory.GetFiles(directoryPath, "*.sldprt")
+
+		' Verifica se há arquivos na pasta
+		If files.Length = 0 Then
+			MessageBox.Show("Nenhum arquivo .sldprt encontrado na pasta selecionada.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+			Exit Sub
+		End If
+
+		Dim swApp As SolidWorks.Interop.sldworks.SldWorks = Nothing
+		Dim swModel As ModelDoc2 = Nothing
+
+		Try
+			' Inicializa o SolidWorks
+			swApp = CType(CreateObject("SldWorks.Application"), SolidWorks.Interop.sldworks.SldWorks)
+			swApp.Visible = True
+
+			For Each filePath In files
+				swModel = swApp.OpenDoc6(filePath, swDocumentTypes_e.swDocPART, swOpenDocOptions_e.swOpenDocOptions_Silent, "", 0, 0)
+				swModel = swApp.ActiveDoc
+
+				If swModel IsNot Nothing Then
+					Dim feature As Feature = swModel.FirstFeature()
+					Dim isSheetMetal As Boolean = False
+					Dim swSheetMetal As SheetMetalFeatureData = Nothing
+
+					' Percorre as features do modelo
+					Do While feature IsNot Nothing
+						If feature.GetTypeName2() = "SheetMetal" Then
+							swSheetMetal = TryCast(feature.GetDefinition(), SheetMetalFeatureData)
+							If swSheetMetal IsNot Nothing Then
+								isSheetMetal = True ' Confirma que o arquivo é um Sheet Metal
+								Exit Do
+							End If
+						End If
+						feature = feature.GetNextFeature()
+					Loop
+
+					' Se for Sheet Metal, aplica as alterações
+					If isSheetMetal AndAlso swSheetMetal IsNot Nothing Then
+						Dim fileName As String = Path.GetFileNameWithoutExtension(filePath) ' Nome do arquivo sem extensão
+
+						' Define "Assunto" como o nome do arquivo
+						swModel.SummaryInfo(swSummInfoField_e.swSumInfoSubject) = fileName
+
+						' Define "Título" como o caminho completo do arquivo
+						swModel.SummaryInfo(swSummInfoField_e.swSumInfoTitle) = filePath
+
+						Dim swModelExt As ModelDocExtension = swModel.Extension
+						If swModelExt IsNot Nothing Then
+							' Definição da cor em RGB normalizado (valores entre 0 e 1)
+							' Verde-claro (RGB: 144, 238, 144) -> Normalizado: (0.564, 0.933, 0.564)
+							' O último valor de cada grupo (0.0) indica "Sem Transparência"
+							Dim color As Object = {0.564, 0.933, 0.564, 0.0,  ' Ambiente
+						   0.564, 0.933, 0.564, 0.0,  ' Difuso
+						   0.564, 0.933, 0.564, 0.0}  ' Especular
+
+
+							' Aplica a cor na configuração atual sem transparência
+							swModelExt.SetMaterialPropertyValues(color, swInConfigurationOpts_e.swThisConfiguration, True)
+
+							' Atualiza a peça
+							'swModel.ForceRebuild3(False)
+
+
+						End If
+
+						''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+						If TypeOf swSheetMetal Is SheetMetalFeatureData Then
+							' Modifica o Fator K para 0,5 e ajusta o raio de dobra
+							Dim espessura As Double = swSheetMetal.Thickness * 1000
+							swSheetMetal.BendRadius = espessura
+							swSheetMetal.KFactor = 0.5
+
+							' Aplica as mudanças e salva
+							' Aplica as mudanças e salva
+							Try
+								Dim result As Boolean = feature.ModifyDefinition(swSheetMetal, swModel, Nothing)
+								If result Then
+									swModel.ForceRebuild3(True)
+									swModel.GraphicsRedraw2()
+									swModel.Save()
+								Else
+									MessageBox.Show("Falha ao modificar a definição da feature.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
+								End If
+							Catch ex As Exception
+								MessageBox.Show("Erro ao modificar a definição da feature: " & ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
+							End Try
+						Else
+							MessageBox.Show("swSheetMetal não é do tipo SheetMetalFeatureData.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
+						End If
+
+						''''''' Modifica o Fator K para 0,5 e ajusta o raio de dobra
+						''''''Dim espessura As Double = swSheetMetal.Thickness * 1000
+						''''''swSheetMetal.BendRadius = espessura
+						''''''swSheetMetal.KFactor = 0.5
+						''''''' Aplica as mudanças e salva
+						''''''feature.ModifyDefinition(swSheetMetal, swModel, Nothing)
+						''''''swModel.ForceRebuild3(True)
+						''''''swModel.Save()
+						''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+					End If
+
+					swApp.CloseDoc(filePath)
+				Else
+					'Console.WriteLine("Erro ao abrir arquivo: " & filePath)
+				End If
+			Next
+
+			MessageBox.Show("Processo concluído com sucesso!", "Concluído", MessageBoxButtons.OK, MessageBoxIcon.Information)
+
+		Catch ex As Exception
+			MessageBox.Show("Erro durante o processamento: " & ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
+		Finally
+			''''''' Fecha o SolidWorks corretamente
+			''''''If swApp IsNot Nothing Then
+			''''''	swApp.ExitApp()
+			''''''	swApp = Nothing
+			''''''End If
+		End Try
+
+		'Dim TabelaProcesso As System.Data.DataTable
+		'Dim sql As String
+		'' Carrega os dados do banco
+		'TabelaProcesso = cl_BancoDados.CarregarDados("select distinct(processofabricacao)  from processofabricacao 
+		'                   WHERE D_E_L_E_T_E = '' or D_E_L_E_T_E is null")
+
+		'Dim coluna As String
+
+		'' Percorre todas as linhas da DataTable
+		'For Each row As DataRow In TabelaProcesso.Rows
+
+		'	coluna = Replace(row("processofabricacao").ToString(), " ", "")
+		'	' Faz algo com a coluna, por exemplo:
+
+		'	sql = String.Format("
+		'  ALTER TABLE material
+		'  ADD COLUMN txt" & coluna & " VARCHAR(1) NULL;")
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN txt" & coluna & " VARCHAR(1) NULL;")
+
+		'	cl_BancoDados.Salvar(sql)
+
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN tttxt" & coluna & "  VARCHAR(5) NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN sttxt" & coluna & "  VARCHAR(1) NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'	sql = String.Format("
+		'				ALTER TABLE ordemservicoitem
+		'				ADD COLUMN DtPl" & coluna & " Inicio TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+
+		'	sql = String.Format("
+		'				ALTER TABLE ordemservicoitem
+		'				ADD COLUMN UsuarioPl" & coluna & " Inicio TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'	sql = String.Format("
+		'				ALTER TABLE ordemservicoitem
+		'				ADD COLUMN DtPl" & coluna & " Final  TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'	sql = String.Format("
+		'				ALTER TABLE ordemservicoitem
+		'				ADD COLUMN UsuarioPl" & coluna & " Final  TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN dttxt" & coluna & " TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN UsuarioInicio" & coluna & " TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN DtTxtFinal" & coluna & " TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN UsuarioFinal" & coluna & " TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN sttxt" & coluna & "idUsuario TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN sttxt" & coluna & "NomeCompleto VARCHAR(1) NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN " & coluna & "TotalExecutado TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'	sql = String.Format("
+		'  ALTER TABLE ordemservicoitem
+		'  ADD COLUMN " & coluna & "TotalExecutar TEXT NULL;", coluna)
+
+		'	cl_BancoDados.Salvar(sql)
+
+		'Next
+
+	End Sub
+
+	Private Sub chkBoxProcessos_Click(sender As Object, e As EventArgs) Handles chkBoxProcessos.Click
+
+		Try
+
+			' Verifique se o swModel foi aberto com sucesso
+			If Not swModel Is Nothing Then
+
+				' Obtém o índice da linha selecionada
+				Dim selectedIndex As Integer = chkBoxProcessos.SelectedIndex
+
+				' Verifica se há um item selecionado
+				If selectedIndex <> -1 Then
+					' Obtém o nome do processo sem espaços
+					Dim Processo As String = "txt" & Replace(chkBoxProcessos.Items(selectedIndex).ToString(), " ", "")
+
+					' Verifica se o item está marcado corretamente
+					If chkBoxProcessos.GetItemChecked(selectedIndex) Then
+						' Criar a propriedade com valor "1" se estiver marcado
+						DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, Processo, "", "")
+						' Atualiza o banco de dados
+						cl_BancoDados.AlteracaoEspecifica("material", Processo, "", "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
+					Else
+						' Criar a propriedade vazia se não estiver marcado
+						DadosArquivoCorrente.GarantirOuCriarPropriedade(swModel, Processo, "1", "1")
+						' Atualiza o banco de dados com valor vazio
+						cl_BancoDados.AlteracaoEspecifica("material", Processo, "1", "CodMatFabricante", DadosArquivoCorrente.NomeArquivoSemExtensao)
+					End If
+				Else
+					MessageBox.Show("Selecione um item antes de continuar.", "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+				End If
+
+			End If
+
+
+		Catch ex As Exception
+		Finally
+		End Try
+
+	End Sub
+
+	Private Sub chkBoxProcessos_SelectedIndexChanged(sender As Object, e As EventArgs) Handles chkBoxProcessos.SelectedIndexChanged
+
+	End Sub
+
+	Private Sub dgvDataGridBOM_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles dgvDataGridBOM.CellContentClick
 
 	End Sub
 

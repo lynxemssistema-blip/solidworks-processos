@@ -48,6 +48,13 @@ Partial Class frmMateriaisAlmoxarifado
         Me.TimerDgvMaterial = New System.Windows.Forms.Timer(Me.components)
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
+        Me.txtValorCalculado = New System.Windows.Forms.TextBox()
+        Me.Label5 = New System.Windows.Forms.Label()
+        Me.txtPesoCalculado = New System.Windows.Forms.TextBox()
+        Me.Label7 = New System.Windows.Forms.Label()
+        Me.txtUnidade = New System.Windows.Forms.TextBox()
+        Me.Label8 = New System.Windows.Forms.Label()
+        Me.Label9 = New System.Windows.Forms.Label()
         CType(Me.dgvMaterial, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
@@ -55,7 +62,7 @@ Partial Class frmMateriaisAlmoxarifado
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(530, 21)
+        Me.Label4.Location = New System.Drawing.Point(508, 32)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(93, 16)
         Me.Label4.TabIndex = 93
@@ -63,7 +70,7 @@ Partial Class frmMateriaisAlmoxarifado
         '
         'txtValorMaterial
         '
-        Me.txtValorMaterial.Location = New System.Drawing.Point(629, 18)
+        Me.txtValorMaterial.Location = New System.Drawing.Point(607, 29)
         Me.txtValorMaterial.Name = "txtValorMaterial"
         Me.txtValorMaterial.Size = New System.Drawing.Size(72, 22)
         Me.txtValorMaterial.TabIndex = 92
@@ -71,7 +78,7 @@ Partial Class frmMateriaisAlmoxarifado
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(340, 21)
+        Me.Label2.Location = New System.Drawing.Point(331, 32)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(93, 16)
         Me.Label2.TabIndex = 91
@@ -79,7 +86,7 @@ Partial Class frmMateriaisAlmoxarifado
         '
         'txtPesoMaterial
         '
-        Me.txtPesoMaterial.Location = New System.Drawing.Point(442, 18)
+        Me.txtPesoMaterial.Location = New System.Drawing.Point(430, 29)
         Me.txtPesoMaterial.Name = "txtPesoMaterial"
         Me.txtPesoMaterial.Size = New System.Drawing.Size(72, 22)
         Me.txtPesoMaterial.TabIndex = 90
@@ -115,7 +122,7 @@ Partial Class frmMateriaisAlmoxarifado
         '
         'txtLarguram2
         '
-        Me.txtLarguram2.Location = New System.Drawing.Point(71, 21)
+        Me.txtLarguram2.Location = New System.Drawing.Point(81, 29)
         Me.txtLarguram2.Name = "txtLarguram2"
         Me.txtLarguram2.Size = New System.Drawing.Size(72, 22)
         Me.txtLarguram2.TabIndex = 3
@@ -131,7 +138,7 @@ Partial Class frmMateriaisAlmoxarifado
         '
         'txtComprimentom2
         '
-        Me.txtComprimentom2.Location = New System.Drawing.Point(262, 21)
+        Me.txtComprimentom2.Location = New System.Drawing.Point(255, 29)
         Me.txtComprimentom2.Name = "txtComprimentom2"
         Me.txtComprimentom2.Size = New System.Drawing.Size(72, 22)
         Me.txtComprimentom2.TabIndex = 4
@@ -139,7 +146,7 @@ Partial Class frmMateriaisAlmoxarifado
         'Label20
         '
         Me.Label20.AutoSize = True
-        Me.Label20.Location = New System.Drawing.Point(12, 24)
+        Me.Label20.Location = New System.Drawing.Point(19, 32)
         Me.Label20.Name = "Label20"
         Me.Label20.Size = New System.Drawing.Size(56, 16)
         Me.Label20.TabIndex = 1
@@ -148,7 +155,7 @@ Partial Class frmMateriaisAlmoxarifado
         'Label21
         '
         Me.Label21.AutoSize = True
-        Me.Label21.Location = New System.Drawing.Point(169, 24)
+        Me.Label21.Location = New System.Drawing.Point(159, 32)
         Me.Label21.Name = "Label21"
         Me.Label21.Size = New System.Drawing.Size(90, 16)
         Me.Label21.TabIndex = 2
@@ -240,7 +247,8 @@ Partial Class frmMateriaisAlmoxarifado
         Me.dgvMaterial.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.dgvMaterial.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCellsExceptHeader
+        Me.dgvMaterial.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader
+        Me.dgvMaterial.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders
         Me.dgvMaterial.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvMaterial.Location = New System.Drawing.Point(10, 141)
         Me.dgvMaterial.Margin = New System.Windows.Forms.Padding(4)
@@ -258,6 +266,9 @@ Partial Class frmMateriaisAlmoxarifado
         'GroupBox1
         '
         Me.GroupBox1.BackColor = System.Drawing.SystemColors.Info
+        Me.GroupBox1.Controls.Add(Me.Label9)
+        Me.GroupBox1.Controls.Add(Me.txtUnidade)
+        Me.GroupBox1.Controls.Add(Me.Label8)
         Me.GroupBox1.Controls.Add(Me.txtLarguram2)
         Me.GroupBox1.Controls.Add(Me.Label21)
         Me.GroupBox1.Controls.Add(Me.Label20)
@@ -268,7 +279,7 @@ Partial Class frmMateriaisAlmoxarifado
         Me.GroupBox1.Controls.Add(Me.txtPesoMaterial)
         Me.GroupBox1.Location = New System.Drawing.Point(10, 12)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(789, 61)
+        Me.GroupBox1.Size = New System.Drawing.Size(880, 61)
         Me.GroupBox1.TabIndex = 99
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Material Tipo Chapa"
@@ -279,11 +290,72 @@ Partial Class frmMateriaisAlmoxarifado
         Me.ToolTip1.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info
         Me.ToolTip1.ToolTipTitle = "Dicas de Uso:"
         '
+        'txtValorCalculado
+        '
+        Me.txtValorCalculado.Location = New System.Drawing.Point(737, 111)
+        Me.txtValorCalculado.Name = "txtValorCalculado"
+        Me.txtValorCalculado.Size = New System.Drawing.Size(90, 22)
+        Me.txtValorCalculado.TabIndex = 100
+        '
+        'Label5
+        '
+        Me.Label5.AutoSize = True
+        Me.Label5.Location = New System.Drawing.Point(734, 91)
+        Me.Label5.Name = "Label5"
+        Me.Label5.Size = New System.Drawing.Size(93, 16)
+        Me.Label5.TabIndex = 101
+        Me.Label5.Text = "Valor Material:"
+        '
+        'txtPesoCalculado
+        '
+        Me.txtPesoCalculado.Location = New System.Drawing.Point(836, 111)
+        Me.txtPesoCalculado.Name = "txtPesoCalculado"
+        Me.txtPesoCalculado.Size = New System.Drawing.Size(90, 22)
+        Me.txtPesoCalculado.TabIndex = 102
+        '
+        'Label7
+        '
+        Me.Label7.AutoSize = True
+        Me.Label7.Location = New System.Drawing.Point(833, 91)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(93, 16)
+        Me.Label7.TabIndex = 103
+        Me.Label7.Text = "Peso Material:"
+        '
+        'txtUnidade
+        '
+        Me.txtUnidade.Location = New System.Drawing.Point(774, 29)
+        Me.txtUnidade.Name = "txtUnidade"
+        Me.txtUnidade.Size = New System.Drawing.Size(72, 22)
+        Me.txtUnidade.TabIndex = 94
+        '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(1085, 24)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(78, 20)
+        Me.Label8.TabIndex = 95
+        Me.Label8.Text = "Unidade:"
+        '
+        'Label9
+        '
+        Me.Label9.AutoSize = True
+        Me.Label9.Location = New System.Drawing.Point(706, 32)
+        Me.Label9.Name = "Label9"
+        Me.Label9.Size = New System.Drawing.Size(62, 16)
+        Me.Label9.TabIndex = 96
+        Me.Label9.Text = "Unidade:"
+        '
         'frmMateriaisAlmoxarifado
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1067, 729)
+        Me.Controls.Add(Me.txtPesoCalculado)
+        Me.Controls.Add(Me.Label7)
+        Me.Controls.Add(Me.txtValorCalculado)
+        Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.btnAssociarMaterialM2)
         Me.Controls.Add(Me.TxtPesqJuridico)
@@ -331,4 +403,11 @@ Partial Class frmMateriaisAlmoxarifado
     Friend WithEvents Label1 As Windows.Forms.Label
     Friend WithEvents GroupBox1 As Windows.Forms.GroupBox
     Friend WithEvents ToolTip1 As Windows.Forms.ToolTip
+    Friend WithEvents txtValorCalculado As Windows.Forms.TextBox
+    Friend WithEvents Label5 As Windows.Forms.Label
+    Friend WithEvents txtPesoCalculado As Windows.Forms.TextBox
+    Friend WithEvents Label7 As Windows.Forms.Label
+    Friend WithEvents txtUnidade As Windows.Forms.TextBox
+    Friend WithEvents Label8 As Windows.Forms.Label
+    Friend WithEvents Label9 As Windows.Forms.Label
 End Class

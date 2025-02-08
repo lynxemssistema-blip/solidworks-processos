@@ -226,6 +226,10 @@ Public Class frmCriaProdutos
         OrdemServico.DataCriacaoProduto = Date.Now.Date.ToShortDateString
 
         ValidarDadosOrdemServico()
+
+
+        MsgBox("OS Transformada em produto com Sucesso!", vbInformation, "Atenção")
+
     End Sub
 
     Private Sub ValidarDadosOrdemServico()
@@ -329,7 +333,7 @@ Public Class frmCriaProdutos
                 Using p As New Diagnostics.Process
                     p.StartInfo = New ProcessStartInfo(arquivoPdf)
                     p.Start()
-                    p.WaitForExit()
+                    ' p.WaitForExit()
                 End Using
             Else
                 MsgBox("Arquivo não encontrado!", vbCritical, "Atenção")
@@ -339,7 +343,7 @@ Public Class frmCriaProdutos
         End Try
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnCancelar.Click
         Me.Close()
     End Sub
 
@@ -349,5 +353,7 @@ Public Class frmCriaProdutos
 
     Private Sub frmCriaProdutos_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
+
     End Sub
+
 End Class

@@ -20,7 +20,7 @@ Imports ClosedXML.Excel
 Public Class ClExcel
 
 
-    Public Function ExportarOrdemServicoPadrao(ByVal dgvGrid As DataGridView, ByVal BarraProgresso As ProgressBar, Endereco As String, ByVal DescricaoOs As String, ByVal dgvprincipal As DataGridView, ByVal dgvMaterial As DataGridView) As Boolean
+    Public Function ExportarOrdemServicoPadrao(dgvGrid As DataGridView, ByVal BarraProgresso As ProgressBar, Endereco As String, ByVal DescricaoOs As String, ByVal dgvprincipal As DataGridView, ByVal dgvMaterial As DataGridView) As Boolean
 
         Try
 
@@ -73,10 +73,9 @@ Public Class ClExcel
             planilha.Range("N8").Value = dgvprincipal.CurrentRow.Cells("Descricao").Value.ToString.Trim.ToUpper
             planilha.Range("D10").Value = dgvprincipal.CurrentRow.Cells("ENDERECO").Value.ToString.Trim.ToUpper
 
-            ''cabeçalho
 
-            planilha.Range("D13").Value = dgvprincipal.CurrentRow.Cells("USUARIO").Value.ToString.Trim.ToUpper
-            planilha.Range("D14").Value = dgvprincipal.CurrentRow.Cells("DATA").Value.ToString.Trim.ToUpper
+            planilha.Range("D13").Value = dgvprincipal.CurrentRow.Cells("CriadoPor").Value.ToString.Trim.ToUpper
+            planilha.Range("D14").Value = dgvprincipal.CurrentRow.Cells("DataCriacao").Value.ToString.Trim.ToUpper
 
 
             'Percorre o grid procurando o item selecionado
@@ -160,6 +159,151 @@ Public Class ClExcel
         Catch ex As Exception
 
 
+            Try
+
+
+                Dim excelFilePath As String = My.Settings.EnderecoTemplateExcel
+
+                ' Abrindo o arquivo Excel
+                Using wb As New XLWorkbook(excelFilePath)
+                    Dim ws As IXLWorksheet = wb.Worksheet(1)
+
+                    '    ' Escrever na célula A1
+                    '    ws.Cell("A1").Value = "Novo valor"
+
+                    '' Salvar o arquivo
+                    'wb.Save()
+
+                    BarraProgresso.Minimum = 0
+                    BarraProgresso.Value = 0
+                    BarraProgresso.Maximum = dgvGrid.RowCount + dgvMaterial.RowCount
+
+
+                    '    Validar condições iniciais
+                    If dgvGrid Is Nothing OrElse dgvGrid.Rows.Count = 0 Then
+                        MsgBox("Não há itens a serem liberados para fabricação.", vbInformation, "Atenção")
+                        Return False
+                    End If
+
+                    If String.IsNullOrEmpty(My.Settings.EnderecoTemplateExcel) OrElse Not File.Exists(My.Settings.EnderecoTemplateExcel) Then
+                        MsgBox("A planilha template não foi encontrada. Por favor, configure o caminho corretamente.", vbCritical, "Erro")
+                        Return False
+                    End If
+
+
+                    Try
+                        Dim NovoIdOrdemServicoDB As Integer = Convert.ToInt32(dgvprincipal.CurrentRow.Cells("IdOrdemServico").Value.ToString)
+
+                        NovoIdOrdemServico = cl_BancoDados.FormatarPara5Caracteres(NovoIdOrdemServicoDB.ToString())
+
+                    Catch ex1 As Exception
+
+                        ' Em caso de erro, atribuir "00001" como valor inicial
+                        NovoIdOrdemServico = "00001" ' Nothing
+
+                    End Try
+
+                    'cabeçalho
+                    wb.Range("W2").Value = NovoIdOrdemServico.ToString
+                    wb.Range("D8").Value = dgvprincipal.CurrentRow.Cells("Projeto").Value.ToString & " - " & dgvprincipal.CurrentRow.Cells("DescEmpresa").Value.ToString
+                    wb.Range("D9").Value = dgvprincipal.CurrentRow.Cells("Tag").Value.ToString
+                    wb.Range("N8").Value = dgvprincipal.CurrentRow.Cells("Descricao").Value.ToString
+                    wb.Range("D10").Value = dgvprincipal.CurrentRow.Cells("ENDERECO").Value.ToString
+
+                    wb.Range("D13").Value = dgvprincipal.CurrentRow.Cells("CriadoPor").Value.ToString
+                    wb.Range("D14").Value = dgvprincipal.CurrentRow.Cells("DataCriacao").Value.ToString
+
+
+                    '  If TipoExcel = True Then
+
+                    wb.Range("N16").Value = dgvprincipal.CurrentRow.Cells("Data_Liberacao_Engenharia").Value.ToString
+
+                    '  End If
+
+                    wb.Range("Q16").Value = My.Computer.Name.ToString.ToUpper
+                    wb.Range("Q17").Value = Date.Now.ToShortDateString
+
+                    'Percorre o grid procurando o item selecionado
+                    For I As Integer = 0 To dgvGrid.Rows.Count - 1
+
+                        Try
+
+                            wb.Range("A18:W18").CopyTo(wb.Range("A" & 19 + I & ":W" & 19 + I))
+                            wb.Range("A" & I + 19).Value = dgvGrid.Rows(I).Cells("IDOrdemServicoItem").Value.ToString.Trim.ToUpper
+                            wb.Range("B" & I + 19).Value = dgvGrid.Rows(I).Cells("CodMatFabricante").Value.ToString.Trim.ToUpper
+                            wb.Range("I" & I + 19).Value = dgvGrid.Rows(I).Cells("QtdeTotal").Value.ToString.Trim.ToUpper
+                            wb.Range("J" & I + 19).Value = dgvGrid.Rows(I).Cells("MaterialSW").Value.ToString.Trim.ToUpper
+                            wb.Range("K" & I + 19).Value = dgvGrid.Rows(I).Cells("Unidade").Value.ToString.Trim.ToUpper
+                            wb.Range("L" & I + 19).Value = dgvGrid.Rows(I).Cells("Espessura").Value.ToString.Trim.ToUpper
+                            wb.Range("M" & I + 19).Value = dgvGrid.Rows(I).Cells("Altura").Value.ToString.Trim.ToUpper
+                            wb.Range("N" & I + 19).Value = dgvGrid.Rows(I).Cells("Largura").Value.ToString.Trim.ToUpper
+                            wb.Range("O" & I + 19).Value = dgvGrid.Rows(I).Cells("txtItemEstoque").Value.ToString.Trim.ToUpper
+                            wb.Range("P" & I + 19).Value = dgvGrid.Rows(I).Cells("DescResumo").Value.ToString.Trim.ToUpper
+                            wb.Range("S" & I + 19).Value = dgvGrid.Rows(I).Cells("DescDetal").Value.ToString.Trim.ToUpper
+                            wb.Range("V" & I + 19).Value = dgvGrid.Rows(I).Cells("Acabamento").Value.ToString.Trim.ToUpper
+                            wb.Range("W" & I + 19).Value = dgvGrid.Rows(I).Cells("txtTipoDesenho").Value.ToString.Trim.ToUpper
+
+                            BarraProgresso.Value = I
+                        Catch ex2 As Exception
+
+                            Continue For
+
+                        End Try
+
+                    Next
+
+                    Dim InicioMaterial As Integer = dgvGrid.RowCount + 1
+
+                    For m As Integer = 0 To dgvMaterial.RowCount - 1
+
+                        Try
+
+
+                            wb.Range("A18:W18").CopyTo(wb.Range("A" & 19 + InicioMaterial + m & ":W" & 19 + InicioMaterial + m))
+
+                            'planilha.Range("A" & InicioMaterial + m + 19).Value = dgvMaterial.Rows(m).Cells("IDOrdemServicoItem").Value
+                            wb.Range("B" & InicioMaterial + m + 19).Value = dgvMaterial.Rows(m).Cells("CodMatFabricante").Value.ToString.Trim.ToUpper
+
+                            wb.Range("I" & InicioMaterial + m + 19).Value = dgvMaterial.Rows(m).Cells("QtdeTotal").Value.ToString.Trim.ToUpper
+                            wb.Range("P" & InicioMaterial + m + 19).Value = dgvMaterial.Rows(m).Cells("DescResumo").Value.ToString.Trim.ToUpper
+                            wb.Range("S" & InicioMaterial + m + 19).Value = dgvMaterial.Rows(m).Cells("DescDetal").Value.ToString.Trim.ToUpper
+
+
+                            wb.Range("W" & InicioMaterial + m + 19).Value = "material"
+                            wb.Range("K" & InicioMaterial + m + 19).Value = dgvMaterial.Rows(m).Cells("Unidade").Value.ToString.Trim.ToUpper
+
+
+                            BarraProgresso.Value = m
+
+                        Catch ex3 As Exception
+
+                            Continue For
+
+                        End Try
+
+                    Next
+
+                    ' Deleta a linha A18:S18
+                    wb.Range("A18:W18").Delete("A18:W18")
+
+                    wb.SaveAs(Endereco & "\OS_" & NovoIdOrdemServico & ".xlsx")
+                    wb.Dispose() ' .Close(False)
+                    'ObjetoExcel.Application.Visible = False
+
+                    'ObjetoExcel.Application.Visible = True
+
+                    Process.Start("Explorer", Endereco.ToString)
+                    BarraProgresso.Value = 0
+
+                    MsgBox("Dados exportados com Sucesso!!!", vbInformation, "Atenção!!!!")
+
+
+                End Using
+
+
+            Catch ex3 As Exception
+
+            End Try
 
 
         End Try
@@ -300,8 +444,9 @@ Public Class clPadraoMetta
             planilha.Range("N10").Value = dgvPrincipal.CurrentRow.Cells("Descricao").Value.ToString
             planilha.Range("D12").Value = dgvPrincipal.CurrentRow.Cells("ENDERECO").Value.ToString
 
-            planilha.Range("D16").Value = dgvPrincipal.CurrentRow.Cells("USUARIO").Value.ToString
-            planilha.Range("D17").Value = dgvPrincipal.CurrentRow.Cells("Data").Value.ToString
+            planilha.Range("D16").Value = dgvPrincipal.CurrentRow.Cells("CriadoPor").Value.ToString
+            planilha.Range("D17").Value = dgvPrincipal.CurrentRow.Cells("DataCriacao").Value.ToString
+
 
             If TipoExcel = True Then
 
@@ -437,8 +582,9 @@ Public Class clPadraoMetta
                     wb.Range("N10").Value = dgvPrincipal.CurrentRow.Cells("Descricao").Value.ToString
                     wb.Range("D12").Value = dgvPrincipal.CurrentRow.Cells("ENDERECO").Value.ToString
 
-                    wb.Range("D16").Value = dgvPrincipal.CurrentRow.Cells("USUARIO").Value.ToString
-                    wb.Range("D17").Value = dgvPrincipal.CurrentRow.Cells("Data").Value.ToString
+                    wb.Range("D16").Value = dgvPrincipal.CurrentRow.Cells("CriadoPor").Value.ToString
+                    wb.Range("D17").Value = dgvPrincipal.CurrentRow.Cells("DataCriacao").Value.ToString
+
 
                     If TipoExcel = True Then
 

@@ -12,6 +12,9 @@ Imports SolidWorks.Interop.swconst
 Imports SolidWorks.Interop.swpublished
 Imports SolidWorksTools
 Imports SolidWorksTools.File
+Imports System.IO
+Imports SwLynx_4._1.My
+Imports System.Text
 
 
 'Se você tem um suplemento que está sendo carregado automaticamente na inicialização Do SolidWorks e deseja desativá-lo via VB.NET, você pode modificar o comportamento Do suplemento alterando o estado de carregamento automático no registro Do Windows.
@@ -148,7 +151,7 @@ Public Class SwAddin
 
 #Region "ISwAddin Implementation"
 
-    Function ConnectToSW(ByVal ThisSW As Object, ByVal Cookie As Integer) As Boolean Implements SolidWorks.Interop.swpublished.SwAddin.ConnectToSW
+    Public Function ConnectToSW(ByVal ThisSW As Object, ByVal Cookie As Integer) As Boolean Implements SolidWorks.Interop.swpublished.SwAddin.ConnectToSW
 
         iSwApp = ThisSW
         addinID = Cookie
@@ -167,59 +170,55 @@ Public Class SwAddin
 
         End If
 
+        If My.Settings.MySqlBancoDados.ToString = "" Then
 
+            cl_BancoDados.arquivoConfiguracao()
 
-
-            If cl_BancoDados.AbrirBanco() = True Then
-
-            AddTaskPane()
-
-            ShowTaskPane()
-
-            MyTaskPanelHost.Show()
-
-            EntradaLogin.ShowDialog()
-
-            ' Subscreve-se aos eventos do SolidWorks
-            AttachEventHandlers()
-
-            ' Chama a função para anexar os manipuladores de eventos a todos os documentos atualmente abertos
-            'AttachEventsToAllDocuments()
-
-            iCmdMgr = SwApp.GetCommandManager(Cookie)
-            SwApp.SetAddinCallbackInfo2(0, Me, Cookie)
-
-            ' Se inscrever no evento de mudança de documento ativo
-            '  AddHandler SwApp.ActiveModelDocChangeNotify, AddressOf OnActiveModelDocChange
-
-            SwApp.LoadAddIn("SwLynx_4._1")
-            ConnectToSW = True
 
         Else
 
-            SwApp.UnloadAddIn("SwLynx_4._1")
+            If cl_BancoDados.AbrirBanco() = True Then
 
-            ConnectToSW = False
+                AddTaskPane()
+
+                ShowTaskPane()
+                MyTaskPanelHost.Show()
+                EntradaLogin.ShowDialog()
+
+                ' Subscreve-se aos eventos do SolidWorks
+                AttachEventHandlers()
+
+                ' Chama a função para anexar os manipuladores de eventos a todos os documentos atualmente abertos
+                'AttachEventsToAllDocuments()
+
+                iCmdMgr = SwApp.GetCommandManager(Cookie)
+                SwApp.SetAddinCallbackInfo2(0, Me, Cookie)
+
+                ' Se inscrever no evento de mudança de documento ativo
+                '  AddHandler SwApp.ActiveModelDocChangeNotify, AddressOf OnActiveModelDocChange
+
+                SwApp.LoadAddIn("SwLynx_4._1")
+                ConnectToSW = True
+
+            Else
+
+                SwApp.UnloadAddIn("SwLynx_4._1")
+
+                ConnectToSW = False
+
+            End If
+            Try
+                SwApp.UnloadAddIn("Lynx_SW_1._0")
+                ConnectToSW = False
+            Catch ex As Exception
+            Finally
+                SwApp.UnloadAddIn("SwLynx_4._1")
+                ConnectToSW = False
+            End Try
 
         End If
 
-        Try
-
-
-            SwApp.UnloadAddIn("Lynx_SW_1._0")
-            ConnectToSW = False
-        Catch ex As Exception
-        Finally
-            SwApp.UnloadAddIn("SwLynx_4._1")
-            ConnectToSW = False
-        End Try
-
-
-
-
     End Function
-
-
     Function SelectionChangeNotify() As Integer
         'MsgBox("mudou")
         ' O que fazer quando a seleção muda
@@ -602,7 +601,7 @@ Public Class SwAddin
 
             MyTaskPanelHost.txtAssuntoSubiTitulo.Clear()
 
-            MyTaskPanelHost.cboTitulo.Text = ""
+            MyTaskPanelHost.txtTitulo.Text = ""
             MyTaskPanelHost.txtAssuntoSubiTitulo.Clear()
             MyTaskPanelHost.txtComentarios.Clear()
             MyTaskPanelHost.txtAuthor.Clear()
@@ -642,7 +641,6 @@ Public Class SwAddin
 
         Else
 
-
             Try
 
 
@@ -650,7 +648,7 @@ Public Class SwAddin
 
                 '''''''''''  ShowTaskPane()
 
-                DadosArquivoCorrente.ArquivoCorrente(swModel)
+                DadosArquivoCorrente.ArquivoCorrente(swModel, MyTaskPanelHost.chkBoxProcessos)
 
                 'dados da caixa delimitadora
                 DadosArquivoCorrente.LerDadosCaixaDelimitadora(swModel)
@@ -659,7 +657,7 @@ Public Class SwAddin
 
                 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''' DadosArquivoCorrente.VerificarProcessodaPecaCorrente(swModel)
 
-                MyTaskPanelHost.AtualizaTela(swModel)
+                MyTaskPanelHost.AtualizaTela(swModel, MyTaskPanelHost.chkBoxProcessos)
 
                 'Carrega a lista de materia para a peça ativa
                 ' MyTaskPanelHost.TimerMontaPeca.Enabled = True
@@ -821,7 +819,7 @@ Public Class SwAddin
 
                 MyTaskPanelHost.txtAssuntoSubiTitulo.Clear()
 
-                MyTaskPanelHost.cboTitulo.Text = ""
+                MyTaskPanelHost.txtTitulo.Text = ""
                 MyTaskPanelHost.txtAssuntoSubiTitulo.Clear()
                 MyTaskPanelHost.txtComentarios.Clear()
                 MyTaskPanelHost.txtAuthor.Clear()

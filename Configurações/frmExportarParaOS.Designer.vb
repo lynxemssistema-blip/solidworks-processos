@@ -87,11 +87,13 @@ Partial Class frmExportarParaOS
         Me.optParametroExportarDXF1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.optParametroExportarDXF1.Checked = True
         Me.optParametroExportarDXF1.Location = New System.Drawing.Point(5, 21)
         Me.optParametroExportarDXF1.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.optParametroExportarDXF1.Name = "optParametroExportarDXF1"
         Me.optParametroExportarDXF1.Size = New System.Drawing.Size(488, 26)
         Me.optParametroExportarDXF1.TabIndex = 27
+        Me.optParametroExportarDXF1.TabStop = True
         Me.optParametroExportarDXF1.Text = "Espessura - material - qtde - Numero Desenho DXF/LXDS/DFT"
         Me.optParametroExportarDXF1.UseVisualStyleBackColor = True
         '
@@ -99,7 +101,7 @@ Partial Class frmExportarParaOS
         '
         Me.btnSalvar.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.btnSalvar.Image = CType(resources.GetObject("btnSalvar.Image"), System.Drawing.Image)
-        Me.btnSalvar.Location = New System.Drawing.Point(333, 578)
+        Me.btnSalvar.Location = New System.Drawing.Point(333, 577)
         Me.btnSalvar.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnSalvar.Name = "btnSalvar"
         Me.btnSalvar.Size = New System.Drawing.Size(164, 50)
@@ -300,9 +302,9 @@ Partial Class frmExportarParaOS
         Me.chkAtualizaCadastroComLeituraBOM.Location = New System.Drawing.Point(5, 335)
         Me.chkAtualizaCadastroComLeituraBOM.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.chkAtualizaCadastroComLeituraBOM.Name = "chkAtualizaCadastroComLeituraBOM"
-        Me.chkAtualizaCadastroComLeituraBOM.Size = New System.Drawing.Size(470, 20)
+        Me.chkAtualizaCadastroComLeituraBOM.Size = New System.Drawing.Size(478, 20)
         Me.chkAtualizaCadastroComLeituraBOM.TabIndex = 14
-        Me.chkAtualizaCadastroComLeituraBOM.Text = "Ative para Fazer atulização do cadastro sempre que fizer a leitura da BOM"
+        Me.chkAtualizaCadastroComLeituraBOM.Text = "Ative para Fazer atualização do cadastro sempre que fizer a leitura da BOM"
         Me.chkAtualizaCadastroComLeituraBOM.UseVisualStyleBackColor = True
         '
         'frmExportarParaOS
@@ -310,7 +312,7 @@ Partial Class frmExportarParaOS
         Me.AcceptButton = Me.btnSalvar
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(515, 639)
+        Me.ClientSize = New System.Drawing.Size(515, 638)
         Me.Controls.Add(Me.chkAtualizaCadastroComLeituraBOM)
         Me.Controls.Add(Me.GroupBox5)
         Me.Controls.Add(Me.Label2)

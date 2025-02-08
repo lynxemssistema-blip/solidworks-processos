@@ -111,7 +111,6 @@ where " & sql & "CodMatFabricante = '" & DadosArquivoCorrente.NomeArquivoSemExte
                 Next
 
 
-
             Else
 
                 MyTaskPanelHost.btnPendencias.Image = My.Resources.atencao

@@ -20,53 +20,241 @@ Imports System.IO.Compression
 Imports System.Runtime.InteropServices
 Imports System.Threading.Tasks
 Imports System.Data.SqlClient
+Imports System.Text
+Imports SolidWorks.Interop.dsgnchk
 
 
 Public Class ClBancoDados
 
 
 
-    Private Const MaxRetry As Integer = 3
+    '''''Private Const MaxRetry As Integer = 3
 
+    '''''Public Function AbrirBanco() As Boolean
+
+    '''''    If TipoBanco = "MYSQL" Then
+
+    '''''        'String de conexão ajustada
+    '''''        conexao = "Server=lynxlocal.mysql.uhserver.com;database=lynxlocal;uid=lynxlocal;pwd=jHAzhFG848@yN@U;" &
+    '''''        "Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+    '''''        My.Settings.BancoDadosAtivo = "lynxlocal"
+
+
+    '''''        ''conexao = "Server=alfatec2.mysql.uhserver.com;database=alfatec2;uid=alfateccozinhas;pwd=jHAzhFG848@yN@U;
+    '''''        ''Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+    '''''        ''My.Settings.BancoDadosAtivo = "alfatec2"
+
+    '''''        '''conexao = "Server=mettapaineis.mysql.uhserver.com;database=mettapaineis;uid=rubensmetta;pwd=jHAzhFG848@yN@U;
+    '''''        '''Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+    '''''        '''My.Settings.BancoDadosAtivo = "mettapaineis"
+    '''''        '''
+
+    '''''        '''''''''''''        ''    'conexao = "Server=marp.mysql.uhserver.com;database=marp;uid=mrogerio;pwd=RZ*5rDs7FPsGTT9;
+    '''''        '''''''''''''        ''    Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+    '''''        '''''''''''''        ''    'My.Settings.BancoDadosAtivo = "marp"
+
+
+    '''''        '''''''''''''        ''    'conexao = "Server=tecnorio.mysql.uhserver.com;database=tecnorio;uid=tecnoriousuario;pwd=jHAzhFG848@yN@U;
+    '''''        '''''''''''''        ''    Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+    '''''        '''''''''''''        ''    'My.Settings.BancoDadosAtivo = "tecnorio"
+
+
+    '''''        '''conexao = "Server=amceletrica.mysql.uhserver.com;database=amceletrica;uid=brunoamc;pwd=jHAzhFG848@yN@U;
+    '''''        '''        Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+    '''''        '''My.Settings.BancoDadosAtivo = "amceletrica"
+    '''''        '''
+
+
+    '''''        ''''conexao = "Server=ihm.mysql.uhserver.com;database=ihm;uid=eduardoihm;pwd=jHAzhFG848@yN@U;
+    '''''        ''''        Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+    '''''        ''''My.Settings.BancoDadosAtivo = "ihm"
+
+
+    '''''    ElseIf TipoBanco = "SQL" Then
+
+    '''''        conexao = "Persist Security Info = False;User ID = engenharia;Password=Engenhari@003498;MultipleActiveResultSets=true;Initial Catalog=MP12OFICIAL;Data Source=192.168.163.22;"
+    '''''        My.Settings.BancoDadosAtivo = "Amc Soluçoes"
+
+
+    '''''    ElseIf TipoBanco = "ACCESS" Then
+
+    '''''        ''''''''' Se estiver usando um banco .mdb antigo, use o provider Jet
+    '''''        conexao = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\caminho_do_banco\seu_banco.mdb;Persist Security Info=False;"
+
+    '''''    End If
+
+    '''''    Try
+    '''''        Select Case TipoBanco.ToUpper()
+    '''''            Case "MYSQL"
+    '''''                conexao = conexao
+    '''''                myconect = New MySqlConnection(conexao)
+    '''''                myconect.Open()
+
+    '''''            Case "SQL"
+    '''''                conexao = conexao
+    '''''                myconectSQL = New SqlConnection(conexao)
+    '''''                myconectSQL.Open()
+
+    '''''            Case "ACCESS"
+    '''''                conexao = conexao
+    '''''                myconectAccess = New OleDbConnection(conexao)
+    '''''                myconectAccess.Open()
+
+    '''''            Case Else
+    '''''                Throw New Exception("Tipo de banco de dados inválido.")
+    '''''        End Select
+
+    '''''        ' Inicializar mecanismo de keep-alive
+    '''''        StartKeepAlive()
+
+    '''''        Return True
+    '''''    Catch ex As Exception
+    '''''        LogErro($"Erro ao abrir banco: {ex.Message}")
+    '''''        Return False
+    '''''    End Try
+
+    '''''End Function
+
+    '''''Private Sub StartKeepAlive()
+
+    '''''    Dim keepAliveTimer As New System.Windows.Forms.Timer() With {
+    '''''        .Interval = 90000 ' 9 segundos
+    '''''    }
+    '''''    AddHandler keepAliveTimer.Tick, AddressOf PingDatabase
+    '''''    keepAliveTimer.Start()
+
+
+
+    '''''End Sub
+
+    '''''Private Sub PingDatabase(sender As Object, e As EventArgs)
+
+    '''''    For i As Integer = 1 To MaxRetry
+    '''''        Try
+    '''''            Select Case TipoBanco.ToUpper()
+    '''''                Case "MYSQL"
+    '''''                    If myconect IsNot Nothing AndAlso myconect.State = ConnectionState.Open Then
+    '''''                        Dim command As New MySqlCommand("SELECT 1", myconect)
+    '''''                        command.ExecuteScalar()
+    '''''                    End If
+
+    '''''                Case "SQL"
+    '''''                    If myconectSQL IsNot Nothing AndAlso myconectSQL.State = ConnectionState.Open Then
+    '''''                        Dim command As New SqlCommand("SELECT 1", myconectSQL)
+    '''''                        command.ExecuteScalar()
+    '''''                    End If
+
+    '''''            End Select
+    '''''            Exit For ' Sai do loop caso o comando seja bem-sucedido
+    '''''        Catch ex As Exception
+    '''''            LogErro($"Erro no keep-alive: {ex.Message}")
+    '''''            If i = MaxRetry Then Throw ' Repassa o erro após atingir o máximo de tentativas
+    '''''        End Try
+    '''''    Next
+    '''''End Sub
+    '''''Private Sub LogErro(mensagem As String)
+    '''''    ' Implementar sistema de logging (ex: gravar em arquivo ou banco de dados)
+    '''''    Console.WriteLine($"[{DateTime.Now}] {mensagem}")
+    '''''End Sub
+
+    '''''Public Function FechaBanco() As Boolean
+
+    '''''    If TipoBanco = "MYSQL" Then
+
+
+    '''''        If myconect.State = ConnectionState.Open Then
+    '''''            Try
+    '''''                myconect.Close()
+    '''''                myconect.Dispose()
+    '''''            Catch ex As Exception
+    '''''                ' Trate erros ao fechar a conexão aqui
+    '''''                MessageBox.Show("Erro ao fechar a conexão: " & ex.Message)
+    '''''            Finally
+    '''''            End Try
+    '''''        End If
+
+    '''''    ElseIf TipoBanco = "SQL" Then
+
+    '''''        If myconectSQL.State = ConnectionState.Open Then
+    '''''            Try
+    '''''                myconectSQL.Close()
+    '''''                myconectSQL.Dispose()
+    '''''            Catch ex As Exception
+    '''''                ' Trate erros ao fechar a conexão aqui
+    '''''                MessageBox.Show("Erro ao fechar a conexão: " & ex.Message)
+    '''''            Finally
+    '''''            End Try
+    '''''        End If
+
+    '''''    ElseIf TipoBanco = "ACCESS" Then
+
+
+    '''''        Try
+    '''''            If myconectAccess IsNot Nothing AndAlso myconectAccess.State = ConnectionState.Open Then
+    '''''                myconectAccess.Close()
+    '''''                myconectAccess.Dispose()
+    '''''                MessageBox.Show("Conexão com o banco de dados Access fechada com sucesso.")
+    '''''                Return True
+    '''''            End If
+    '''''        Catch ex As Exception
+    '''''            ' Trate erros ao fechar a conexão aqui
+    '''''            MessageBox.Show("Erro ao fechar a conexão com o banco de dados Access: " & ex.Message)
+    '''''            Return False
+    '''''        End Try
+
+    '''''    End If
+
+
+    '''''End Function
+
+    Private Const MaxRetry As Integer = 3
+    Private keepAliveTimer As System.Windows.Forms.Timer
+
+    ' Método para abrir conexão com o banco de dados
     Public Function AbrirBanco() As Boolean
 
         If TipoBanco = "MYSQL" Then
 
-            'String de conexão ajustada
-            conexao = "Server=lynxlocal.mysql.uhserver.com;database=lynxlocal;uid=lynxlocal;pwd=jHAzhFG848@yN@U;" &
-            "Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
-            My.Settings.BancoDadosAtivo = "lynxlocal"
+            ''  ''''  String de conexão ajustada
+            ''  conexao = "Server=lynxlocal.mysql.uhserver.com;database=lynxlocal;uid=lynxlocal;pwd=jHAzhFG848@yN@U;" &
+            ''"Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+            ''  My.Settings.BancoDadosAtivo = "lynxlocal"
 
-
-            ''conexao = "Server=alfatec2.mysql.uhserver.com;database=alfatec2;uid=alfateccozinhas;pwd=jHAzhFG848@yN@U;
-            ''Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
-            ''My.Settings.BancoDadosAtivo = "alfatec2"
+            'conexao = "Server=alfatec2.mysql.uhserver.com;database=alfatec2;uid=alfateccozinhas;pwd=jHAzhFG848@yN@U;
+            'Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+            'My.Settings.BancoDadosAtivo = "alfatec2"
 
             '''conexao = "Server=mettapaineis.mysql.uhserver.com;database=mettapaineis;uid=rubensmetta;pwd=jHAzhFG848@yN@U;
             '''Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
             '''My.Settings.BancoDadosAtivo = "mettapaineis"
-            '''
 
             '''''''''''''        ''    'conexao = "Server=marp.mysql.uhserver.com;database=marp;uid=mrogerio;pwd=RZ*5rDs7FPsGTT9;
             '''''''''''''        ''    Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
             '''''''''''''        ''    'My.Settings.BancoDadosAtivo = "marp"
 
-
             '''''''''''''        ''    'conexao = "Server=tecnorio.mysql.uhserver.com;database=tecnorio;uid=tecnoriousuario;pwd=jHAzhFG848@yN@U;
             '''''''''''''        ''    Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
             '''''''''''''        ''    'My.Settings.BancoDadosAtivo = "tecnorio"
 
-
-            '''conexao = "Server=amceletrica.mysql.uhserver.com;database=amceletrica;uid=brunoamc;pwd=jHAzhFG848@yN@U;
-            '''        Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
-            '''My.Settings.BancoDadosAtivo = "amceletrica"
-            '''
-
+            ''''conexao = "Server=amceletrica.mysql.uhserver.com;database=amceletrica;uid=brunoamc;pwd=jHAzhFG848@yN@U;
+            ''''        Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+            ''''My.Settings.BancoDadosAtivo = "amceletrica"
 
             ''''conexao = "Server=ihm.mysql.uhserver.com;database=ihm;uid=eduardoihm;pwd=jHAzhFG848@yN@U;
             ''''        Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
             ''''My.Settings.BancoDadosAtivo = "ihm"
 
+
+            'conexao = "Server=construcare.mysql.uhserver.com;database=construcare;uid=rogeconstrucare;pwd=jHAzhFG848@yN@U;
+            '        Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+            'My.Settings.BancoDadosAtivo = "construcare"
+            ''''
+
+
+            conexao = "Server=" & My.Settings.MysqlEndereco & ";database=" & My.Settings.MySqlBancoDados & ";uid=" & My.Settings.MysqlUsuario & ";pwd=" & My.Settings.MysqlSenha & ";
+                    Max Pool Size=50;Connection Timeout=600;Connection Lifetime=3600;CharSet=utf8;"
+            My.Settings.BancoDadosAtivo = My.Settings.MySqlBancoDados.ToString
+            '''
 
         ElseIf TipoBanco = "SQL" Then
 
@@ -104,26 +292,42 @@ Public Class ClBancoDados
 
             ' Inicializar mecanismo de keep-alive
             StartKeepAlive()
+            Return True
 
             Return True
         Catch ex As Exception
-            LogErro($"Erro ao abrir banco: {ex.Message}")
+            MsgBox($"Erro ao abrir banco: {ex.Message}")
             Return False
         End Try
 
     End Function
 
-    Private Sub StartKeepAlive()
+    Public Function AbrirBancoSqlServerProtheus() As Boolean
 
-        Dim keepAliveTimer As New System.Windows.Forms.Timer() With {
-            .Interval = 90000 ' 9 segundos
-        }
-        AddHandler keepAliveTimer.Tick, AddressOf PingDatabase
-        keepAliveTimer.Start()
+        conexao = "Persist Security Info = False;User ID = engenharia;Password=Engenhari@003498;MultipleActiveResultSets=true;Initial Catalog=MP12OFICIAL;Data Source=192.168.163.22;"
+        My.Settings.BancoDadosAtivo = "Amc Soluçoes"
+
+        conexao = conexao
+        myconectSQL = New SqlConnection(conexao)
+        myconectSQL.Open()
+
+    End Function
+
+
+
+    ' Método para manter a conexão ativa
+    Private Sub StartKeepAlive()
+        If keepAliveTimer Is Nothing Then
+            keepAliveTimer = New System.Windows.Forms.Timer() With {
+                .Interval = 90000 ' 90 segundos
+            }
+            AddHandler keepAliveTimer.Tick, AddressOf PingDatabase
+            keepAliveTimer.Start()
+        End If
     End Sub
 
+    ' Método para testar a conexão periodicamente
     Private Sub PingDatabase(sender As Object, e As EventArgs)
-
         For i As Integer = 1 To MaxRetry
             Try
                 Select Case TipoBanco.ToUpper()
@@ -131,76 +335,210 @@ Public Class ClBancoDados
                         If myconect IsNot Nothing AndAlso myconect.State = ConnectionState.Open Then
                             Dim command As New MySqlCommand("SELECT 1", myconect)
                             command.ExecuteScalar()
+                        Else
+                            AbrirBanco()
                         End If
 
                     Case "SQL"
                         If myconectSQL IsNot Nothing AndAlso myconectSQL.State = ConnectionState.Open Then
                             Dim command As New SqlCommand("SELECT 1", myconectSQL)
                             command.ExecuteScalar()
+                        Else
+                            AbrirBanco()
                         End If
-
                 End Select
-                Exit For ' Sai do loop caso o comando seja bem-sucedido
+                Exit For ' Sai do loop caso a verificação seja bem-sucedida
+
             Catch ex As Exception
-                LogErro($"Erro no keep-alive: {ex.Message}")
+                ' MsgBox("Erro no keep-alive: " & ex.Message, MsgBoxStyle.Exclamation)
                 If i = MaxRetry Then Throw ' Repassa o erro após atingir o máximo de tentativas
             End Try
         Next
     End Sub
-    Private Sub LogErro(mensagem As String)
-        ' Implementar sistema de logging (ex: gravar em arquivo ou banco de dados)
-        Console.WriteLine($"[{DateTime.Now}] {mensagem}")
+
+
+    ' Método para fechar a conexão corretamente
+    Public Sub FecharBanco()
+        Try
+            If myconect IsNot Nothing AndAlso myconect.State = ConnectionState.Open Then
+                myconect.Close()
+            End If
+
+            If myconectSQL IsNot Nothing AndAlso myconectSQL.State = ConnectionState.Open Then
+                myconectSQL.Close()
+            End If
+
+            If myconectAccess IsNot Nothing AndAlso myconectAccess.State = ConnectionState.Open Then
+                myconectAccess.Close()
+            End If
+
+            If keepAliveTimer IsNot Nothing Then
+                keepAliveTimer.Stop()
+                keepAliveTimer.Dispose()
+                keepAliveTimer = Nothing
+            End If
+
+        Catch ex As Exception
+            MsgBox("Erro ao fechar banco: " & ex.Message, MsgBoxStyle.Exclamation)
+        End Try
     End Sub
 
-    Public Function FechaBanco() As Boolean
+    Public Function ObterDiaDaSemana(ByVal data As Date) As String
 
-        If TipoBanco = "MYSQL" Then
+        ' ObterDiaDaSemana = data.DayOfWeek.ToString()
 
-
-            If myconect.State = ConnectionState.Open Then
-                Try
-                    myconect.Close()
-                    myconect.Dispose()
-                Catch ex As Exception
-                    ' Trate erros ao fechar a conexão aqui
-                    MessageBox.Show("Erro ao fechar a conexão: " & ex.Message)
-                Finally
-                End Try
-            End If
-
-        ElseIf TipoBanco = "SQL" Then
-
-            If myconectSQL.State = ConnectionState.Open Then
-                Try
-                    myconectSQL.Close()
-                    myconectSQL.Dispose()
-                Catch ex As Exception
-                    ' Trate erros ao fechar a conexão aqui
-                    MessageBox.Show("Erro ao fechar a conexão: " & ex.Message)
-                Finally
-                End Try
-            End If
-
-        ElseIf TipoBanco = "ACCESS" Then
-
-
-            Try
-                If myconectAccess IsNot Nothing AndAlso myconectAccess.State = ConnectionState.Open Then
-                    myconectAccess.Close()
-                    myconectAccess.Dispose()
-                    MessageBox.Show("Conexão com o banco de dados Access fechada com sucesso.")
-                    Return True
-                End If
-            Catch ex As Exception
-                ' Trate erros ao fechar a conexão aqui
-                MessageBox.Show("Erro ao fechar a conexão com o banco de dados Access: " & ex.Message)
-                Return False
-            End Try
-
-        End If
+        Dim diasDaSemana As String() = {"Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"}
+        Dim diaDaSemana As Integer = data.DayOfWeek
+        ObterDiaDaSemana = diasDaSemana(diaDaSemana)
 
 
     End Function
+
+
+    Public Function CriarGrupoDataGridView(ByVal ObjDataGrid As DataGridView, ByVal NomeColunaDataGrid As String)
+
+        Try
+
+
+            Dim currentGroup As String = ""
+            Dim fontNegrito As New Font(ObjDataGrid.Font, FontStyle.Bold) ' Crie uma fonte em negrito
+            Dim isFirstInGroup As Boolean = True
+
+
+
+
+            For Each row As DataGridViewRow In ObjDataGrid.Rows
+                Dim osmValue As String = row.Cells(NomeColunaDataGrid).Value.ToString()
+
+                If osmValue <> currentGroup Then
+                    currentGroup = osmValue
+                    isFirstInGroup = True
+                    row.DefaultCellStyle.BackColor = Color.LightBlue
+                Else
+                    isFirstInGroup = False
+                End If
+
+                ' Se for a primeira linha de um novo grupo, aplique o estilo de fonte negrito
+                If isFirstInGroup Then
+                    For Each cell As DataGridViewCell In row.Cells
+                        cell.Style.Font = fontNegrito
+                    Next
+                End If
+            Next
+
+
+        Catch ex As Exception
+
+        End Try
+
+
+
+    End Function
+
+    Public Function arquivoConfiguracao() As Boolean
+
+        If InputBox("Senha de acesso", "Administrador", "") = "99678982" Then
+            Dim OpenfileConfiguracao As New OpenFileDialog
+
+            ' Configura o diálogo para aceitar somente arquivos de texto
+            OpenfileConfiguracao.Filter = "Arquivos de Texto (*.txt)|*.txt|Todos os arquivos (*.*)|*.*"
+            OpenfileConfiguracao.FilterIndex = 1
+
+            ' Exibe o diálogo e verifica se o usuário selecionou um arquivo
+            If OpenfileConfiguracao.ShowDialog() = DialogResult.OK Then
+                Dim caminhoArquivo As String = OpenfileConfiguracao.FileName
+
+                ' Verifica se o arquivo existe
+                If File.Exists(caminhoArquivo) Then
+                    Try
+                        ' Variáveis para armazenar os parâmetros
+                        Dim endereco, usuario, banco, senha As String
+                        Dim EnderecoPastaRaizOS, EnderecoTemplateExcel, CopiaBancoDados As String
+                        Dim EnderecoPastaRaizRomaneio, EnderecoTemplateExcelRomaneio, ParametroExportarDXF As String
+
+                        ' Codificação utilizada na leitura do arquivo
+                        Dim codificacao As Encoding = Encoding.GetEncoding("ISO-8859-1") ' Ajustável conforme o arquivo
+
+                        ' Lê o arquivo linha por linha
+                        Dim parametrosEncontrados As New Dictionary(Of String, String)
+                        Using leitor As New StreamReader(caminhoArquivo, codificacao)
+                            While Not leitor.EndOfStream
+                                Dim linha As String = leitor.ReadLine()?.Trim()
+
+                                ' Ignorar linhas em branco ou mal formadas
+                                If String.IsNullOrEmpty(linha) OrElse Not linha.Contains(";") Then Continue While
+
+                                Dim partes = linha.Split(";"c)
+                                If partes.Length = 2 Then
+                                    Dim chave = partes(0).Trim()
+                                    Dim valor = partes(1).Trim()
+
+                                    ' Armazena no dicionário
+                                    If Not parametrosEncontrados.ContainsKey(chave) Then
+                                        parametrosEncontrados(chave) = valor
+                                    End If
+                                End If
+                            End While
+                        End Using
+
+                        ' Atribui valores ao My.Settings
+                        Dim parametrosNecessarios = {"endereco", "Usuario", "Banco", "Senha", "EnderecoPastaRaizOS", "EnderecoTemplateExcelOrdemServico", "ParametroExportarDXF"}
+                        For Each param In parametrosNecessarios
+                            If Not parametrosEncontrados.ContainsKey(param) Then
+                                MsgBox($"Erro: Parâmetro '{param}' não encontrado no arquivo de configuração!", MsgBoxStyle.Critical)
+
+                            End If
+                        Next
+
+                        My.Settings.MySqlBancoDados = parametrosEncontrados("Banco")
+                        My.Settings.MysqlEndereco = parametrosEncontrados("endereco")
+                        My.Settings.MysqlUsuario = parametrosEncontrados("Usuario")
+                        My.Settings.MysqlSenha = parametrosEncontrados("Senha")
+                        My.Settings.BancoDadosAtivo = parametrosEncontrados("Banco")
+
+                        My.Settings.EnderecoPastaRaizOS = parametrosEncontrados("EnderecoPastaRaizOS")
+                        My.Settings.EnderecoTemplateExcel = parametrosEncontrados("EnderecoTemplateExcelOrdemServico")
+                        My.Settings.ParametroExportarDXF = parametrosEncontrados("ParametroExportarDXF")
+
+                        ' Salva as configurações
+                        My.Settings.Save()
+
+                        MsgBox("Configurações carregadas com sucesso!", MsgBoxStyle.Information)
+
+
+                        ' Dim swApp As SldWorks.SldWorks = Nothing
+                        swapp = CType(GetObject(, "SldWorks.Application"), SolidWorks.Interop.sldworks.SldWorks)
+
+
+                        swapp.ExitApp()
+                        swapp = Nothing
+
+                        ' Aguarda 5 segundos antes de reabrir
+                        System.Threading.Thread.Sleep(5000)
+
+                        ' Reabre o SolidWorks
+                        Dim swAppNew As SolidWorks.Interop.sldworks.SldWorks = CType(CreateObject("SldWorks.Application"), SolidWorks.Interop.sldworks.SldWorks)
+                        swAppNew.Visible = True
+
+                        ' Carregar o suplemento novamente
+                        swapp.LoadAddIn("SwLynx_4._1")
+
+                        cl_BancoDados.AbrirBanco()
+
+
+                    Catch ex As Exception
+                        MsgBox($"Erro ao processar o arquivo de configuração: {ex.Message}", MsgBoxStyle.Critical)
+                    End Try
+                Else
+                    MsgBox("Arquivo selecionado não encontrado!", MsgBoxStyle.Exclamation)
+                End If
+            End If
+        Else
+            MsgBox("Senha inválida!", MsgBoxStyle.Exclamation)
+        End If
+
+    End Function
+
 
     ' Função para carregar dados em um DataTable
     Public Function CarregarDados(ByVal query As String) As DataTable
@@ -726,6 +1064,81 @@ Public Class ClBancoDados
 
     End Function
 
+
+    Public Function VerificaSaldoTag(ByVal IdTag As String, IdProjeto As String, fatorK As String) As Integer
+
+        VerificaSaldoTag = 0
+
+        If TipoBanco = "MYSQL" Then
+
+            Try
+
+                ' Criação do comando SQL
+                Dim daMysql As New MySqlCommand("SELECT QtdeTag, SaldoTag,QtdeLiberada FROM  " & ComplementoTipoBanco & "tags where IdTag = '" & IdTag & "'", myconect)
+
+                ' Execução da consulta e leitura dos dados
+                Using drMysql As MySqlDataReader = daMysql.ExecuteReader()
+
+                    If drMysql.HasRows Then
+                        drMysql.Read()
+                        OrdemServico.QtdeTag = Convert.ToInt32(drMysql("QtdeTag").ToString())
+                        OrdemServico.SaldoTag = Convert.ToInt32(drMysql("SaldoTag").ToString())
+                        OrdemServico.QtdeLiberada = Convert.ToInt32(drMysql("QtdeLiberada").ToString())
+
+                    End If
+
+                End Using
+            Catch ex As Exception
+
+                ClasseEmail.EmailTratamentoErro(ex.Message)
+            Finally
+
+            End Try
+
+        End If
+
+
+    End Function
+
+
+
+    Public Sub FormatarDataGridView(dataGridView As DataGridView, GradeCores As String)
+        ' Ajustar automaticamente o tamanho das colunas
+        '  dataGridView.AutoResizeColumns()
+
+        ' Percorrer todas as colunas e ajustar o formato do conteúdo conforme necessário
+        For Each column As DataGridViewColumn In dataGridView.Columns
+            If column.ValueType = GetType(DateTime) Then
+                ' Se a coluna contém datas, definir o formato de exibição para um formato legível
+                column.DefaultCellStyle.Format = "dd/MM/yyyy"
+            ElseIf column.ValueType = GetType(Decimal) Then
+                ' Se a coluna contém números decimais, definir o formato de exibição para um formato legível
+                column.DefaultCellStyle.Format = "N2"
+            ElseIf column.ValueType = GetType(Double) OrElse column.ValueType = GetType(Single) Then
+                ' Se a coluna contém números de ponto flutuante, definir o formato de exibição para um formato legível
+                column.DefaultCellStyle.Format = "F2"
+            End If
+
+            column.ReadOnly = True
+
+        Next
+
+        If GradeCores = "SIM" Then
+            For Each row As DataGridViewRow In dataGridView.Rows
+                ' Configure a cor de fundo da linha
+                If row.Index Mod 2 = 0 Then
+                    row.DefaultCellStyle.BackColor = Color.LightGray
+                    'Else
+                    '    row.DefaultCellStyle.BackColor = Color.White
+                End If
+
+                ' Configure outros aspectos visuais da linha, se necessário
+                ' ...
+
+            Next
+        End If
+
+    End Sub
     Public Function AlteracaoEspecifica(tabela As String, campoTabela As String, NovoValor As String, campo_id As String, Valor_id As String) As Boolean
 
         If TipoBanco = "MYSQL" Then
@@ -818,7 +1231,7 @@ Public Class ClBancoDados
     End Function
 
 
-    Public Function AlteracaoEspecificaDadosOS(ByVal IDOrdemServicoItem As String, ByVal QtdeTotal As String, AreaPintura As String, ByVal Peso As String) As Boolean
+    Public Function AlteracaoEspecificaDadosOS(ByVal IDOrdemServicoItem As String, ByVal QtdeTotal As String, AreaPintura As String, ByVal Peso As String, ByVal Fator As String) As Boolean
 
         If TipoBanco = "MYSQL" Then
 
@@ -828,7 +1241,8 @@ Public Class ClBancoDados
                 ' Construção da consulta SQL usando parâmetros para prevenir SQL Injection
                 Dim sql As String = $"UPDATE ordemservicoitem SET QtdeTotal = @QtdeTotal,
                                                                           AreaPintura = @AreaPintura,
-                                                                          Peso = @Peso
+                                                                          Peso = @Peso,
+                                                                          Fator = @Fator
                                                                           WHERE IDOrdemServicoItem = @IDOrdemServicoItem"
 
                 ' Criação do comando SQL com o uso de parâmetros
@@ -836,6 +1250,7 @@ Public Class ClBancoDados
                     mycomand.Parameters.AddWithValue("@QtdeTotal", QtdeTotal)
                     mycomand.Parameters.AddWithValue("@AreaPintura", AreaPintura)
                     mycomand.Parameters.AddWithValue("@Peso", Peso)
+                    mycomand.Parameters.AddWithValue("@Fator", Fator)
                     mycomand.Parameters.AddWithValue("@IDOrdemServicoItem", IDOrdemServicoItem)
                     ' Execução do comando SQL
                     mycomand.ExecuteNonQuery()

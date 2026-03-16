@@ -1190,4 +1190,41 @@ Public Class SwAddin
 
 #End Region
 
+    Private Function iSwApp_ActiveModelDocChangeNotify() As Integer Handles iSwApp.ActiveModelDocChangeNotify
+        Try
+            ' Quando troca de aba no SolidWorks
+            IntanciaSolidWorks.ConectarSolidWorks()
+            swModel = iSwApp.ActiveDoc
+            
+            If swModel IsNot Nothing 
+                If swModel.GetType() = swDocumentTypes_e.swDocDRAWING Then
+                    ' Limpa o Painel (Desenho 2D no tem informaes completas de peso etc)
+                    MyTaskPanelHost.txtAssuntoSubiTitulo.Clear()
+                    MyTaskPanelHost.txtTitulo.Text = ""
+                    MyTaskPanelHost.txtComentarios.Clear()
+                    MyTaskPanelHost.txtAuthor.Clear()
+                    MyTaskPanelHost.txtPalavraChave.Clear()
+                    MyTaskPanelHost.lblEspessura.Text = ""
+                    MyTaskPanelHost.lblLargura.Text = ""
+                    MyTaskPanelHost.lblComprimento.Text = ""
+                    MyTaskPanelHost.lblNumeroDobra.Text = ""
+                    MyTaskPanelHost.lblPeso.Text = ""
+                    MyTaskPanelHost.lblMaterial.Text = ""
+                    MyTaskPanelHost.lblAreaPintura.Text = ""
+                    MyTaskPanelHost.lblAlturaTotalCaixaDelimitadora.Text = ""
+                    MyTaskPanelHost.lblProfundidadeTotalCaixaDelimitadora.Text = ""
+                    MyTaskPanelHost.btnPendencias.Enabled = False
+                Else
+                    ' Mada Atualizar (Part ou Assembly)
+                    DadosArquivoCorrente.ArquivoCorrente(swModel, MyTaskPanelHost.chkBoxProcessos)
+                    DadosArquivoCorrente.LerDadosCaixaDelimitadora(swModel)
+                    DadosArquivoCorrente.PercorrerPropriedadesDaListaDeCorte(swModel)
+                    MyTaskPanelHost.AtualizaTela(swModel, MyTaskPanelHost.chkBoxProcessos)
+                End If
+            End If
+        Catch ex As Exception
+        End Try
+        Return 0
+    End Function
+
 End Class

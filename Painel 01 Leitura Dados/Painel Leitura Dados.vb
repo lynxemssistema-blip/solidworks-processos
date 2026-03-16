@@ -6370,7 +6370,7 @@ WHERE
                 dtTabelaPlanoCorte = cl_BancoDados.CarregarDados("SELECT  idplanodecorte, CodMatFabricante
 					 FROM  " & ComplementoTipoBanco & "ordemservicoitem where IdOrdemServico  = '" & OrdemServico.IdOrdemServico & "' and (idplanodecorte > 0) AND (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '');")
 
-                Dim MessagemItens As String
+                Dim MessagemItens As String = ""
 
                 For I As Integer = 0 To dtTabelaPlanoCorte.Rows.Count - 1
 
@@ -6681,6 +6681,7 @@ WHERE
             ' MsgBox(ex.Message)
         End Try
 
+        Return Nothing
     End Function
 
     Private Sub OPTEstoqueSim_Click(sender As Object, e As EventArgs) Handles OPTEstoqueSim.Click
@@ -8657,7 +8658,7 @@ DescEmpresa) values
                 dtTabelaPlanoCorte = cl_BancoDados.CarregarDados("SELECT  idplanodecorte, CodMatFabricante
 					 FROM  " & ComplementoTipoBanco & "ordemservicoitem where IdOrdemServico  = '" & OrdemServico.IdOrdemServico & "' and (idplanodecorte > 0) AND (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '');")
 
-                Dim MessagemItens As String
+                Dim MessagemItens As String = ""
 
                 For I As Integer = 0 To dtTabelaPlanoCorte.Rows.Count - 1
 
@@ -8782,11 +8783,15 @@ DescEmpresa) values
 
                 swModel = swapp.OpenDoc6(fileName.ToString, swDocumentTypes_e.swDocDRAWING, swOpenDocOptions_e.swOpenDocOptions_LoadModel, True, fileerror, filewarning)
 
+                swDrawing = DirectCast(swModel, DrawingDoc)
+                
                 Dim currentSheetScale As Double
                 Dim scaleStatus As Boolean
 
                 ' Obtém a escala da folha atual
-                scaleStatus = swDrawing.GetCurrentSheetScale(currentSheetScale)
+                If swDrawing IsNot Nothing Then
+                    scaleStatus = swDrawing.GetCurrentSheetScale(currentSheetScale)
+                End If
 
                 If scaleStatus Then
                     ' Configura a nova folha mantendo a escala atual
@@ -9154,12 +9159,14 @@ DescEmpresa) values
 
                 ' swModel = swapp.OpenDoc6(fileName, swDocumentTypes_e.swDocDRAWING, swOpenDocOptions_e.swOpenDocOptions_Silent, "", errors, warnings)
                 swModelDocExt = swModel.Extension
-                swDrawing = swModel
-                sheetNames(0) = "Sheet2"
-                sheetNames(1) = "Sheet3"
-                sheetNameArray = sheetNames
-                swDrawing.SetSheetsSelected(sheetNameArray)
-                status = swDrawing.SetupSheet6("Sheet3", swDwgPaperSizes_e.swDwgPaperA4size, swDwgTemplates_e.swDwgTemplateCustom, 0.21, 0.297, True, My.Settings.EnderecoNovoFormatoA4.ToString, 0.21, 0.297, "Default", True, 0, 0, 0, 0, 0, 0)
+                swDrawing = DirectCast(swModel, DrawingDoc)
+                
+                If swDrawing IsNot Nothing Then
+                    sheetNames(0) = "Sheet2"
+                    sheetNames(1) = "Sheet3"
+                    swDrawing.SetSheetsSelected(sheetNames)
+                    status = swDrawing.SetupSheet6("Sheet3", swDwgPaperSizes_e.swDwgPaperA4size, swDwgTemplates_e.swDwgTemplateCustom, 0.21, 0.297, True, My.Settings.EnderecoNovoFormatoA4.ToString, 0.21, 0.297, "Default", True, 0, 0, 0, 0, 0, 0)
+                End If
 
                 swModel.ForceRebuild3(True)
                 swModel.ViewZoomtofit2()
@@ -9191,7 +9198,6 @@ DescEmpresa) values
                 Dim swDrawing As DrawingDoc
                 Dim fileName As String
                 Dim status As Boolean
-                Dim sheetNameArray As Object
                 Dim sheetNames(1) As String
                 Dim fileerror As Integer
 
@@ -9210,11 +9216,15 @@ DescEmpresa) values
 
                 swModel = swapp.OpenDoc6(fileName.ToString, swDocumentTypes_e.swDocDRAWING, swOpenDocOptions_e.swOpenDocOptions_LoadModel, True, fileerror, filewarning)
 
+                swDrawing = DirectCast(swModel, DrawingDoc)
+
                 Dim currentSheetScale As Double
                 Dim scaleStatus As Boolean
 
                 ' Obtém a escala da folha atual
-                scaleStatus = swDrawing.GetCurrentSheetScale(currentSheetScale)
+                If swDrawing IsNot Nothing Then
+                    scaleStatus = swDrawing.GetCurrentSheetScale(currentSheetScale)
+                End If
 
                 If scaleStatus Then
                     ' Configura a nova folha mantendo a escala atual
@@ -11350,8 +11360,7 @@ DescEmpresa) values
 
         End Try
 
-
-
+        Return ""
     End Function
 
     Private Sub ConfiguraçãoToolStripMenuItem2_Click_1(sender As Object, e As EventArgs) Handles ConfiguraçãoToolStripMenuItem2.Click
@@ -11761,10 +11770,12 @@ DescEmpresa) values
         OrdemServico.Fator.ToString())
 
                 ' Valida a entrada
-                If Not Integer.TryParse(inputFator, OrdemServico.Fator) OrElse OrdemServico.Fator <= 0 Then
+                Dim tempFator As Integer
+                If Not Integer.TryParse(inputFator, tempFator) OrElse tempFator <= 0 Then
                     MsgBox("O Fator de Multiplicação deve ser um número inteiro maior que zero.", vbCritical, "Atenção")
                     Exit Sub
                 End If
+                OrdemServico.Fator = tempFator
 
                 ' Atualiza o valor no banco
                 cl_BancoDados.AlteracaoEspecifica("OrdemServico", "Fator", OrdemServico.Fator, "IdOrdemServico", OrdemServico.IdOrdemServico)
@@ -12374,7 +12385,7 @@ DescEmpresa) values
         End Try
     End Sub
 
-    Private Async Sub txtPalavraChave_DoubleClick(sender As Object, e As EventArgs) Handles txtPalavraChave.DoubleClick
+    Private Sub txtPalavraChave_DoubleClick(sender As Object, e As EventArgs) Handles txtPalavraChave.DoubleClick
 
         Me.txtPalavraChave.Text = DadosArquivoCorrente.EnderecoArquivo.ToUpper
 

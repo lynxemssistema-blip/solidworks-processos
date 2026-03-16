@@ -1,5 +1,4 @@
-﻿
-Imports System.Data.SqlClient
+﻿Imports System.Data.SqlClient
 Imports MySql.Data.MySqlClient
 
 Public Class clUsuario
@@ -10,9 +9,9 @@ Public Class clUsuario
 
     Public Function RetornaDadosUsuario(ByVal LoginEntrada As String, ByVal SenhaEntrada As String) As Boolean
 
+        cl_BancoDados.AbrirBanco()
         ' Verifica se o banco de dados não está aberto
-        If TipoBanco = "MYSQL" Then
-
+        If My.Settings.TipoConexao = "MYSQL" Then
 
             Try
 
@@ -59,18 +58,18 @@ Public Class clUsuario
                         End If
                     End Using
                 End Using
-
             Catch ex As Exception
-
             Finally
 
             End Try
 
-        ElseIf TipoBanco = "SQL" Then
+        ElseIf My.Settings.TipoConexao = "SQL" Then
 
             Try
 
-                Using da As New SqlCommand("SELECT * FROM  " & ComplementoTipoBanco & "usuario WHERE Login = @Login AND Senha = @Senha", myconectSQL)
+                Dim query As String = "SELECT * FROM  " & ComplementoTipoBanco & "usuario WHERE Login = @Login AND Senha = @Senha"
+
+                Using da As New SqlCommand(query, myconectSQL)
                     ' Adicionar parâmetros para evitar SQL Injection
                     da.Parameters.AddWithValue("@Login", LoginEntrada.ToUpper)
                     da.Parameters.AddWithValue("@Senha", SenhaEntrada.ToUpper)
@@ -113,30 +112,27 @@ Public Class clUsuario
                         End If
                     End Using
                 End Using
-
             Catch ex As Exception
-
             Finally
 
             End Try
 
         End If
 
-
-
+        cl_BancoDados.FecharBanco()
 
     End Function
-
-
 
     Public idConfigucacaoSistema, Bancoendereco, Bancousuario, banco, Bancosenha,
         EnderecoPastaRaizOS, EnderecoTemplateExcel, CopiaBancoDados, EnderecoPastaRaizRomaneio,
         EnderecoTemplateExcelRomaneio, ParametroExportarDXF, EnderecoNovoFormatoA3,
         EnderecoNovoFormatoA4, DataCriacao, Usuario, PermitirPecastxtcorte0noPlanoCorte,
         PermitirVerLiberado_EngenharianoPlanoCorte, EnviarEmailLiberacaoOS As String
+
     Public Function RetornaDadosConfiguracao() As Boolean
 
-        If TipoBanco = "MYSQL" Then
+        cl_BancoDados.AbrirBanco()
+        If My.Settings.TipoConexao = "MYSQL" Then
 
             Try
 
@@ -154,24 +150,67 @@ Public Class clUsuario
                             EnviarEmailLiberacaoOS = dr("EnviarEmailLiberacaoOS").ToString()
 
                             RetornaDadosConfiguracao = True
+
+                            MyTaskPanelHost.TimerdgvPlanejamentoProjetista.Enabled = True
                         Else
                             EnviarEmailLiberacaoOS = ""
                             RetornaDadosConfiguracao = False
                         End If
                     End Using
                 End Using
-
             Catch ex As Exception
-
             Finally
 
             End Try
 
-        ElseIf TipoBanco = "SQL" Then
+        ElseIf My.Settings.TipoConexao = "SQL" Then
 
         End If
-
+        cl_BancoDados.FecharBanco()
 
     End Function
+
+    'Public Function SalvarOrdeMServicoBanco()
+
+    '    If My.Settings.TipoConexao = "MYSQL" Then
+
+    '        Try
+
+    '            Dim cmd As New MySqlCommand("insert into  " & ComplementoTipoBanco & "ordemservico
+    '(idProjeto, Projeto, idTag, Tag, Descricao, EnderecoOrdemServico,
+    'CriadoPor, DataCriacao, Estatus, D_E_L_E_T_E, Liberado_Engenharia,
+    'Data_Liberacao_Engenharia, IdOSReferencia, DescEmpresa, DataPrevisao, Fator)
+    'values
+    '(@idProjeto, @Projeto, @idTag, @Tag, @Descricao, @EnderecoOrdemServico,
+    '@CriadoPor, @DataCriacao, @Estatus, @D_E_L_E_T_E, @Liberado_Engenharia,
+    '@Data_Liberacao_Engenharia, @IdOSReferencia, @DescEmpresa, @DataPrevisao, @Fator)", myconect)
+
+    '            cmd.Parameters.AddWithValue("@idProjeto", OrdemServico.idProjeto)
+    '            cmd.Parameters.AddWithValue("@Projeto", OrdemServico.Projeto)
+    '            cmd.Parameters.AddWithValue("@idTag", OrdemServico.idTag)
+    '            cmd.Parameters.AddWithValue("@Tag", OrdemServico.Tag)
+    '            cmd.Parameters.AddWithValue("@Descricao", OrdemServico.Descricao)
+    '            cmd.Parameters.AddWithValue("@EnderecoOrdemServico", OrdemServico.EnderecoOrdemServico)
+    '            cmd.Parameters.AddWithValue("@CriadoPor", If(String.IsNullOrEmpty(OrdemServico.CriadoPor), DBNull.Value, OrdemServico.CriadoPor.ToUpper().ToString).ToString)
+    '            cmd.Parameters.AddWithValue("@DataCriacao", OrdemServico.DataCriacao.ToString("dd/MM/yyyy"))
+    '            cmd.Parameters.AddWithValue("@Estatus", OrdemServico.Estatus)
+    '            cmd.Parameters.AddWithValue("@D_E_L_E_T_E", "")  ' ou tratar conforme necessário
+    '            cmd.Parameters.AddWithValue("@Liberado_Engenharia", OrdemServico.Liberado_Engenharia)
+    '            cmd.Parameters.AddWithValue("@Data_Liberacao_Engenharia", OrdemServico.Data_Liberacao_Engenharia)
+    '            cmd.Parameters.AddWithValue("@IdOSReferencia", OrdemServico.IdOSReferencia)
+    '            cmd.Parameters.AddWithValue("@DescEmpresa", OrdemServico.DescEmpresa)
+    '            cmd.Parameters.AddWithValue("@DataPrevisao", OrdemServico.DataPrevisao)
+    '            cmd.Parameters.AddWithValue("@Fator", OrdemServico.Fator)
+
+    '            cmd.ExecuteNonQuery()
+
+    '        Catch ex As Exception
+
+    '            MsgBox(ex.Message)
+    '        Finally
+
+    '        End Try
+
+    '    End If
 
 End Class

@@ -98,6 +98,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Office.Interop.Outlook, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="SolidWorks.Interop.cosworks">
       <HintPath>C:\Program Files\SOLIDWORKS Corp\SOLIDWORKS\api\redist\SolidWorks.Interop.cosworks.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
@@ -205,10 +208,16 @@
     <Import Include="System.Diagnostics" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Acabamento\frmAcabamento.Designer.vb">
-      <DependentUpon>frmAcabamento.vb</DependentUpon>
+    <Compile Include="Ajuda\FrmAjudaLynx.Designer.vb">
+      <DependentUpon>FrmAjudaLynx.vb</DependentUpon>
     </Compile>
-    <Compile Include="Acabamento\frmAcabamento.vb">
+    <Compile Include="Ajuda\FrmAjudaLynx.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Analise Tecnica\frmIAAnaliseTecnica.Designer.vb">
+      <DependentUpon>frmIAAnaliseTecnica.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Analise Tecnica\frmIAAnaliseTecnica.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Buscar Programas\FrmBuscarProgramas.Designer.vb">
@@ -217,15 +226,20 @@
     <Compile Include="Buscar Programas\FrmBuscarProgramas.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Classe Lynx\ChapaFormatarDataGrid.vb" />
+    <Compile Include="Classe Lynx\clAjudaAI.vb" />
     <Compile Include="Classe Lynx\ClBancoDados.vb" />
     <Compile Include="Classe Lynx\ClCriptografiaArquivos.vb" />
     <Compile Include="Classe Lynx\clDadosArquivoCorrente.vb" />
+    <Compile Include="Classe Lynx\ClDataGridView.vb" />
     <Compile Include="Classe Lynx\ClEmail.vb" />
     <Compile Include="Classe Lynx\ClExcel.vb" />
     <Compile Include="Classe Lynx\ClImpressao.vb" />
+    <Compile Include="Classe Lynx\ClOmie.vb" />
     <Compile Include="Classe Lynx\ClOrdemServico.vb" />
     <Compile Include="Classe Lynx\ClQualidadeSGQ.vb" />
     <Compile Include="Classe Lynx\ClUsuario.vb" />
+    <Compile Include="Classe Lynx\GrokClient.vb" />
     <Compile Include="Classe SW\AssemblyInfo.vb">
       <SubType>Code</SubType>
     </Compile>
@@ -238,6 +252,12 @@
     <Compile Include="Configurações\frmExportarParaOS.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Configurações\frmProcessamentovb.Designer.vb">
+      <DependentUpon>frmProcessamentovb.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Configurações\frmProcessamentovb.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Materiais Almoxarifado\frmMateriaisAlmoxarifado.Designer.vb">
       <DependentUpon>frmMateriaisAlmoxarifado.vb</DependentUpon>
     </Compile>
@@ -245,6 +265,8 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Modulos\Module1.vb" />
+    <Compile Include="Modulos\ModuleAgentes.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Resources.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -267,6 +289,13 @@
     <Compile Include="Ordem de Serviço\frmOpcaoLiberacaoOrdemServico.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="OS-Tags\frmOsTags.Designer.vb">
+      <DependentUpon>frmOsTags.vb</DependentUpon>
+    </Compile>
+    <Compile Include="OS-Tags\frmOsTags.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Outlook\ClOutlook.vb" />
     <Compile Include="Painel 01 Leitura Dados\Painel Leitura Dados.Designer.vb">
       <DependentUpon>Painel Leitura Dados.vb</DependentUpon>
     </Compile>
@@ -301,10 +330,16 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Protheus\ClBancoProtheus.vb" />
-    <Compile Include="Protheus\Materiais\frmMateriaisProtheusa.Designer.vb">
-      <DependentUpon>frmMateriaisProtheusa.vb</DependentUpon>
+    <Compile Include="Protheus\Materiais\frmMateriaisOmie.Designer.vb">
+      <DependentUpon>frmMateriaisOmie.vb</DependentUpon>
     </Compile>
-    <Compile Include="Protheus\Materiais\frmMateriaisProtheusa.vb">
+    <Compile Include="Protheus\Materiais\frmMateriaisOmie.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Protheus\Materiais\frmMateriaisProtheus.Designer.vb">
+      <DependentUpon>frmMateriaisProtheus.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Protheus\Materiais\frmMateriaisProtheus.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Protheus\ModuleProtheus.vb" />
@@ -314,20 +349,32 @@
     <Compile Include="SGQ\frmInspecaoQualidade.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Telas de Carregamento\frmTelaCarregamento.Designer.vb">
+      <DependentUpon>frmTelaCarregamento.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Telas de Carregamento\frmTelaCarregamento.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Usuario\frmLogin.Designer.vb">
       <DependentUpon>frmLogin.vb</DependentUpon>
     </Compile>
     <Compile Include="Usuario\frmLogin.vb">
       <SubType>Form</SubType>
     </Compile>
-    <EmbeddedResource Include="Acabamento\frmAcabamento.resx">
-      <DependentUpon>frmAcabamento.vb</DependentUpon>
+    <EmbeddedResource Include="Ajuda\FrmAjudaLynx.resx">
+      <DependentUpon>FrmAjudaLynx.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Analise Tecnica\frmIAAnaliseTecnica.resx">
+      <DependentUpon>frmIAAnaliseTecnica.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Buscar Programas\FrmBuscarProgramas.resx">
       <DependentUpon>FrmBuscarProgramas.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Configurações\frmExportarParaOS.resx">
       <DependentUpon>frmExportarParaOS.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Configurações\frmProcessamentovb.resx">
+      <DependentUpon>frmProcessamentovb.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Icone Padrão sw\mainicon_20.png" />
     <EmbeddedResource Include="Icone Padrão sw\mainicon_32.png" />
@@ -350,6 +397,9 @@
     <EmbeddedResource Include="Ordem de Serviço\frmOpcaoLiberacaoOrdemServico.resx">
       <DependentUpon>frmOpcaoLiberacaoOrdemServico.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="OS-Tags\frmOsTags.resx">
+      <DependentUpon>frmOsTags.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Painel 01 Leitura Dados\Painel Leitura Dados.resx">
       <DependentUpon>Painel Leitura Dados.vb</DependentUpon>
     </EmbeddedResource>
@@ -362,11 +412,17 @@
     <EmbeddedResource Include="Projetos\frmRNC.resx">
       <DependentUpon>frmRNC.vb</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Protheus\Materiais\frmMateriaisProtheusa.resx">
-      <DependentUpon>frmMateriaisProtheusa.vb</DependentUpon>
+    <EmbeddedResource Include="Protheus\Materiais\frmMateriaisOmie.resx">
+      <DependentUpon>frmMateriaisOmie.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Protheus\Materiais\frmMateriaisProtheus.resx">
+      <DependentUpon>frmMateriaisProtheus.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SGQ\frmInspecaoQualidade.resx">
       <DependentUpon>frmInspecaoQualidade.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Telas de Carregamento\frmTelaCarregamento.resx">
+      <DependentUpon>frmTelaCarregamento.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Usuario\frmLogin.resx">
       <DependentUpon>frmLogin.vb</DependentUpon>
@@ -479,7 +535,6 @@
     <None Include="Resources\alterar.png" />
     <None Include="Resources\desmarcado.png" />
     <None Include="Resources\marcado.png" />
-    <None Include="Resources\dxf.PNG" />
     <None Include="Resources\pdf.PNG" />
     <None Include="Resources\sinal-de-menos.png" />
     <None Include="Resources\sinal-de-mais.png" />
@@ -501,6 +556,7 @@
     <None Include="Resources\Sem Incone.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="NewFolder1\" />
     <Folder Include="Tipo Desenho\" />
   </ItemGroup>
   <ItemGroup>
@@ -567,6 +623,9 @@
     <PackageReference Include="Microsoft.Office.Interop.Excel">
       <Version>15.0.4795.1001</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Web.WebView2">
+      <Version>1.0.3179.45</Version>
+    </PackageReference>
     <PackageReference Include="MySql.Data">
       <Version>9.0.0</Version>
     </PackageReference>
@@ -612,12 +671,15 @@
     <PackageReference Include="System.Memory">
       <Version>4.5.4</Version>
     </PackageReference>
+    <PackageReference Include="System.Net.Http">
+      <Version>4.3.4</Version>
+    </PackageReference>
     <PackageReference Include="System.Numerics.Vectors">
       <Version>4.1.3</Version>
     </PackageReference>
     <PackageReference Include="System.Resources.Extensions" Version="7.0.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
-      <Version>5.0.0</Version>
+      <Version>6.1.2</Version>
     </PackageReference>
     <PackageReference Include="System.Threading.Tasks.Extensions">
       <Version>4.5.4</Version>
@@ -628,6 +690,114 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\calculadora.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\socorro.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\qualidade.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bloqueado.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cadeado-aberto.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\desbloqueado.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\o-email.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\salva.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sinco-DXF.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sinco-PDF.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sinco-configurações.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sinco-Diversos.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sinco-salva.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Ler Dados da Lista.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Processar a Lista.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sinco-CheckList.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sinco-Medição.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sinco-Setores.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sinco-Excluir.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sinco-salva - Copia.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Ajuda - Copia.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Atualizar - Copia.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Sinco Limpar Campos.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Tag Projeto - Copia.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ICONE FOREST.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ICONE FOREST.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ICONE-FOREST1.bmp.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\downloadprotheus.jpeg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\download-omie.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\download-mega senior.jpeg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\curti.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\mao.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\desativado.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\isometrico.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\start.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\stop.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>

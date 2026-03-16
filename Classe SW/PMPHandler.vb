@@ -2,7 +2,6 @@ Imports SolidWorks.Interop.sldworks
 Imports SolidWorks.Interop.swconst
 Imports SolidWorks.Interop.swpublished
 
-
 Public Class PMPageHandler
     Implements PropertyManagerPage2Handler9
 
@@ -198,8 +197,8 @@ Public Class PMPageHandler
 
     End Sub
 
-
     Sub OnNumberBoxTrackingCompleted(ByVal id As Integer, ByVal val As Double) Implements SolidWorks.Interop.swpublished.IPropertyManagerPage2Handler9.OnNumberBoxTrackingCompleted
 
     End Sub
+
 End Class

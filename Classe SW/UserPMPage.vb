@@ -1,6 +1,5 @@
 Imports SolidWorks.Interop.sldworks
 Imports SolidWorks.Interop.swconst
-Imports SolidWorks.Interop.swpublished
 
 Public Class UserPMPage
     Dim iSwApp As SldWorks
@@ -11,12 +10,15 @@ Public Class UserPMPage
     Dim ppagetab2 As PropertyManagerPageTab
 
 #Region "Property Manager Page Controls"
+
     'Groups
     Dim group1 As PropertyManagerPageGroup
+
     Dim group2 As PropertyManagerPageGroup
 
     'Controls
     Dim checkbox1 As PropertyManagerPageCheckbox
+
     Dim option1 As PropertyManagerPageOption
     Dim option2 As PropertyManagerPageOption
     Dim option3 As PropertyManagerPageOption
@@ -33,6 +35,7 @@ Public Class UserPMPage
 
     'Control IDs
     Dim group1ID As Integer = 0
+
     Dim group2ID As Integer = 1
     Dim checkbox1ID As Integer = 2
     Dim option1ID As Integer = 3
@@ -94,7 +97,7 @@ Public Class UserPMPage
         options = swAddGroupBoxOptions_e.swGroupBoxOptions_Checkbox + swAddGroupBoxOptions_e.swGroupBoxOptions_Visible
         group2 = ppagetab1.AddGroupBox(group2ID, "Sample Group II", options)
 
-        'Add Controls to Group1 
+        'Add Controls to Group1
         'Checkbox1
         controlType = swPropertyManagerPageControlType_e.swControlType_Checkbox
         leftAlign = swPropertyManagerPageControlLeftAlign_e.swControlAlign_LeftEdge
@@ -193,4 +196,3 @@ Public Class UserPMPage
     End Sub
 
 End Class
-

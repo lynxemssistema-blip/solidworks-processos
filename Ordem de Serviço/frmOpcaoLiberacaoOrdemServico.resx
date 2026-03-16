@@ -117,4 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Label1.Text" xml:space="preserve">
+    <value>🔧 Escolha de Liberação da Ordem de Serviço
+Opção 1 – Libera a Ordem de Serviço e dá Baixa na Quantidade da Tag
+Use esta opção quando o produto for liberado de forma total para a fabricação, conforme o saldo informado na tag no momento do cadastro do Projeto/Tag.
+Essa opção é ideal para situações em que a quantidade prevista na tag será produzida por completo, sem necessidade de controle parcial ou etapas separadas.
+
+Exemplo de uso: Produção em lote fechado, onde todas as peças serão fabricadas de uma vez.
+
+Opção 2 – Libera a Ordem de Serviço sem dar Baixa na Quantidade da Tag
+Utilize esta opção quando a liberação da OS for parcial, como em liberações avulsas, por etapas ou em ordens de serviço complementares.
+Com essa opção, não há baixa imediata no saldo da tag, permitindo controlar a quantidade real conforme a produção for sendo liberada gradualmente.
+
+Exemplo de uso: Fabricação por etapas, ajustes, retrabalho, OS de complemento ou liberação parcial do lote.
+
+</value>
+  </data>
 </root>

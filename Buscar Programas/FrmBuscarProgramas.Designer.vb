@@ -55,12 +55,13 @@ Partial Class FrmBuscarProgramas
         Me.dgvDesenhosCadastrados.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvDesenhosCadastrados.Columns.AddRange(New System.Windows.Forms.DataGridViewColumn() {Me.dgvsw, Me.dgvPDF, Me.dgvDXF, Me.dgvLXDS, Me.dgvDFT})
         Me.dgvDesenhosCadastrados.ContextMenuStrip = Me.mnudgvDesenhosCadastrados
-        Me.dgvDesenhosCadastrados.Location = New System.Drawing.Point(12, 99)
+        Me.dgvDesenhosCadastrados.Location = New System.Drawing.Point(9, 80)
+        Me.dgvDesenhosCadastrados.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.dgvDesenhosCadastrados.Name = "dgvDesenhosCadastrados"
         Me.dgvDesenhosCadastrados.ReadOnly = True
         Me.dgvDesenhosCadastrados.RowHeadersWidth = 51
         Me.dgvDesenhosCadastrados.RowTemplate.Height = 24
-        Me.dgvDesenhosCadastrados.Size = New System.Drawing.Size(1101, 484)
+        Me.dgvDesenhosCadastrados.Size = New System.Drawing.Size(826, 393)
         Me.dgvDesenhosCadastrados.TabIndex = 0
         '
         'dgvsw
@@ -120,27 +121,27 @@ Partial Class FrmBuscarProgramas
         Me.mnudgvDesenhosCadastrados.ImageScalingSize = New System.Drawing.Size(20, 20)
         Me.mnudgvDesenhosCadastrados.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.Abrir3DDaLinhaSelecionadaToolStripMenuItem, Me.AbrirPDFDaLinhaSelecionadaToolStripMenuItem, Me.AbrirDXFDaLinhaSelecionadaToolStripMenuItem})
         Me.mnudgvDesenhosCadastrados.Name = "mnudgvDesenhosCadastrados"
-        Me.mnudgvDesenhosCadastrados.Size = New System.Drawing.Size(292, 82)
+        Me.mnudgvDesenhosCadastrados.Size = New System.Drawing.Size(243, 82)
         '
         'Abrir3DDaLinhaSelecionadaToolStripMenuItem
         '
         Me.Abrir3DDaLinhaSelecionadaToolStripMenuItem.Image = Global.SwLynx_4._1.My.Resources.Resources.sw
         Me.Abrir3DDaLinhaSelecionadaToolStripMenuItem.Name = "Abrir3DDaLinhaSelecionadaToolStripMenuItem"
-        Me.Abrir3DDaLinhaSelecionadaToolStripMenuItem.Size = New System.Drawing.Size(291, 26)
+        Me.Abrir3DDaLinhaSelecionadaToolStripMenuItem.Size = New System.Drawing.Size(242, 26)
         Me.Abrir3DDaLinhaSelecionadaToolStripMenuItem.Text = "Abrir 3D da Linha Selecionada"
         '
         'AbrirPDFDaLinhaSelecionadaToolStripMenuItem
         '
         Me.AbrirPDFDaLinhaSelecionadaToolStripMenuItem.Image = Global.SwLynx_4._1.My.Resources.Resources.pdf
         Me.AbrirPDFDaLinhaSelecionadaToolStripMenuItem.Name = "AbrirPDFDaLinhaSelecionadaToolStripMenuItem"
-        Me.AbrirPDFDaLinhaSelecionadaToolStripMenuItem.Size = New System.Drawing.Size(291, 26)
+        Me.AbrirPDFDaLinhaSelecionadaToolStripMenuItem.Size = New System.Drawing.Size(242, 26)
         Me.AbrirPDFDaLinhaSelecionadaToolStripMenuItem.Text = "Abrir PDF da Linha Selecionada"
         '
         'AbrirDXFDaLinhaSelecionadaToolStripMenuItem
         '
         Me.AbrirDXFDaLinhaSelecionadaToolStripMenuItem.Image = Global.SwLynx_4._1.My.Resources.Resources.dxf
         Me.AbrirDXFDaLinhaSelecionadaToolStripMenuItem.Name = "AbrirDXFDaLinhaSelecionadaToolStripMenuItem"
-        Me.AbrirDXFDaLinhaSelecionadaToolStripMenuItem.Size = New System.Drawing.Size(291, 26)
+        Me.AbrirDXFDaLinhaSelecionadaToolStripMenuItem.Size = New System.Drawing.Size(242, 26)
         Me.AbrirDXFDaLinhaSelecionadaToolStripMenuItem.Text = "Abrir DXF da Linha Selecionada"
         '
         'TimerdgvDesenhosCadastrados
@@ -149,17 +150,19 @@ Partial Class FrmBuscarProgramas
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(22, 17)
+        Me.Label1.Location = New System.Drawing.Point(16, 14)
+        Me.Label1.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(148, 16)
+        Me.Label1.Size = New System.Drawing.Size(117, 13)
         Me.Label1.TabIndex = 1
         Me.Label1.Text = "Endereço dos Arquivos"
         '
         'txtPesqEnderecoArquivo
         '
-        Me.txtPesqEnderecoArquivo.Location = New System.Drawing.Point(19, 42)
+        Me.txtPesqEnderecoArquivo.Location = New System.Drawing.Point(14, 34)
+        Me.txtPesqEnderecoArquivo.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.txtPesqEnderecoArquivo.Name = "txtPesqEnderecoArquivo"
-        Me.txtPesqEnderecoArquivo.Size = New System.Drawing.Size(532, 22)
+        Me.txtPesqEnderecoArquivo.Size = New System.Drawing.Size(400, 20)
         Me.txtPesqEnderecoArquivo.TabIndex = 2
         '
         'MySqlCommandBuilder1
@@ -172,17 +175,19 @@ Partial Class FrmBuscarProgramas
         '
         Me.ProgressBarBuscarArquivos.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.ProgressBarBuscarArquivos.Location = New System.Drawing.Point(12, 70)
+        Me.ProgressBarBuscarArquivos.Location = New System.Drawing.Point(9, 57)
+        Me.ProgressBarBuscarArquivos.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.ProgressBarBuscarArquivos.Name = "ProgressBarBuscarArquivos"
-        Me.ProgressBarBuscarArquivos.Size = New System.Drawing.Size(1101, 23)
+        Me.ProgressBarBuscarArquivos.Size = New System.Drawing.Size(826, 19)
         Me.ProgressBarBuscarArquivos.TabIndex = 5
         '
         'btnBuscarLXDS
         '
         Me.btnBuscarLXDS.Image = Global.SwLynx_4._1.My.Resources.Resources.CYPCUT
-        Me.btnBuscarLXDS.Location = New System.Drawing.Point(683, 12)
+        Me.btnBuscarLXDS.Location = New System.Drawing.Point(512, 10)
+        Me.btnBuscarLXDS.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.btnBuscarLXDS.Name = "btnBuscarLXDS"
-        Me.btnBuscarLXDS.Size = New System.Drawing.Size(120, 53)
+        Me.btnBuscarLXDS.Size = New System.Drawing.Size(90, 43)
         Me.btnBuscarLXDS.TabIndex = 4
         Me.btnBuscarLXDS.Text = "Buscar Arquivo LXDS"
         Me.btnBuscarLXDS.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
@@ -191,9 +196,10 @@ Partial Class FrmBuscarProgramas
         'btnBuscarDFT
         '
         Me.btnBuscarDFT.Image = Global.SwLynx_4._1.My.Resources.Resources.DFT
-        Me.btnBuscarDFT.Location = New System.Drawing.Point(557, 11)
+        Me.btnBuscarDFT.Location = New System.Drawing.Point(418, 9)
+        Me.btnBuscarDFT.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.btnBuscarDFT.Name = "btnBuscarDFT"
-        Me.btnBuscarDFT.Size = New System.Drawing.Size(120, 53)
+        Me.btnBuscarDFT.Size = New System.Drawing.Size(90, 43)
         Me.btnBuscarDFT.TabIndex = 3
         Me.btnBuscarDFT.Text = "Buscar Arquivo DFT"
         Me.btnBuscarDFT.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText
@@ -201,15 +207,16 @@ Partial Class FrmBuscarProgramas
         '
         'FrmBuscarProgramas
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1125, 595)
+        Me.ClientSize = New System.Drawing.Size(844, 483)
         Me.Controls.Add(Me.ProgressBarBuscarArquivos)
         Me.Controls.Add(Me.btnBuscarLXDS)
         Me.Controls.Add(Me.btnBuscarDFT)
         Me.Controls.Add(Me.txtPesqEnderecoArquivo)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.dgvDesenhosCadastrados)
+        Me.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
         Me.Name = "FrmBuscarProgramas"
         Me.Text = "Buscar Programas-Pasta padrão"
         CType(Me.dgvDesenhosCadastrados, System.ComponentModel.ISupportInitialize).EndInit()

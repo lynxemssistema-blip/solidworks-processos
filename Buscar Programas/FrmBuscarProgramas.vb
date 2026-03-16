@@ -3,10 +3,11 @@ Imports System.IO
 Imports System.Windows.Forms
 
 Public Class FrmBuscarProgramas
+
     Private Sub TimerdgvDesenhosCadastrados_Tick(sender As Object, e As EventArgs) Handles TimerdgvDesenhosCadastrados.Tick
 
         dgvDesenhosCadastrados.DataSource = cl_BancoDados.CarregarDados("SELECT RNC,
-        CodMatFabricante, 
+        CodMatFabricante,
         EnderecoArquivo
         FROM  " & ComplementoTipoBanco & "material where PecaManuFat = 'S' and (d_e_l_e_t_e <> '*' or d_e_l_e_t_e is null)
         and (EnderecoArquivo like '%.SLDPRT%' or EnderecoArquivo like '%.SLDASM%')
@@ -23,7 +24,6 @@ Public Class FrmBuscarProgramas
     End Sub
 
     Private Sub btnBuscarDFT_Click(sender As Object, e As EventArgs) Handles btnBuscarDFT.Click
-
 
         Dim pastaBuscaDFT As String = ""
 
@@ -89,7 +89,6 @@ Public Class FrmBuscarProgramas
 
                 ' Atualiza a barra de progresso
                 ProgressBarBuscarArquivos.Value = row.Index + 1
-
             Catch ex As Exception
                 ' Trata exceções e continua o loop
                 row.DefaultCellStyle.BackColor = Color.LightCoral
@@ -101,12 +100,9 @@ Public Class FrmBuscarProgramas
         ProgressBarBuscarArquivos.Value = 0
         MessageBox.Show("Operação concluída.")
 
-
-
     End Sub
 
     Private Sub btnBuscarLXDS_Click(sender As Object, e As EventArgs) Handles btnBuscarLXDS.Click
-
 
         Dim pastaBuscaLXDS As String = ""
 
@@ -168,7 +164,6 @@ Public Class FrmBuscarProgramas
 
                 ' Atualiza a barra de progresso
                 ProgressBarBuscarArquivos.Value = row.Index + 1
-
             Catch ex As Exception
                 ' Trata exceções e continua o loop
                 row.DefaultCellStyle.BackColor = Color.LightCoral
@@ -263,7 +258,6 @@ Public Class FrmBuscarProgramas
 
                     dgvDesenhosCadastrados.CurrentRow.DefaultCellStyle.BackColor = Color.LightCyan
                 End Using
-
             Else
 
                 ' Substitui extensões ".SLDASM" e ".SLDPRT" por ".DDF"
@@ -282,10 +276,8 @@ Public Class FrmBuscarProgramas
                         dgvDesenhosCadastrados.CurrentRow.DefaultCellStyle.BackColor = Color.LightCyan
                     End Using
 
-
                 End If
             End If
-
         Catch ex As Exception
             MsgBox("Arquivo não encontrado!", vbCritical, "Atenção")
         Finally
@@ -296,25 +288,24 @@ Public Class FrmBuscarProgramas
 
     Private Sub dgvDesenhosCadastrados_DataBindingComplete(sender As Object, e As DataGridViewBindingCompleteEventArgs) Handles dgvDesenhosCadastrados.DataBindingComplete
 
+        cl_BancoDados.FormatarDataGridView(dgvDesenhosCadastrados, "SIM")
+
         Dim enderecoArquivo As String
 
         Dim dxf, pdf, LXDS, dft As String
 
         For i As Integer = 0 To dgvDesenhosCadastrados.Rows.Count - 1
 
-
             Try
 
                 Try
                     enderecoArquivo = dgvDesenhosCadastrados.Rows(i).Cells("EnderecoArquivo").Value.ToString()
-
                 Catch ex As Exception
                     enderecoArquivo = ""
                     Continue For
                 End Try
 
                 If enderecoArquivo <> "" Then
-
 
                     ' Verifica se o arquivo é uma peça (.SLDPRT) ou uma montagem (.SLDASM) e altera para .dxf
                     If enderecoArquivo.EndsWith(".SLDPRT", StringComparison.OrdinalIgnoreCase) OrElse
@@ -366,12 +357,10 @@ Public Class FrmBuscarProgramas
 
                     End If
 
-
                     ' Verifica se o arquivo é uma peça (.SLDPRT) ou uma montagem (.SLDASM) e altera para .dxf
                     If enderecoArquivo.EndsWith(".SLDPRT", StringComparison.OrdinalIgnoreCase) OrElse
                        enderecoArquivo.EndsWith(".SLDASM", StringComparison.OrdinalIgnoreCase) Then
                         LXDS = Path.ChangeExtension(enderecoArquivo, ".LXDS")
-
 
                         ' Verifica se o arquivo PDF existe
                         If File.Exists(LXDS) Then
@@ -381,12 +370,10 @@ Public Class FrmBuscarProgramas
                         End If
                     End If
 
-
                     ' Verifica se o arquivo é uma peça (.SLDPRT) ou uma montagem (.SLDASM) e altera para .dxf
                     If enderecoArquivo.EndsWith(".SLDPRT", StringComparison.OrdinalIgnoreCase) OrElse
                        enderecoArquivo.EndsWith(".SLDASM", StringComparison.OrdinalIgnoreCase) Then
                         dft = Path.ChangeExtension(enderecoArquivo, ".DFT")
-
 
                         ' Verifica se o arquivo PDF existe
                         If File.Exists(enderecoArquivo) Then
@@ -405,4 +392,9 @@ Public Class FrmBuscarProgramas
 
         Next
     End Sub
+
+    Private Sub dgvDesenhosCadastrados_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles dgvDesenhosCadastrados.CellContentClick
+
+    End Sub
+
 End Class

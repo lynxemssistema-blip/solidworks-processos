@@ -1,21 +1,10 @@
-Imports System
-Imports System.Collections
 Imports System.Collections.Generic
-Imports System.Diagnostics
-Imports System.Net
 Imports System.Reflection
 Imports System.Runtime.InteropServices
-Imports System.Threading
 Imports System.Windows.Forms
 Imports SolidWorks.Interop.sldworks
 Imports SolidWorks.Interop.swconst
-Imports SolidWorks.Interop.swpublished
-Imports SolidWorksTools
 Imports SolidWorksTools.File
-Imports System.IO
-Imports SwLynx_4._1.My
-Imports System.Text
-
 
 'Se você tem um suplemento que está sendo carregado automaticamente na inicialização Do SolidWorks e deseja desativá-lo via VB.NET, você pode modificar o comportamento Do suplemento alterando o estado de carregamento automático no registro Do Windows.
 
@@ -23,7 +12,6 @@ Imports System.Text
 
 'Caminho do Registro
 'HKEY_CURRENT_USER\ Software \ SolidWorks \ AddInsStartup \ {GUID Do Add-In}
-
 
 <Guid("971f984a-5563-483d-a608-2f62bda31268")>
 <ComVisible(True)>
@@ -34,7 +22,7 @@ Imports System.Text
         )>
 Public Class SwAddin
     Implements SolidWorks.Interop.swpublished.SwAddin
-    Implements SolidWorks.Interop.sldworks.DSldWorksEvents
+    ' Implements SolidWorks.Interop.sldworks.DSldWorksEvents
 
     Private WithEvents selectionMgr As SelectionMgr
     Private WithEvents modelView As ModelView
@@ -156,69 +144,92 @@ Public Class SwAddin
         iSwApp = ThisSW
         addinID = Cookie
 
-        TipoBanco = "MYSQL"
-        'TipoBanco = "SQL"
+        My.Settings.TipoConexao = "MYSQL"
+        'My.Settings.TipoConexao = "SQL"
 
+        'If My.Settings.MySqlBancoDados.ToString = "SQL" Then
 
-        If TipoBanco = "MYSQL" Then
+        '    cl_BancoDados.arquivoConfiguracao()
+
+        'End If
+        If My.Settings.MySqlBancoDados.ToString = "" Then
+
+            cl_BancoDados.arquivoConfiguracao()
+
+        End If
+
+        My.Settings.BancoDadosAtivo = My.Settings.MySqlBancoDados
+
+        If My.Settings.TipoConexao.ToString = "MYSQL" Then
 
             ComplementoTipoBanco = ""
 
-        ElseIf TipoBanco = "SQL" Then
+        ElseIf My.Settings.TipoConexao.ToString = "SQL" Then
 
             ComplementoTipoBanco = "[BDENG].[dbo]."
 
         End If
 
-        If My.Settings.MySqlBancoDados.ToString = "" Then
+        If cl_BancoDados.AbrirBanco() = True Then
 
-            cl_BancoDados.arquivoConfiguracao()
+            AddTaskPane()
 
+            ShowTaskPane()
+            MyTaskPanelHost.Show()
+            EntradaLogin.ShowDialog()
 
+            ' Subscreve-se aos eventos do SolidWorks
+            AttachEventHandlers()
+
+            ' Chama a função para anexar os manipuladores de eventos a todos os documentos atualmente abertos
+            'AttachEventsToAllDocuments()
+
+            iCmdMgr = SwApp.GetCommandManager(Cookie)
+            SwApp.SetAddinCallbackInfo2(0, Me, Cookie)
+
+            ' Se inscrever no evento de mudança de documento ativo
+            '  AddHandler SwApp.ActiveModelDocChangeNotify, AddressOf OnActiveModelDocChange
+
+            SwApp.LoadAddIn("SwLynx_4._1")
+            ConnectToSW = True
         Else
 
-            If cl_BancoDados.AbrirBanco() = True Then
+            SwApp.UnloadAddIn("SwLynx_4._1")
 
-                AddTaskPane()
-
-                ShowTaskPane()
-                MyTaskPanelHost.Show()
-                EntradaLogin.ShowDialog()
-
-                ' Subscreve-se aos eventos do SolidWorks
-                AttachEventHandlers()
-
-                ' Chama a função para anexar os manipuladores de eventos a todos os documentos atualmente abertos
-                'AttachEventsToAllDocuments()
-
-                iCmdMgr = SwApp.GetCommandManager(Cookie)
-                SwApp.SetAddinCallbackInfo2(0, Me, Cookie)
-
-                ' Se inscrever no evento de mudança de documento ativo
-                '  AddHandler SwApp.ActiveModelDocChangeNotify, AddressOf OnActiveModelDocChange
-
-                SwApp.LoadAddIn("SwLynx_4._1")
-                ConnectToSW = True
-
-            Else
-
-                SwApp.UnloadAddIn("SwLynx_4._1")
-
-                ConnectToSW = False
-
-            End If
-            Try
-                SwApp.UnloadAddIn("Lynx_SW_1._0")
-                ConnectToSW = False
-            Catch ex As Exception
-            Finally
-                SwApp.UnloadAddIn("SwLynx_4._1")
-                ConnectToSW = False
-            End Try
+            ConnectToSW = False
 
         End If
+        Try
+            SwApp.UnloadAddIn("Lynx_SW_1._0")
+            ConnectToSW = False
+        Catch ex As Exception
+        Finally
+            SwApp.UnloadAddIn("SwLynx_4._1")
+            ConnectToSW = False
+        End Try
 
     End Function
+
+    'Imports System.Runtime.InteropServices
+    'Imports SolidWorks.Interop.sldworks
+
+    Public Sub DescarregarAddinSW(ByVal guidAddin As String)
+        Try
+            ' Tenta obter a instância atual do SolidWorks já aberta
+            Dim swApp As SldWorks = TryCast(Marshal.GetActiveObject("SldWorks.Application"), SldWorks)
+
+            If swApp Is Nothing Then
+                MsgBox("Nenhuma instância do SolidWorks foi encontrada em execução.", MsgBoxStyle.Exclamation)
+                Exit Sub
+            End If
+
+            ' Descarrega o Add-in pelo GUID informado
+            swApp.UnloadAddIn(guidAddin)
+        Catch ex As Exception
+            MsgBox("Erro ao descarregar o add-in: " & ex.Message, MsgBoxStyle.Exclamation)
+        End Try
+    End Sub
+
     Function SelectionChangeNotify() As Integer
         'MsgBox("mudou")
         ' O que fazer quando a seleção muda
@@ -307,23 +318,23 @@ Public Class SwAddin
         DisconnectFromSW = True
     End Function
 
-    Public Function FileCloseNotify(FileName As String, reason As Integer) As Integer Implements DSldWorksEvents.FileCloseNotify
-        Try
-            ' Aqui você pode registrar o momento do fechamento.
-            Dim currentTime As DateTime = DateTime.Now
-            Dim message As String = $"Documento fechado: {FileName}. Momento do fechamento: {currentTime}"
+    'Public Function FileCloseNotify(FileName As String, reason As Integer) As Integer Implements DSldWorksEvents.FileCloseNotify
+    '    Try
+    '        ' Aqui você pode registrar o momento do fechamento.
+    '        Dim currentTime As DateTime = DateTime.Now
+    '        Dim message As String = $"Documento fechado: {FileName}. Momento do fechamento: {currentTime}"
 
-            ' Exemplo: mostrar uma mensagem com o nome do arquivo e o horário de fechamento
-            MessageBox.Show(message, "Fechamento de Documento", MessageBoxButtons.OK, MessageBoxIcon.Information)
+    '        ' Exemplo: mostrar uma mensagem com o nome do arquivo e o horário de fechamento
+    '        MessageBox.Show(message, "Fechamento de Documento", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
-            ' Aqui você pode adicionar lógica adicional se necessário
-        Catch ex As Exception
-            ' Tratamento de exceções
-            MessageBox.Show($"Erro ao processar o fechamento do documento: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
-        End Try
+    '        ' Aqui você pode adicionar lógica adicional se necessário
+    '    Catch ex As Exception
+    '        ' Tratamento de exceções
+    '        MessageBox.Show($"Erro ao processar o fechamento do documento: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
+    '    End Try
 
-        Return 0
-    End Function
+    '    Return 0
+    'End Function
 
 #End Region
 
@@ -331,12 +342,35 @@ Public Class SwAddin
 
     Public Sub AddTaskPane()
 
-        MyTaskPaneView = SwApp.CreateTaskpaneView2("", "SwLynx_4._1")
+        Dim tempPath As String = SalvarIconeNoDiretorioDoSolidWorks()
+        MyTaskPaneView = SwApp.CreateTaskpaneView2(tempPath, "SwLynx_4._1")
         MyTaskPanelHost = MyTaskPaneView.AddControl("SwLynx_4._1", "")
 
-        MyTaskPanelHost.getSwApp(SwApp)
-
     End Sub
+
+    Public Function SalvarIconeNoDiretorioDoSolidWorks() As String
+
+        ' Caminho padrão de instalação do SOLIDWORKS
+        Dim solidworksPath As String = "C:\Program Files\SOLIDWORKS Corp\SOLIDWORKS"
+
+        ' Nome do arquivo que será salvo
+        Dim iconPath As String = IO.Path.Combine(solidworksPath, "ICONE-FOREST1.bmp")
+
+        Try
+            ' Converte e salva o recurso como .bmp no diretório do SOLIDWORKS
+            My.Resources.ICONE_FOREST1_bmp.Save(iconPath, System.Drawing.Imaging.ImageFormat.Bmp)
+
+            SalvarIconeNoDiretorioDoSolidWorks = iconPath
+
+            'MessageBox.Show("Ícone salvo com sucesso em: " & iconPath, "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        Catch ex As UnauthorizedAccessException
+            'MessageBox.Show("Permissão negada para salvar o arquivo. Execute o programa como administrador.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Catch ex As Exception
+            ' MessageBox.Show("Erro ao salvar o ícone: " & ex.Message, "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
+        End Try
+
+    End Function
 
     Public Sub RemoveTaskPane()
 
@@ -472,7 +506,7 @@ Public Class SwAddin
 
     Sub AttachEventHandlers()
 
-        AttachSWEvents()
+        'AttachSWEvents()
 
         'Listen for events on all currently open docs
         AttachEventsToAllDocuments()
@@ -524,24 +558,23 @@ Public Class SwAddin
         numKeys = 0
     End Sub
 
-    Sub AttachSWEvents()
-        Try
+    'Sub AttachSWEvents()
+    '    Try
 
-
-            AddHandler iSwApp.ActiveDocChangeNotify, AddressOf Me.SldWorks_ActiveDocChangeNotify
-            'edson 20-01-2025
-            ' AddHandler iSwApp.DocumentLoadNotify2, AddressOf Me.SldWorks_DocumentLoadNotify2
-            ' AddHandler iSwApp.FileNewNotify2, AddressOf Me.SldWorks_FileNewNotify2
-            'AddHandler iSwApp.ActiveModelDocChangeNotify, AddressOf Me.SldWorks_ActiveModelDocChangeNotify
-            'AddHandler iSwApp.FileOpenPostNotify, AddressOf Me.SldWorks_FileOpenPostNotify
-            AddHandler iSwApp.FileCloseNotify, AddressOf Me.FileCloseNotify
-            ' Acompanhar eventos de seleção globais
-            AddHandler iSwApp.ActiveModelDocChangeNotify, AddressOf OnActiveModelDocChange
-        Catch e As Exception
-            '   Console.WriteLine(e.Message)
-        Finally
-        End Try
-    End Sub
+    '        AddHandler iSwApp.ActiveDocChangeNotify, AddressOf Me.SldWorks_ActiveDocChangeNotify
+    '        'edson 20-01-2025
+    '        ' AddHandler iSwApp.DocumentLoadNotify2, AddressOf Me.SldWorks_DocumentLoadNotify2
+    '        ' AddHandler iSwApp.FileNewNotify2, AddressOf Me.SldWorks_FileNewNotify2
+    '        'AddHandler iSwApp.ActiveModelDocChangeNotify, AddressOf Me.SldWorks_ActiveModelDocChangeNotify
+    '        'AddHandler iSwApp.FileOpenPostNotify, AddressOf Me.SldWorks_FileOpenPostNotify
+    '        AddHandler iSwApp.FileCloseNotify, AddressOf Me.FileCloseNotify
+    '        ' Acompanhar eventos de seleção globais
+    '        AddHandler iSwApp.ActiveModelDocChangeNotify, AddressOf OnActiveModelDocChange
+    '    Catch e As Exception
+    '        '   Console.WriteLine(e.Message)
+    '    Finally
+    '    End Try
+    'End Sub
 
     ' Configura os eventos ao abrir o documento
     Public Sub ConectarEventos()
@@ -562,6 +595,9 @@ Public Class SwAddin
     End Function
 
     Sub DetachSWEvents()
+
+        If DescarregarLynx = False Then Exit Sub
+
         Try
             RemoveHandler iSwApp.ActiveDocChangeNotify, AddressOf Me.SldWorks_ActiveDocChangeNotify
             'edson 20-01-2025
@@ -569,7 +605,7 @@ Public Class SwAddin
             'RemoveHandler iSwApp.FileNewNotify2, AddressOf Me.SldWorks_FileNewNotify2
             'RemoveHandler iSwApp.ActiveModelDocChangeNotify, AddressOf Me.SldWorks_ActiveModelDocChangeNotify
             'RemoveHandler iSwApp.FileOpenPostNotify, AddressOf Me.SldWorks_FileOpenPostNotify
-            RemoveHandler iSwApp.FileCloseNotify, AddressOf Me.FileCloseNotify
+            '   RemoveHandler iSwApp.FileCloseNotify, AddressOf Me.FileCloseNotify
 
             ' MsgBox(swModel.GetPathName)
         Catch e As Exception
@@ -580,6 +616,8 @@ Public Class SwAddin
 
     Sub AttachEventsToAllDocuments()
 
+        If DescarregarLynx = False Then Exit Sub
+
         ' Obtemos o primeiro documento
         swModel = SwApp.GetFirstDocument()
 
@@ -588,7 +626,6 @@ Public Class SwAddin
         '    ' MsgBox("Nenhum documento aberto.")
         '    Return
         'End If
-
 
         ' Conectar ao SolidWorks
         IntanciaSolidWorks.ConectarSolidWorks()
@@ -620,29 +657,29 @@ Public Class SwAddin
             MyTaskPanelHost.lblProfundidadeTotalCaixaDelimitadora.Text = ""
             MyTaskPanelHost.lblProfundidadeTotalCaixaDelimitadora.Text = ""
 
+            MyTaskPanelHost.btnPendencias.Enabled = False
+
             'MyTaskPanelHost.cboAcabamento.Text = ""
             'MyTaskPanelHost.cboProcessoSoldagem.Text = ""
             ' MyTaskPanelHost.cboTipoDesenho.Text = ""
             ' MyTaskPanelHost.cboItemEstoque.Text = ""
 
-            MyTaskPanelHost.chkCorte.Checked = False
+            'MyTaskPanelHost.chkCorte.Checked = False
 
-            MyTaskPanelHost.chkDobra.Checked = False
+            'MyTaskPanelHost.chkDobra.Checked = False
 
-            MyTaskPanelHost.chkSolda.Checked = False
+            'MyTaskPanelHost.chkSolda.Checked = False
 
-            MyTaskPanelHost.chkPintura.Checked = False
+            'MyTaskPanelHost.chkPintura.Checked = False
 
-            MyTaskPanelHost.chkPintura.Checked = False
+            'MyTaskPanelHost.chkPintura.Checked = False
 
-            MyTaskPanelHost.chkMontagem.Checked = False
+            'MyTaskPanelHost.chkMontagem.Checked = False
 
-            MyTaskPanelHost.TimerMontaPeca.Enabled = True
-
+            'MyTaskPanelHost.TimerMontaPeca.Enabled = True
         Else
 
             Try
-
 
                 ' Mensagem com o caminho do documento
 
@@ -666,8 +703,6 @@ Public Class SwAddin
                 '  MyTaskPanelHost.TimerFiltroPecaAtivaOS.Enabled = True
 
                 ' DadosArquivoCorrente.AtualizaDesenho(swModel) 'teste salvamento 20-01-2025
-
-
             Catch ex As Exception
 
                 ' MsgBox("Erro geral: " & ex.Message)
@@ -677,10 +712,12 @@ Public Class SwAddin
 
         End If
 
-
     End Sub
 
     Function AttachModelDocEventHandler(ByVal swModel As ModelDoc2) As Boolean
+
+        If DescarregarLynx = False Then Exit Function
+
         If swModel Is Nothing Then
             Return False
         End If
@@ -716,6 +753,8 @@ Public Class SwAddin
 #Region "Event Handlers"
 
     Public Function OnSelectionChange(ByVal SwModel As ModelDoc2) As Integer
+
+        If DescarregarLynx = False Then Exit Function
         Try
             ' Obter o documento ativo
             SwModel = SwApp.ActiveDoc
@@ -748,6 +787,9 @@ Public Class SwAddin
     End Function
 
     Public Sub LerDadosArvoreMontagem(ByVal SwModel As ModelDoc2)
+
+        If DescarregarLynx = False Then Exit Sub
+
         Try
             ' Obter o documento ativo
 
@@ -782,6 +824,8 @@ Public Class SwAddin
     ' Função recursiva para percorrer os componentes da montagem
     Private Sub LerDadosComponentes(ByVal comp As Component2, ByVal nivel As Integer, ByVal swModel As ModelDoc2)
 
+        If DescarregarLynx = False Then Exit Sub
+
         Try
             If comp Is Nothing Then Return
 
@@ -808,6 +852,8 @@ Public Class SwAddin
     End Sub
 
     Function SldWorks_ActiveDocChangeNotify() As Integer
+
+        If DescarregarLynx = False Then Exit Function
 
         AttachEventsToAllDocuments()
 
@@ -843,19 +889,21 @@ Public Class SwAddin
                 ' MyTaskPanelHost.cboTipoDesenho.Text = ""
                 ' MyTaskPanelHost.cboItemEstoque.Text = ""
 
-                MyTaskPanelHost.chkCorte.Checked = False
+                'MyTaskPanelHost.chkCorte.Checked = False
 
-                MyTaskPanelHost.chkDobra.Checked = False
+                'MyTaskPanelHost.chkDobra.Checked = False
 
-                MyTaskPanelHost.chkSolda.Checked = False
+                'MyTaskPanelHost.chkSolda.Checked = False
 
-                MyTaskPanelHost.chkPintura.Checked = False
+                'MyTaskPanelHost.chkPintura.Checked = False
 
-                MyTaskPanelHost.chkPintura.Checked = False
+                'MyTaskPanelHost.chkPintura.Checked = False
 
-                MyTaskPanelHost.chkMontagem.Checked = False
+                'MyTaskPanelHost.chkMontagem.Checked = False
 
-                MyTaskPanelHost.TimerMontaPeca.Enabled = True
+                'MyTaskPanelHost.TimerMontaPeca.Enabled = True
+
+                MyTaskPanelHost.btnPendencias.Enabled = False
 
             End If
 
@@ -866,10 +914,8 @@ Public Class SwAddin
         'TODO: Add your implementation here
     End Function
 
-
     'edson 20-01-2025
     ''''Function SldWorks_DocumentLoadNotify2(ByVal docTitle As String, ByVal docPath As String) As Integer
-
 
     ''''End Function
 
@@ -1001,146 +1047,146 @@ Public Class SwAddin
         Return 1
     End Function
 
-    Public Function FileOpenNotify(FileName As String) As Integer Implements DSldWorksEvents.FileOpenNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function FileNewNotify(NewDoc As Object, DocType As Integer) As Integer Implements DSldWorksEvents.FileNewNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function DestroyNotify() As Integer Implements DSldWorksEvents.DestroyNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function ActiveDocChangeNotify() As Integer Implements DSldWorksEvents.ActiveDocChangeNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function ActiveModelDocChangeNotify() As Integer Implements DSldWorksEvents.ActiveModelDocChangeNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function PropertySheetCreateNotify(Sheet As Object, sheetType As Integer) As Integer Implements DSldWorksEvents.PropertySheetCreateNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function NonNativeFileOpenNotify(FileName As String) As Integer Implements DSldWorksEvents.NonNativeFileOpenNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function LightSheetCreateNotify(NewSheet As Object, sheetType As Integer, LightId As Integer) As Integer Implements DSldWorksEvents.LightSheetCreateNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function DocumentConversionNotify(FileName As String) As Integer Implements DSldWorksEvents.DocumentConversionNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function DocumentLoadNotify(docTitle As String, docPath As String) As Integer Implements DSldWorksEvents.DocumentLoadNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function FileNewNotify2(NewDoc As Object, DocType As Integer, TemplateName As String) As Integer Implements DSldWorksEvents.FileNewNotify2
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function FileOpenNotify2(FileName As String) As Integer Implements DSldWorksEvents.FileOpenNotify2
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function ReferenceNotFoundNotify(FileName As String) As Integer Implements DSldWorksEvents.ReferenceNotFoundNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function PromptForFilenameNotify(openOrSave As Integer, suggestedFileName As String, DocType As Integer, cause As Integer) As Integer Implements DSldWorksEvents.PromptForFilenameNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function BeginTranslationNotify(FileName As String, Options As Integer) As Integer Implements DSldWorksEvents.BeginTranslationNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function EndTranslationNotify(FileName As String, Options As Integer) As Integer Implements DSldWorksEvents.EndTranslationNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function OnIdleNotify() As Integer Implements DSldWorksEvents.OnIdleNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function FileOpenPreNotify(FileName As String) As Integer Implements DSldWorksEvents.FileOpenPreNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function FileOpenPostNotify(FileName As String) As Integer Implements DSldWorksEvents.FileOpenPostNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function ReferencedFilePreNotify(FileName As String) As Integer Implements DSldWorksEvents.ReferencedFilePreNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function BeginRecordNotify() As Integer Implements DSldWorksEvents.BeginRecordNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function EndRecordNotify() As Integer Implements DSldWorksEvents.EndRecordNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function FileNewPreNotify(DocType As Integer, TemplateName As String) As Integer Implements DSldWorksEvents.FileNewPreNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function JournalWriteNotify(journalFile As String, LineCount As Integer) As Integer Implements DSldWorksEvents.JournalWriteNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Private Function DSldWorksEvents_DocumentLoadNotify2(docTitle As String, docPath As String) As Integer Implements DSldWorksEvents.DocumentLoadNotify2
-        Throw New NotImplementedException()
-
-    End Function
-
-    Public Function CommandCloseNotify(Command As Integer, reason As Integer) As Integer Implements DSldWorksEvents.CommandCloseNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function PromptForMultipleFileNamesNotify(openOrSave As Integer, ByRef suggestedFileNames As Object, ByRef DocTypes As Object, cause As Integer) As Integer Implements DSldWorksEvents.PromptForMultipleFileNamesNotify
-        Throw New NotImplementedException()
-    End Function
-
-    Public Function CommandOpenPreNotify(Command As Integer, UserCommand As Integer) As Integer Implements DSldWorksEvents.CommandOpenPreNotify
-        Throw New NotImplementedException()
-    End Function
-
-    'Public Function FileCloseNotify(FileName As String, reason As Integer) As Integer Implements DSldWorksEvents.FileCloseNotify
+    'Public Function FileOpenNotify(FileName As String) As Integer Implements DSldWorksEvents.FileOpenNotify
     '    Throw New NotImplementedException()
     'End Function
 
-    Public Function BackgroundProcessingStartNotify(FileName As String) As Integer Implements DSldWorksEvents.BackgroundProcessingStartNotify
-        Throw New NotImplementedException()
-    End Function
+    'Public Function FileNewNotify(NewDoc As Object, DocType As Integer) As Integer Implements DSldWorksEvents.FileNewNotify
+    '    Throw New NotImplementedException()
+    'End Function
 
-    Public Function BackgroundProcessingEndNotify(FileName As String) As Integer Implements DSldWorksEvents.BackgroundProcessingEndNotify
-        Throw New NotImplementedException()
-    End Function
+    'Public Function DestroyNotify() As Integer Implements DSldWorksEvents.DestroyNotify
+    '    Throw New NotImplementedException()
+    'End Function
 
-    Public Function InterfaceBrightnessThemeChangeNotify(ThemeType As Integer, ByRef Colors As Object) As Integer Implements DSldWorksEvents.InterfaceBrightnessThemeChangeNotify
-        Throw New NotImplementedException()
-    End Function
+    'Public Function ActiveDocChangeNotify() As Integer Implements DSldWorksEvents.ActiveDocChangeNotify
+    '    Throw New NotImplementedException()
+    'End Function
 
-    Public Function ReferencedFilePreNotify2(FileName As String, FileStatus As Integer) As Integer Implements DSldWorksEvents.ReferencedFilePreNotify2
-        Throw New NotImplementedException()
-    End Function
+    'Public Function ActiveModelDocChangeNotify() As Integer Implements DSldWorksEvents.ActiveModelDocChangeNotify
+    '    Throw New NotImplementedException()
+    'End Function
 
-    Public Function Begin3DInterconnectTranslationNotify(FileName As String) As Integer Implements DSldWorksEvents.Begin3DInterconnectTranslationNotify
-        Throw New NotImplementedException()
-    End Function
+    'Public Function PropertySheetCreateNotify(Sheet As Object, sheetType As Integer) As Integer Implements DSldWorksEvents.PropertySheetCreateNotify
+    '    Throw New NotImplementedException()
+    'End Function
 
-    Public Function End3DInterconnectTranslationNotify(FileName As String) As Integer Implements DSldWorksEvents.End3DInterconnectTranslationNotify
-        Throw New NotImplementedException()
-    End Function
+    'Public Function NonNativeFileOpenNotify(FileName As String) As Integer Implements DSldWorksEvents.NonNativeFileOpenNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function LightSheetCreateNotify(NewSheet As Object, sheetType As Integer, LightId As Integer) As Integer Implements DSldWorksEvents.LightSheetCreateNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function DocumentConversionNotify(FileName As String) As Integer Implements DSldWorksEvents.DocumentConversionNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function DocumentLoadNotify(docTitle As String, docPath As String) As Integer Implements DSldWorksEvents.DocumentLoadNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function FileNewNotify2(NewDoc As Object, DocType As Integer, TemplateName As String) As Integer Implements DSldWorksEvents.FileNewNotify2
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function FileOpenNotify2(FileName As String) As Integer Implements DSldWorksEvents.FileOpenNotify2
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function ReferenceNotFoundNotify(FileName As String) As Integer Implements DSldWorksEvents.ReferenceNotFoundNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function PromptForFilenameNotify(openOrSave As Integer, suggestedFileName As String, DocType As Integer, cause As Integer) As Integer Implements DSldWorksEvents.PromptForFilenameNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function BeginTranslationNotify(FileName As String, Options As Integer) As Integer Implements DSldWorksEvents.BeginTranslationNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function EndTranslationNotify(FileName As String, Options As Integer) As Integer Implements DSldWorksEvents.EndTranslationNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function OnIdleNotify() As Integer Implements DSldWorksEvents.OnIdleNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function FileOpenPreNotify(FileName As String) As Integer Implements DSldWorksEvents.FileOpenPreNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function FileOpenPostNotify(FileName As String) As Integer Implements DSldWorksEvents.FileOpenPostNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function ReferencedFilePreNotify(FileName As String) As Integer Implements DSldWorksEvents.ReferencedFilePreNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function BeginRecordNotify() As Integer Implements DSldWorksEvents.BeginRecordNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function EndRecordNotify() As Integer Implements DSldWorksEvents.EndRecordNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function FileNewPreNotify(DocType As Integer, TemplateName As String) As Integer Implements DSldWorksEvents.FileNewPreNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function JournalWriteNotify(journalFile As String, LineCount As Integer) As Integer Implements DSldWorksEvents.JournalWriteNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Private Function DSldWorksEvents_DocumentLoadNotify2(docTitle As String, docPath As String) As Integer Implements DSldWorksEvents.DocumentLoadNotify2
+    '    Throw New NotImplementedException()
+
+    'End Function
+
+    'Public Function CommandCloseNotify(Command As Integer, reason As Integer) As Integer Implements DSldWorksEvents.CommandCloseNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function PromptForMultipleFileNamesNotify(openOrSave As Integer, ByRef suggestedFileNames As Object, ByRef DocTypes As Object, cause As Integer) As Integer Implements DSldWorksEvents.PromptForMultipleFileNamesNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function CommandOpenPreNotify(Command As Integer, UserCommand As Integer) As Integer Implements DSldWorksEvents.CommandOpenPreNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    ''Public Function FileCloseNotify(FileName As String, reason As Integer) As Integer Implements DSldWorksEvents.FileCloseNotify
+    ''    Throw New NotImplementedException()
+    ''End Function
+
+    'Public Function BackgroundProcessingStartNotify(FileName As String) As Integer Implements DSldWorksEvents.BackgroundProcessingStartNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function BackgroundProcessingEndNotify(FileName As String) As Integer Implements DSldWorksEvents.BackgroundProcessingEndNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function InterfaceBrightnessThemeChangeNotify(ThemeType As Integer, ByRef Colors As Object) As Integer Implements DSldWorksEvents.InterfaceBrightnessThemeChangeNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function ReferencedFilePreNotify2(FileName As String, FileStatus As Integer) As Integer Implements DSldWorksEvents.ReferencedFilePreNotify2
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function Begin3DInterconnectTranslationNotify(FileName As String) As Integer Implements DSldWorksEvents.Begin3DInterconnectTranslationNotify
+    '    Throw New NotImplementedException()
+    'End Function
+
+    'Public Function End3DInterconnectTranslationNotify(FileName As String) As Integer Implements DSldWorksEvents.End3DInterconnectTranslationNotify
+    '    Throw New NotImplementedException()
+    'End Function
 
 #End Region
 

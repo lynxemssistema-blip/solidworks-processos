@@ -1,8 +1,6 @@
-﻿
-Imports MySql.Data.MySqlClient
+﻿Imports MySql.Data.MySqlClient
 
 Public Class ClQualidadeSGQ
-
 
     Public idDimencionalReferencia As Integer
     Public CodMatFabricante As String
@@ -31,7 +29,6 @@ Public Class ClQualidadeSGQ
                 cmd.Parameters.AddWithValue("@CriadoPor", CriadoPor)
                 cmd.Parameters.AddWithValue("@Revisao", Revisao)
 
-
                 ' Exiba o comando SQL para depuração
                 ' MsgBox("Comando SQL: " & cmd.CommandText)
 
@@ -45,7 +42,6 @@ Public Class ClQualidadeSGQ
         End Try
 
     End Sub
-
 
     Public Sub UpdateDados()
         Dim sucesso As Boolean = False
@@ -74,8 +70,6 @@ Public Class ClQualidadeSGQ
             sucesso = False
         End Try
 
-
     End Sub
-
 
 End Class

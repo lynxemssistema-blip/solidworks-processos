@@ -1,6 +1,5 @@
-﻿Imports System.Windows.Forms
+﻿Public Class frmExportarParaOS
 
-Public Class frmExportarParaOS
     Private Sub frmExportarParaOS_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         If My.Settings.ParametroExportarDXF = "1" Then
@@ -12,7 +11,6 @@ Public Class frmExportarParaOS
             optParametroExportarDXF2.Checked = True
 
         End If
-
 
         If My.Settings.LiberaOSsemMaterial = "SIM" Then
 
@@ -26,26 +24,21 @@ Public Class frmExportarParaOS
 
         End If
 
-
-
-
         If My.Settings.CaixaDelimitadora = "SIM" Then
 
             chkCaixaDelimitadora.Checked = True
 
         ElseIf My.Settings.CaixaDelimitadora = "NÃO" Then
 
-
             chkCaixaDelimitadora.Checked = False
-
 
         End If
 
-        Me.txtEmailPCP.Text = Usuario.EnviarEmailLiberacaoOS.ToString
-
-
-
-
+        Try
+            Me.txtEmailPCP.Text = Usuario.EnviarEmailLiberacaoOS.ToString
+        Catch ex As Exception
+            Me.txtEmailPCP.Text = ""
+        End Try
 
         If My.Settings.AtualizaCadastroComLeituraBOM = "SIM" Then
 
@@ -57,6 +50,19 @@ Public Class frmExportarParaOS
 
         End If
 
+        If My.Settings.chkAcabamentoObrigatorio = "SIM" Then
+
+            chkAcabamentoObrigatorio.Checked = True
+            ' Salva as configurações
+            'My.Settings.Save()
+
+        ElseIf My.Settings.chkAcabamentoObrigatorio = "NÃO" Then
+
+            chkAcabamentoObrigatorio.Checked = False
+            ' Salva as configurações
+            'My.Settings.Save()
+
+        End If
 
     End Sub
 
@@ -76,7 +82,6 @@ Public Class frmExportarParaOS
             My.Settings.Save()
 
         End If
-
 
         If optLiberaSemMaterial.Checked = True Then
 
@@ -106,10 +111,9 @@ Public Class frmExportarParaOS
             My.Settings.TempoRespostaServidor = "0"
             My.Settings.Save()
         Else
-            My.Settings.TempoRespostaServidor = txtTempoRespostaServidor.Text
+            My.Settings.TempoRespostaServidor = Convert.ToInt32(txtTempoRespostaServidor.Text * 1000)
             My.Settings.Save()
         End If
-
 
         If chkAtualizaCadastroComLeituraBOM.Checked = True Then
 
@@ -125,9 +129,25 @@ Public Class frmExportarParaOS
 
         End If
 
+        If chkAcabamentoObrigatorio.Checked = True Then
+
+            My.Settings.chkAcabamentoObrigatorio = "SIM"
+            ' Salva as configurações
+            My.Settings.Save()
+
+        ElseIf chkAcabamentoObrigatorio.Checked = False Then
+
+            My.Settings.chkAcabamentoObrigatorio = "NÃO"
+            ' Salva as configurações
+            My.Settings.Save()
+
+        End If
+
         txtEmailPCP.Text = Usuario.EnviarEmailLiberacaoOS
 
         cl_BancoDados.AlteracaoEspecifica("configucacaosistema", "EnviarEmailLiberacaoOS", txtEmailPCP.Text, "idConfigucacaoSistema", 1)
+
+        My.Settings.Save()
 
         Me.Close()
 
@@ -150,7 +170,6 @@ Public Class frmExportarParaOS
         End If
 
         My.Settings.Save()
-
 
     End Sub
 
@@ -218,7 +237,6 @@ Public Class frmExportarParaOS
             ' Salva as configurações
             My.Settings.Save()
 
-
         End If
 
     End Sub
@@ -237,13 +255,13 @@ Public Class frmExportarParaOS
 
     Private Sub chkAtualizaCadastroComLeituraBOM_CheckedChanged(sender As Object, e As EventArgs) Handles chkAtualizaCadastroComLeituraBOM.CheckedChanged
 
-
-
         If chkAtualizaCadastroComLeituraBOM.Checked = True Then
 
             My.Settings.AtualizaCadastroComLeituraBOM = "SIM"
             ' Salva as configurações
             My.Settings.Save()
+
+            MyTaskPanelHost.tspOpcaoSalvamentoAUTOMADICO.Image = My.Resources.marcado
 
         ElseIf chkAtualizaCadastroComLeituraBOM.Checked = False Then
 
@@ -251,9 +269,32 @@ Public Class frmExportarParaOS
             ' Salva as configurações
             My.Settings.Save()
 
+            MyTaskPanelHost.tspOpcaoSalvamentoAUTOMADICO.Image = My.Resources.desmarcado
 
         End If
 
+    End Sub
+
+    Private Sub Label2_Click(sender As Object, e As EventArgs) Handles Label2.Click
 
     End Sub
+
+    Private Sub chkAcabamentoObrigatorio_CheckedChanged(sender As Object, e As EventArgs) Handles chkAcabamentoObrigatorio.CheckedChanged
+
+        If chkAcabamentoObrigatorio.Checked = True Then
+
+            My.Settings.chkAcabamentoObrigatorio = "SIM"
+            ' Salva as configurações
+            My.Settings.Save()
+
+        ElseIf chkAcabamentoObrigatorio.Checked = False Then
+
+            My.Settings.chkAcabamentoObrigatorio = "NÃO"
+            ' Salva as configurações
+            My.Settings.Save()
+
+        End If
+
+    End Sub
+
 End Class

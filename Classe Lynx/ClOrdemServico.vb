@@ -1,8 +1,6 @@
 ﻿Imports System.Data.SqlClient
-Imports System.Linq
 Imports System.Windows.Forms
 Imports MySql.Data.MySqlClient
-
 
 Public Class CLOrdemServico
 
@@ -12,6 +10,7 @@ Public Class CLOrdemServico
     Public Tag As String
     Public idProjeto As String
     Public idTag As String
+    Public DescTag As String
     Public Descricao As String
     Public DescEmpresa As String
     Public EnderecoOrdemServico As String
@@ -60,11 +59,11 @@ Public Class CLOrdemServico
     Public DataPrevisao As String
     Public ProdutoPrincipal As String
     Public Fator As String
+    Public idempresa As String
 
     Public QtdeTag As Integer
     Public QtdeLiberada As Integer
     Public SaldoTag As Integer
-
 
     Public Liberado_Engenharia As String
     Public Data_Liberacao_Engenharia As String
@@ -85,6 +84,9 @@ Public Class CLOrdemServico
     Public EnderecoIsometrico As String
     Public ProdutoCriadoPor As String
     Public DataCriacaoProduto As String
+
+    Public bloqueado As String
+
     Public Function CriarOsCompleta(ByVal DgvGrid As DataGridView, ByVal timerDgvOS As Timer, ByVal timerDgvOSiTEM As Timer) As Boolean
 
         If My.Settings.EnderecoPastaRaizOS.ToString = "" And System.IO.Directory.Exists(My.Settings.EnderecoPastaRaizOS) = False Then
@@ -106,7 +108,7 @@ Public Class CLOrdemServico
                     ''''''OrdemServico.Tag = Tag.ToUpper
                     ''''''OrdemServico.Descricao = Descricao.ToUpper
                     OrdemServico.CriadoPor = Usuario.NomeCompleto
-                    OrdemServico.DataCriacao = Date.Now.Date
+                    OrdemServico.DataCriacao = Date.Now.ToString("dd/MM/yyyy")
                     OrdemServico.Estatus = "A".ToUpper
                     ''''''OrdemServico.idProjeto = idProjeto
                     ''''''OrdemServico.idTag = idTag
@@ -119,11 +121,13 @@ Public Class CLOrdemServico
                         OrdemServico.IdOrdemServico.ToString = "" Or
                         OrdemServico.IdOrdemServico = 0 Then
 
-                        Dim idosRetono As String
+                        Dim idosRetono As Integer
 
                         Try
+                            VCampo0 = ""
+                            cl_BancoDados.RetornaCampoDaPesquisa("SELECT IdOrdemServico from  " & ComplementoTipoBanco & "ordemservico where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'", "IdOrdemServico")
 
-                            idosRetono = cl_BancoDados.RetornaCampoDaPesquisa("SELECT IdOrdemServico from  " & ComplementoTipoBanco & "ordemservico where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'", "IdOrdemServico")
+                            idosRetono = Convert.ToInt32(VCampo0)
                         Catch ex As Exception
                             idosRetono = 0
                         Finally
@@ -132,7 +136,10 @@ Public Class CLOrdemServico
                         If idosRetono = 0 Then
 
                             Try
-                                Dim NovoIdOrdemServicoDB As Integer = Convert.ToInt32(cl_BancoDados.RetornaCampoDaPesquisa("SELECT max(IdOrdemServico)  as NovoIdOrdemServico FROM  " & ComplementoTipoBanco & "ordemservico", "NovoIdOrdemServico")) + 1
+                                VCampo0 = ""
+                                cl_BancoDados.RetornaCampoDaPesquisa("SELECT max(IdOrdemServico)  as NovoIdOrdemServico FROM  " & ComplementoTipoBanco & "ordemservico", "NovoIdOrdemServico")
+
+                                Dim NovoIdOrdemServicoDB As Integer = Convert.ToInt32(VCampo0) + 1
 
                                 NovoIdOrdemServico = cl_BancoDados.FormatarPara5Caracteres(NovoIdOrdemServicoDB.ToString())
                             Catch ex As Exception
@@ -160,12 +167,12 @@ Public Class CLOrdemServico
 
                             Try
 
-                                OrdemServico.DataPrevisao = cl_BancoDados.RetornaCampoDaPesquisa("Select DataPrevisao from  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "DataPrevisao").ToString
+                                cl_BancoDados.RetornaCampoDaPesquisa("Select DataPrevisao from  " & ComplementoTipoBanco & "tags where idTag = '" & OrdemServico.idTag & "'", "DataPrevisao")
 
+                                OrdemServico.DataPrevisao = VCampo0
                             Catch ex As Exception
                                 OrdemServico.DataPrevisao = ""
                             End Try
-
 
                             SalvarOrdeMServicoBanco()
 
@@ -174,7 +181,6 @@ Public Class CLOrdemServico
                             MsgBox("Ordem de Serviço Criada com sucesso!")
 
                         End If
-
                     Else
 
                         'Altera dos dados da Ordem de serviço
@@ -185,16 +191,45 @@ idProjeto = '" & OrdemServico.idProjeto & "',
 idTag = '" & OrdemServico.idTag & "',
 Fator = '" & OrdemServico.Fator & "',
 DataPrevisao = '" & OrdemServico.DataPrevisao & "',
-DescEmpresa = '" & OrdemServico.DescEmpresa & "'
-where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'")
-
-                        'Altera dos dados dos itens da Ordem de serviço
-                        cl_BancoDados.Salvar("update  " & ComplementoTipoBanco & "ordemservicoitem set Projeto = '" & OrdemServico.Projeto & "',
+DescEmpresa = '" & OrdemServico.DescEmpresa & "',
+idEmpresa = '" & OrdemServico.idempresa & "',
+desctag = '" & OrdemServico.DescTag & "'
+where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "';
+update  " & ComplementoTipoBanco & "ordemservicoitem set Projeto = '" & OrdemServico.Projeto & "',
 Tag = '" & OrdemServico.Tag & "',
 idProjeto = '" & OrdemServico.idProjeto & "',
 DataPrevisao = '" & OrdemServico.DataPrevisao & "',
-idTag = '" & OrdemServico.idTag & "'
+idTag = '" & OrdemServico.idTag & "',
+DescEmpresa = '" & OrdemServico.DescEmpresa & "',
+idEmpresa = '" & OrdemServico.idempresa & "',
+desctag = '" & OrdemServico.DescTag & "'
 where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto = '" & OrdemServico.idProjeto & "' and idTag = '" & OrdemServico.idTag & "'")
+
+                        'inicio teste query unica 25/09/2025
+
+                        '''                        'Altera dos dados da Ordem de serviço
+                        '''                        cl_BancoDados.Salvar("update ordemservico set Descricao = '" & OrdemServico.Descricao & "',
+                        '''Projeto = '" & OrdemServico.Projeto & "',
+                        '''Tag = '" & OrdemServico.Tag & "',
+                        '''idProjeto = '" & OrdemServico.idProjeto & "',
+                        '''idTag = '" & OrdemServico.idTag & "',
+                        '''Fator = '" & OrdemServico.Fator & "',
+                        '''DataPrevisao = '" & OrdemServico.DataPrevisao & "',
+                        '''DescEmpresa = '" & OrdemServico.DescEmpresa & "',
+                        '''idEmpresa = '" & OrdemServico.idempresa & "',
+                        '''desctag = '" & OrdemServico.DescTag & "'
+                        '''where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'")
+
+                        '''                        'Altera dos dados dos itens da Ordem de serviço
+                        '''                        cl_BancoDados.Salvar("update  " & ComplementoTipoBanco & "ordemservicoitem set Projeto = '" & OrdemServico.Projeto & "',
+                        '''Tag = '" & OrdemServico.Tag & "',
+                        '''idProjeto = '" & OrdemServico.idProjeto & "',
+                        '''DataPrevisao = '" & OrdemServico.DataPrevisao & "',
+                        '''idTag = '" & OrdemServico.idTag & "',
+                        '''DescEmpresa = '" & OrdemServico.DescEmpresa & "',
+                        '''idEmpresa = '" & OrdemServico.idempresa & "',
+                        '''desctag = '" & OrdemServico.DescTag & "'
+                        '''where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto = '" & OrdemServico.idProjeto & "' and idTag = '" & OrdemServico.idTag & "'")
 
                         ', , Descricao, Estatus, , , ,  FROM ordemservico o;
 
@@ -229,24 +264,62 @@ where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto =
 
     End Function
 
+    '    Public Function TotaisPecasOrdemServico(ByVal IdOrdemServico As Integer)
+
+    '        cl_BancoDados.RetornaCampoDaPesquisa("SELECT
+    '  SUM(CASE WHEN txtCorte = '1' THEN QtdeTotal ELSE 0 END) AS CorteTotalExecutar,
+    '  SUM(CASE WHEN txtDobra = '1' THEN QtdeTotal ELSE 0 END) AS DobraTotalExecutar,
+    '  SUM(CASE WHEN txtSolda = '1' THEN QtdeTotal ELSE 0 END) AS SoldaTotalExecutar,
+    '  SUM(CASE WHEN txtPintura = '1' THEN QtdeTotal ELSE 0 END) AS PinturaTotalExecutar,
+    '  SUM(CASE WHEN txtMontagem = '1' AND ProdutoPrincipal = 'SIM' THEN QtdeTotal ELSE 0 END) AS MontagemTotalExecutar,
+    '  count(CASE WHEN txtTipoDesenho = 'CHAPARIA' THEN QtdeTotal ELSE 0 END) AS QtdeTotalItens,
+    '  SUM(CASE WHEN txtTipoDesenho = 'CHAPARIA' THEN QtdeTotal ELSE 0 END) AS QtdeTotalPecas,
+    '  SUM(areapintura) AS areapinturatotal,
+    '  SUM(peso) AS pesototal
+    'FROM ordemservicoitem
+    'WHERE (D_E_L_E_T_E IS NULL OR D_E_L_E_T_E = '')
+    '  AND IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'",
+    '                                             "CorteTotalExecutar",
+    '                                             "DobraTotalExecutar",
+    '                                             "SoldaTotalExecutar",
+    '                                             "PinturaTotalExecutar",
+    '                                             "MontagemTotalExecutar",
+    '                                             "QtdeTotalItens",
+    '                                             "QtdeTotalPecas",
+    '                                             "areapinturatotal",
+    '                                             "pesototal")
+
+    '        cl_BancoDados.Salvar("Update ordemservico set Liberado_Engenharia = 'S',
+    '                Data_Liberacao_Engenharia = '" & Date.Now & "',
+    '                CorteTotalExecutar = '" & VCampo0 & "',
+    '                 DobraTotalExecutar = '" & VCampo1 & "',
+    '                  SoldaTotalExecutar = '" & VCampo2 & "',
+    '                   PinturaTotalExecutar = '" & VCampo3 & "',
+    '                    MontagemTotalExecutar = '" & VCampo4 & "',
+    '                    QtdeTotalItens = '" & VCampo5 & "',
+    '                    QtdeTotalPecas = '" & VCampo6 & "',
+    '                    areapinturatotal = '" & VCampo7 & "',
+    '                    pesototal = '" & VCampo8 & "'
+    '						where IdOrdemServico = '" & IdOrdemServico & "'")
+
+    '    End Function
 
     Public Function SalvarOrdeMServicoBanco()
 
-        If TipoBanco = "MYSQL" Then
+        cl_BancoDados.AbrirBanco()
 
+        If My.Settings.TipoConexao = "MYSQL" Then
 
             Try
 
-
-
-                Dim cmd As New MySqlCommand("insert into  " & ComplementoTipoBanco & "ordemservico 
-    (idProjeto, Projeto, idTag, Tag, Descricao, EnderecoOrdemServico, 
-    CriadoPor, DataCriacao, Estatus, D_E_L_E_T_E, Liberado_Engenharia, 
-    Data_Liberacao_Engenharia, IdOSReferencia, DescEmpresa, DataPrevisao, Fator) 
-    values 
-    (@idProjeto, @Projeto, @idTag, @Tag, @Descricao, @EnderecoOrdemServico, 
-    @CriadoPor, @DataCriacao, @Estatus, @D_E_L_E_T_E, @Liberado_Engenharia, 
-    @Data_Liberacao_Engenharia, @IdOSReferencia, @DescEmpresa, @DataPrevisao, @Fator)", myconect)
+                Dim cmd As New MySqlCommand("insert into  " & ComplementoTipoBanco & "ordemservico
+    (idProjeto, Projeto, idTag, Tag, Descricao, EnderecoOrdemServico,
+    CriadoPor, DataCriacao, Estatus, D_E_L_E_T_E, Liberado_Engenharia,
+    Data_Liberacao_Engenharia, IdOSReferencia, DescEmpresa, DataPrevisao, Fator,idempresa,DescTag)
+    values
+    (@idProjeto, @Projeto, @idTag, @Tag, @Descricao, @EnderecoOrdemServico,
+    @CriadoPor, @DataCriacao, @Estatus, @D_E_L_E_T_E, @Liberado_Engenharia,
+    @Data_Liberacao_Engenharia, @IdOSReferencia, @DescEmpresa, @DataPrevisao, @Fator,@idempresa,@DescTag)", myconect)
 
                 cmd.Parameters.AddWithValue("@idProjeto", OrdemServico.idProjeto)
                 cmd.Parameters.AddWithValue("@Projeto", OrdemServico.Projeto)
@@ -255,7 +328,7 @@ where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto =
                 cmd.Parameters.AddWithValue("@Descricao", OrdemServico.Descricao)
                 cmd.Parameters.AddWithValue("@EnderecoOrdemServico", OrdemServico.EnderecoOrdemServico)
                 cmd.Parameters.AddWithValue("@CriadoPor", If(String.IsNullOrEmpty(OrdemServico.CriadoPor), DBNull.Value, OrdemServico.CriadoPor.ToUpper().ToString).ToString)
-                cmd.Parameters.AddWithValue("@DataCriacao", OrdemServico.DataCriacao)
+                cmd.Parameters.AddWithValue("@DataCriacao", OrdemServico.DataCriacao.ToString("dd/MM/yyyy"))
                 cmd.Parameters.AddWithValue("@Estatus", OrdemServico.Estatus)
                 cmd.Parameters.AddWithValue("@D_E_L_E_T_E", "")  ' ou tratar conforme necessário
                 cmd.Parameters.AddWithValue("@Liberado_Engenharia", OrdemServico.Liberado_Engenharia)
@@ -264,10 +337,10 @@ where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto =
                 cmd.Parameters.AddWithValue("@DescEmpresa", OrdemServico.DescEmpresa)
                 cmd.Parameters.AddWithValue("@DataPrevisao", OrdemServico.DataPrevisao)
                 cmd.Parameters.AddWithValue("@Fator", OrdemServico.Fator)
+                cmd.Parameters.AddWithValue("@idempresa", OrdemServico.idempresa)
+                cmd.Parameters.AddWithValue("@DescTag", OrdemServico.DescTag)
 
                 cmd.ExecuteNonQuery()
-
-
             Catch ex As Exception
 
                 MsgBox(ex.Message)
@@ -275,20 +348,17 @@ where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto =
 
             End Try
 
-        ElseIf TipoBanco = "SQL" Then
-
+        ElseIf My.Settings.TipoConexao = "SQL" Then
 
             Try
 
-
-
-                Dim cmd As New SqlCommand("insert into " & ComplementoTipoBanco & " ordemservico 
-    (idProjeto, Projeto, idTag, Tag, Descricao, EnderecoOrdemServico, 
-    CriadoPor, DataCriacao, Estatus, D_E_L_E_T_E, Liberado_Engenharia, 
-    Data_Liberacao_Engenharia, IdOSReferencia, DescEmpresa, DataPrevisao) 
-    values 
-    (@idProjeto, @Projeto, @idTag, @Tag, @Descricao, @EnderecoOrdemServico, 
-    @CriadoPor, @DataCriacao, @Estatus, @D_E_L_E_T_E, @Liberado_Engenharia, 
+                Dim cmd As New SqlCommand("insert into " & ComplementoTipoBanco & " ordemservico
+    (idProjeto, Projeto, idTag, Tag, Descricao, EnderecoOrdemServico,
+    CriadoPor, DataCriacao, Estatus, D_E_L_E_T_E, Liberado_Engenharia,
+    Data_Liberacao_Engenharia, IdOSReferencia, DescEmpresa, DataPrevisao)
+    values
+    (@idProjeto, @Projeto, @idTag, @Tag, @Descricao, @EnderecoOrdemServico,
+    @CriadoPor, @DataCriacao, @Estatus, @D_E_L_E_T_E, @Liberado_Engenharia,
     @Data_Liberacao_Engenharia, @IdOSReferencia, @DescEmpresa, @DataPrevisao)", myconectSQL)
 
                 cmd.Parameters.AddWithValue("@idProjeto", OrdemServico.idProjeto)
@@ -308,8 +378,6 @@ where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto =
                 cmd.Parameters.AddWithValue("@DataPrevisao", OrdemServico.DataPrevisao)
 
                 cmd.ExecuteNonQuery()
-
-
             Catch ex As Exception
 
                 MsgBox(ex.Message)
@@ -317,9 +385,9 @@ where IdOrdemServico = '" & OrdemServico.IdOrdemServico & "'") ' and idProjeto =
 
             End Try
 
-
         End If
 
+        cl_BancoDados.FecharBanco()
 
     End Function
 
@@ -378,194 +446,4 @@ Public Class clProjeto
     Public UsuarioD_E_L_E_T_E As String
     Public DataD_E_L_E_T_E As String
 
-    Public Sub SalvarDadosNoBanco(
-    ByVal idProjeto As String, ByVal Projeto As String, ByVal descProjeto As String,
-    ByVal responsavel As String, ByVal DescEmpresa As String, ByVal dataEntrada As String,
-    ByVal dataPrevisao As String, ByVal dataTermino As String, ByVal totalProjeto As String,
-    ByVal statusProj As String, ByVal d_e_l_e_t_e As String, ByVal descStatus As String,
-    ByVal idEmpresa As String, ByVal liberado As String,
-    ByVal usuarioD_e_l_e_t_e As String, ByVal dataD_e_l_e_t_e As String
-)
-        Using conn As New MySqlConnection(conexao)
-
-            Try
-                '   conn.Open()
-
-                ' SQL de inserção
-                Dim query As String = "INSERT INTO projetos " &
-                                  "(Projeto, DescProjeto, Responsavel, DescEmpresa, DataEntrada, DataPrevisao, DataTermino, TotalProjeto, StatusProj, D_E_L_E_T_E, DescStatus, IdEmpresa, Liberado, UsuarioD_E_L_E_T_E, DataD_E_L_E_T_E) " &
-                                  "VALUES (@idProjeto, @Projeto, @DescProjeto, @Responsavel, @DescEmpresa, @DataEntrada, @DataPrevisao, @DataTermino, @TotalProjeto, @StatusProj, @D_E_L_E_T_E, @DescStatus, @IdEmpresa, @Liberado, @UsuarioD_E_L_E_T_E, @DataD_E_L_E_T_E)"
-
-                ' Comando e parâmetros
-                Using cmd As New MySqlCommand(query, conn)
-                    cmd.Parameters.AddWithValue("@idProjeto", idProjeto)
-                    cmd.Parameters.AddWithValue("@Projeto", Projeto)
-                    cmd.Parameters.AddWithValue("@DescProjeto", descProjeto)
-                    cmd.Parameters.AddWithValue("@Responsavel", responsavel)
-                    cmd.Parameters.AddWithValue("@DescEmpresa", DescEmpresa)
-                    cmd.Parameters.AddWithValue("@DataEntrada", dataEntrada)
-                    cmd.Parameters.AddWithValue("@DataPrevisao", dataPrevisao)
-                    cmd.Parameters.AddWithValue("@DataTermino", dataTermino)
-                    cmd.Parameters.AddWithValue("@TotalProjeto", totalProjeto)
-                    cmd.Parameters.AddWithValue("@StatusProj", statusProj)
-                    cmd.Parameters.AddWithValue("@D_E_L_E_T_E", d_e_l_e_t_e)
-                    cmd.Parameters.AddWithValue("@DescStatus", descStatus)
-                    cmd.Parameters.AddWithValue("@IdEmpresa", idEmpresa)
-                    cmd.Parameters.AddWithValue("@Liberado", liberado)
-                    cmd.Parameters.AddWithValue("@UsuarioD_E_L_E_T_E", usuarioD_e_l_e_t_e)
-                    cmd.Parameters.AddWithValue("@DataD_E_L_E_T_E", dataD_e_l_e_t_e)
-
-                    ' Executar o comando
-                    cmd.ExecuteNonQuery()
-                End Using
-            Catch ex As MySqlException
-                '  MsgBox("Erro ao salvar os dados: " & ex.Message)
-            Finally
-                conn.Close()
-            End Try
-        End Using
-    End Sub
-
-    Public Sub AtualizarDadosNoBanco(
-    ByVal idProjeto As String, ByVal Projeto As String, ByVal descProjeto As String,
-    ByVal responsavel As String, ByVal DescEmpresa As String, ByVal dataEntrada As String,
-    ByVal dataPrevisao As String, ByVal dataTermino As String, ByVal totalProjeto As String,
-    ByVal statusProj As String, ByVal d_e_l_e_t_e As String, ByVal descStatus As String,
-    ByVal idEmpresa As String, ByVal liberado As String,
-    ByVal usuarioD_e_l_e_t_e As String, ByVal dataD_e_l_e_t_e As String
-)
-        Using conn As New MySqlConnection(conexao)
-
-            Try
-                '  conn.Open()
-
-                ' SQL de atualização
-                Dim query As String = "UPDATE projetos SET " &
-                                  "Projeto = @Projeto, DescProjeto = @DescProjeto, Responsavel = @Responsavel, " &
-                                  "DescEmpresa = @DescEmpresa, DataEntrada = @DataEntrada, DataPrevisao = @DataPrevisao, " &
-                                  "DataTermino = @DataTermino, TotalProjeto = @TotalProjeto, StatusProj = @StatusProj, " &
-                                  "D_E_L_E_T_E = @D_E_L_E_T_E, DescStatus = @DescStatus, IdEmpresa = @IdEmpresa, " &
-                                  "Liberado = @Liberado, UsuarioD_E_L_E_T_E = @UsuarioD_E_L_E_T_E, DataD_E_L_E_T_E = @DataD_E_L_E_T_E " &
-                                  "WHERE idProjeto = @idProjeto"
-
-                ' Comando e parâmetros
-                Using cmd As New MySqlCommand(query, conn)
-                    cmd.Parameters.AddWithValue("@idProjeto", idProjeto)
-                    cmd.Parameters.AddWithValue("@Projeto", Projeto)
-                    cmd.Parameters.AddWithValue("@DescProjeto", descProjeto)
-                    cmd.Parameters.AddWithValue("@Responsavel", responsavel)
-                    cmd.Parameters.AddWithValue("@DescEmpresa", DescEmpresa)
-                    cmd.Parameters.AddWithValue("@DataEntrada", dataEntrada)
-                    cmd.Parameters.AddWithValue("@DataPrevisao", dataPrevisao)
-                    cmd.Parameters.AddWithValue("@DataTermino", dataTermino)
-                    cmd.Parameters.AddWithValue("@TotalProjeto", totalProjeto)
-                    cmd.Parameters.AddWithValue("@StatusProj", statusProj)
-                    cmd.Parameters.AddWithValue("@D_E_L_E_T_E", d_e_l_e_t_e)
-                    cmd.Parameters.AddWithValue("@DescStatus", descStatus)
-                    cmd.Parameters.AddWithValue("@IdEmpresa", idEmpresa)
-                    cmd.Parameters.AddWithValue("@Liberado", liberado)
-                    cmd.Parameters.AddWithValue("@UsuarioD_E_L_E_T_E", usuarioD_e_l_e_t_e)
-                    cmd.Parameters.AddWithValue("@DataD_E_L_E_T_E", dataD_e_l_e_t_e)
-
-                    ' Executar o comando
-                    cmd.ExecuteNonQuery()
-                End Using
-            Catch ex As MySqlException
-                '  MsgBox("Erro ao atualizar os dados: " & ex.Message)
-            Finally
-                conn.Close()
-            End Try
-        End Using
-    End Sub
-
-    Public Sub MarcarComoDeletado(ByVal idProjeto As String)
-
-        Using conn As New MySqlConnection(conexao)
-
-            Try
-                '  conn.Open()
-
-                ' SQL de atualização
-                Dim query As String = "UPDATE projetos SET " &
-                                  "D_E_L_E_T_E = '*', " &
-                                  "UsuarioD_E_L_E_T_E = @Usuario, " &
-                                  "DataD_E_L_E_T_E = @DataAtual " &
-                                  "WHERE idProjeto = @idProjeto"
-
-                ' Comando e parâmetros
-                Using cmd As New MySqlCommand(query, conn)
-                    cmd.Parameters.AddWithValue("@idProjeto", idProjeto)
-                    cmd.Parameters.AddWithValue("@Usuario", My.User.Name)
-                    cmd.Parameters.AddWithValue("@DataAtual", Date.Now.Date)
-
-                    ' Executar o comando
-                    cmd.ExecuteNonQuery()
-                End Using
-            Catch ex As MySqlException
-                ' MsgBox("Erro ao atualizar os dados: " & ex.Message)
-            Finally
-                conn.Close()
-            End Try
-
-        End Using
-
-    End Sub
-
-    Public Function ValidarDadosEntrada(
-     ByVal Projeto As String, ByVal descProjeto As String,
-    ByVal responsavel As String, ByVal DescEmpresa As String, ByVal dataEntrada As String,
-    ByVal dataPrevisao As String, ByVal dataTermino As String, ByVal totalProjeto As String,
-    ByVal statusProj As String
-) As String
-
-        ' Verificar campos obrigatórios
-        If String.IsNullOrWhiteSpace(Projeto) Then
-            Return "O campo 'Projeto' é obrigatório."
-        End If
-
-        If String.IsNullOrWhiteSpace(descProjeto) Then
-            Return "O campo 'Descrição do Projeto' é obrigatório."
-        End If
-
-        If String.IsNullOrWhiteSpace(responsavel) Then
-            Return "O campo 'Responsável' é obrigatório."
-        End If
-
-        If String.IsNullOrWhiteSpace(dataEntrada) Then
-            Return "O campo 'Data de Entrada' é obrigatório."
-        End If
-
-        ' Validar formato de data
-        Dim dataValida As DateTime
-        If Not DateTime.TryParse(dataEntrada, dataValida) Then
-            Return "O campo 'Data de Entrada' deve conter uma data válida."
-        End If
-
-        If Not String.IsNullOrWhiteSpace(dataPrevisao) AndAlso Not DateTime.TryParse(dataPrevisao, dataValida) Then
-            Return "O campo 'Data de Previsão' deve conter uma data válida."
-        End If
-
-        If Not String.IsNullOrWhiteSpace(dataTermino) AndAlso Not DateTime.TryParse(dataTermino, dataValida) Then
-            Return "O campo 'Data de Término' deve conter uma data válida."
-        End If
-
-        ' Validar valores numéricos
-        Dim total As Decimal
-        If Not String.IsNullOrWhiteSpace(totalProjeto) AndAlso Not Decimal.TryParse(totalProjeto, total) Then
-            Return "O campo 'Total do Projeto' deve conter um valor numérico válido."
-        End If
-
-        ' Validar valores específicos (opcional)
-        Dim statusValidos As String() = {"Em Andamento", "Concluído", "Pendente"}
-        If Not String.IsNullOrWhiteSpace(statusProj) AndAlso Not statusValidos.Contains(statusProj) Then
-            Return "O campo 'Status do Projeto' contém um valor inválido."
-        End If
-
-        ' Se todas as validações passarem, retornar string vazia
-        Return String.Empty
-    End Function
-
-
-
 End Class
-

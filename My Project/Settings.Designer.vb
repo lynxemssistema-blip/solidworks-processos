@@ -15,7 +15,7 @@ Option Explicit On
 Namespace My
     
     <Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute(),  _
-     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.12.0.0"),  _
+     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.14.0.0"),  _
      Global.System.ComponentModel.EditorBrowsableAttribute(Global.System.ComponentModel.EditorBrowsableState.Advanced)>  _
     Partial Friend NotInheritable Class MySettings
         Inherits Global.System.Configuration.ApplicationSettingsBase
@@ -315,6 +315,90 @@ Namespace My
             End Get
             Set
                 Me("SQLServerProtheus") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property EnderecoImagens() As String
+            Get
+                Return CType(Me("EnderecoImagens"),String)
+            End Get
+            Set
+                Me("EnderecoImagens") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property OrdemColunasDataGridView() As String
+            Get
+                Return CType(Me("OrdemColunasDataGridView"),String)
+            End Get
+            Set
+                Me("OrdemColunasDataGridView") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("MYSQL")>  _
+        Public Property TipoConexao() As String
+            Get
+                Return CType(Me("TipoConexao"),String)
+            End Get
+            Set
+                Me("TipoConexao") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property chkAcabamentoObrigatorio() As String
+            Get
+                Return CType(Me("chkAcabamentoObrigatorio"),String)
+            End Get
+            Set
+                Me("chkAcabamentoObrigatorio") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property ProgramaRM() As String
+            Get
+                Return CType(Me("ProgramaRM"),String)
+            End Get
+            Set
+                Me("ProgramaRM") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property TravarEmissaoOS() As String
+            Get
+                Return CType(Me("TravarEmissaoOS"),String)
+            End Get
+            Set
+                Me("TravarEmissaoOS") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property PlanilhaModeloOmie() As String
+            Get
+                Return CType(Me("PlanilhaModeloOmie"),String)
+            End Get
+            Set
+                Me("PlanilhaModeloOmie") = value
             End Set
         End Property
     End Class

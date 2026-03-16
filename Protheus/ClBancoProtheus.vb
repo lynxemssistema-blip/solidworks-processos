@@ -1,12 +1,6 @@
-﻿
-Imports System.Data.SqlClient
-Imports System.Security
-Imports System.Diagnostics
-Imports System.Windows.Forms
-Imports System.Drawing
-Imports System.IO
-Public Class ClBancoProtheus
+﻿Imports System.Data.SqlClient
 
+Public Class ClBancoProtheus
 
     Public Function AbriBanco() As Boolean
 
@@ -23,14 +17,11 @@ Public Class ClBancoProtheus
             sqlmyCmd.Connection = sqlcn
             sqlcn.Open()
             Return True
-
         Catch ex As Exception
             Return False
         Finally
         End Try
 
-
     End Function
-
 
 End Class

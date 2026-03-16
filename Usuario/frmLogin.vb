@@ -1,5 +1,10 @@
-﻿Public Class frmLogin
+Public Class frmLogin
+
     Private Sub frmLogin_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        cl_BancoDados.AbrirBanco()
+
+        '  cl_BancoDados.ComboBoxDataSet("usuario", "IdUsuario", "Login", cboLogin1, " WHERE (D_E_L_E_T_E = '' OR D_E_L_E_T_E IS NULL )", "")
 
         Me.Text = "Sistema SINCO - Lynx - Cliente: " & My.Settings.BancoDadosAtivo
 
@@ -8,7 +13,6 @@
             Me.txtLogin.Text = My.Settings.UsuarioLogado
             Me.mskSenha.Text = My.Settings.SenhaUsuarioLogado
             Me.chkSalvarDadosEntrada.Checked = True
-
         Else
 
             Me.txtLogin.Text = Nothing
@@ -17,19 +21,17 @@
 
         End If
 
-        dgvListaUsuario.DataSource = cl_BancoDados.CarregarDados("SELECT
-    idUsuario, 
-    NomeCompleto,
-    Login,
-    Senha,
-    Sigla 
-FROM
-     " & ComplementoTipoBanco & " usuario
-WHERE
-    (D_E_L_E_T_E <> '*' OR D_E_L_E_T_E IS NULL)
-    AND Login = Senha order by idUsuario")
-
-
+        '        'dgvListaUsuario.DataSource = cl_BancoDados.CarregarDados("SELECT
+        '    IdUsuario,
+        '    NomeCompleto,
+        '    Login,
+        '    Senha,
+        '    Sigla
+        'FROM
+        '     " & ComplementoTipoBanco & " usuario
+        'WHERE
+        '    (D_E_L_E_T_E <> '*' OR D_E_L_E_T_E IS NULL)
+        '    AND Login = Senha order by IdUsuario")
 
     End Sub
 
@@ -37,7 +39,7 @@ WHERE
 
         Dim TotalUsuario As Integer
         'Verificar a quantide de usuarios cadastrado no sistema
-        TotalUsuario = cl_BancoDados.RetornaCampoDaPesquisa("SELECT count(idUsuario) as qtde FROM  " & ComplementoTipoBanco & "usuario", "qtde")
+        TotalUsuario = cl_BancoDados.RetornaCampoDaPesquisa("SELECT count(IdUsuario) as qtde FROM  " & ComplementoTipoBanco & "usuario", "qtde")
         Usuario.RetornaDadosConfiguracao()
 
         Dim entrar As Boolean
@@ -47,6 +49,8 @@ WHERE
             If Usuario.RetornaDadosUsuario(Me.txtLogin.Text, Me.mskSenha.Text) = True Then
 
                 entrar = True
+
+                MyTaskPanelHost.txtPesqCriadoPor.Text = Usuario.Login
 
                 If chkSalvarDadosEntrada.Checked = True Then
 
@@ -61,7 +65,7 @@ WHERE
 
                 End If
 
-                Me.Hide()
+                ' Me.Hide()
 
                 My.Settings.Save()
                 '  BancoDados.FecharBanco()
@@ -79,7 +83,6 @@ WHERE
         Catch ex As Exception
 
             MsgBox("Usuário ou senha inválidos", vbInformation, "Falha ao entrar no sitema SINCO !!")
-
         Finally
 
         End Try
@@ -88,9 +91,7 @@ WHERE
 
     Private Sub btnFechar_Click(sender As Object, e As EventArgs) Handles btnFechar.Click
 
-
         Me.Close()
-
 
     End Sub
 
@@ -105,11 +106,9 @@ WHERE
 
         End If
 
-
     End Sub
 
     Private Sub chkSalvarDadosEntrada_CheckedChanged(sender As Object, e As EventArgs) Handles chkSalvarDadosEntrada.CheckedChanged
-
 
         If chkSalvarDadosEntrada.Checked = True Then
 
@@ -125,4 +124,70 @@ WHERE
         My.Settings.Save()
 
     End Sub
+
+    Private Sub btnRecuperarSenha_Click(sender As Object, e As EventArgs) Handles btnRecuperarSenha.Click
+
+        Dim email As String = InputBox("Digite o e-mail associado à sua conta:", "Recuperação de Senha")
+
+        If String.IsNullOrEmpty(email) Then
+            MsgBox("E-mail não pode ser vazio.", MsgBoxStyle.Exclamation, "Recuperação de Senha")
+            Return
+        End If
+
+        ' Verifica se o e-mail existe no banco de dados (query parametrizada — sem SQL Injection)
+        Dim sqlRecuperacao As String = "SELECT Email, NomeCompleto, Login, Senha FROM " & ComplementoTipoBanco & "usuario WHERE Email = @Email"
+        Try
+            Using cmd As New MySql.Data.MySqlClient.MySqlCommand(sqlRecuperacao, myconect)
+                cmd.Parameters.AddWithValue("@Email", email.Trim())
+                Using reader As MySql.Data.MySqlClient.MySqlDataReader = cmd.ExecuteReader()
+                    If reader.Read() Then
+                        VCampo0 = If(reader.IsDBNull(0), "", reader.GetString(0))
+                        VCampo1 = If(reader.IsDBNull(1), "", reader.GetString(1))
+                        VCampo2 = If(reader.IsDBNull(2), "", reader.GetString(2))
+                        VCampo3 = If(reader.IsDBNull(3), "", reader.GetString(3))
+                    Else
+                        VCampo0 = ""
+                    End If
+                End Using
+            End Using
+        Catch ex As Exception
+            Debug.WriteLine("[RecuperarSenha] Erro ao consultar e-mail: " & ex.Message)
+            VCampo0 = ""
+        End Try
+
+        If VCampo0.ToString <> "" Then
+
+            Usuario.email = VCampo0
+            Usuario.NomeCompleto = VCampo1
+            Usuario.Login = VCampo2
+            Usuario.Senha = VCampo3
+
+            Dim corpoEmail As String = "Olá " & VCampo1 & "," & vbCrLf & vbCrLf &
+                    "Aqui estão os detalhes da sua conta:" & vbCrLf &
+                    "Login: " & Usuario.Login & vbCrLf &
+                    "Senha: " & Usuario.Senha & vbCrLf & vbCrLf &
+                    "Se você não solicitou essa recuperação de senha,
+                     por favor, ignore este e-mail." & vbCrLf &
+                    "Atenciosamente," & vbCrLf &
+                    "Equipe de Suporte"
+
+            If My.Settings.BancoDadosAtivo = "alfatec2" Then
+
+                ClasseEmail.EmailAlfatec(Usuario.email, Usuario.NomeCompleto, corpoEmail, "Recuperação de senha")
+
+                MsgBox("Em instantes você recebera o e-mail de recuperação de senha", vbInformation, "Atenção")
+
+            ElseIf My.Settings.BancoDadosAtivo = "amceletrica" Then
+
+                ClasseEmail.EnviarEmailamc("arquivos.engenharia@amcsolucoes.com.br", "Recuperação de Senha", email, corpoEmail)
+                MsgBox("E-mail enviado com sucesso para " & email, MsgBoxStyle.Information, "Recuperação de Senha")
+            End If
+        Else
+
+            MsgBox("Email não cadastro!", vbInformation, "Recuperação de Senha")
+
+        End If
+
+    End Sub
+
 End Class

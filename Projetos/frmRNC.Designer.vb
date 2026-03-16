@@ -85,7 +85,6 @@ Partial Class frmRNC
         'btnFechar
         '
         Me.btnFechar.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        ' Me.btnFechar.Image = Global.SwLynx_4._1.My.Resources.Resources.Cancelar
         Me.btnFechar.Location = New System.Drawing.Point(899, 12)
         Me.btnFechar.Name = "btnFechar"
         Me.btnFechar.Size = New System.Drawing.Size(175, 44)
@@ -96,7 +95,6 @@ Partial Class frmRNC
         '
         'btnFinalizarRNC
         '
-        'Me.btnFinalizarRNC.Image = Global.SwLynx_4._1.My.Resources.Resources.atualizar
         Me.btnFinalizarRNC.Location = New System.Drawing.Point(12, 12)
         Me.btnFinalizarRNC.Name = "btnFinalizarRNC"
         Me.btnFinalizarRNC.Size = New System.Drawing.Size(175, 44)
